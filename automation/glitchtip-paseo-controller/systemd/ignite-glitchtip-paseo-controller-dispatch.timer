@@ -1,0 +1,10 @@
+[Unit]
+Description=Run one guarded Ignite GlitchTip Paseo dispatch tick per minute
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+Persistent=true
+Unit=ignite-glitchtip-paseo-controller-dispatch.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Ignite.Infrastructure\Ignite.Infrastructure.fsproj" />
+    <ProjectReference Include="..\..\src\Ignite.Core\Ignite.Core.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="DatabaseTests.fs" />
+    <Compile Include="UserSessionRepositoryTests.fs" />
+    <Compile Include="PlaylistSearchSnapshotRepositoryTests.fs" />
+    <Compile Include="CdlcScraperTests.fs" />
+    <Compile Include="SpotifyPlaylistPaginationTests.fs" />
+  </ItemGroup>
+
+</Project>

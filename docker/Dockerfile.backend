@@ -1,0 +1,42 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS build
+WORKDIR /src
+
+COPY backend/src/Ignite.Core/Ignite.Core.fsproj Ignite.Core/
+COPY backend/src/Ignite.Matching/Ignite.Matching.fsproj Ignite.Matching/
+COPY backend/src/Ignite.Infrastructure/Ignite.Infrastructure.fsproj Ignite.Infrastructure/
+COPY backend/src/Ignite.Jobs/Ignite.Jobs.fsproj Ignite.Jobs/
+COPY backend/src/Ignite.Api/Ignite.Api.fsproj Ignite.Api/
+RUN dotnet restore Ignite.Api/Ignite.Api.fsproj
+
+COPY backend/src/ .
+RUN dotnet publish Ignite.Api/Ignite.Api.fsproj -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS test
+WORKDIR /src
+COPY backend/ .
+RUN dotnet test Ignite.slnx --verbosity minimal
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.12 AS runtime
+WORKDIR /app
+
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r ignite && useradd -r -g ignite ignite
+
+RUN mkdir -p /app/data && chown -R ignite:ignite /app/data
+
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:5050
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+USER ignite
+
+EXPOSE 5050
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5050/health/ready || exit 1
+
+ENTRYPOINT ["dotnet", "Ignite.Api.dll"]

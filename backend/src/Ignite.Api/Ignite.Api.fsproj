@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.15.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
+    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.3" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Sentry.AspNetCore" Version="5.16.3" />
+    <PackageReference Include="Sentry.Serilog" Version="5.16.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ignite.Core\Ignite.Core.fsproj" />
+    <ProjectReference Include="..\Ignite.Infrastructure\Ignite.Infrastructure.fsproj" />
+    <ProjectReference Include="..\Ignite.Jobs\Ignite.Jobs.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Hubs/SearchHub.fs" />
+    <Compile Include="Hubs/HubNotificationService.fs" />
+    <Compile Include="PlaylistSearchJob.fs" />
+    <Compile Include="OAuthCallbackFailure.fs" />
+    <Compile Include="RequestCancellationMiddleware.fs" />
+    <Compile Include="DatabaseReadiness.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+</Project>

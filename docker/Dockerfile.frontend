@@ -1,0 +1,41 @@
+FROM golang:1.27.1-alpine AS caddy-build
+
+ARG CADDY_VERSION=v2.11.4
+ARG CADDY_COMMIT=e2eee6a7fce366321294c9c2a79f3146891dcbdf
+
+WORKDIR /src
+
+RUN apk add --no-cache git \
+    && git init \
+    && git remote add origin https://github.com/caddyserver/caddy.git \
+    && git fetch --depth 1 origin "$CADDY_COMMIT" \
+    && git fetch --depth 1 origin "refs/tags/$CADDY_VERSION:refs/tags/$CADDY_VERSION" \
+    && test "$(git rev-parse "$CADDY_VERSION^{commit}")" = "$CADDY_COMMIT" \
+    && git checkout --detach "$CADDY_VERSION"
+
+RUN cp go.mod /tmp/caddy.mod \
+    && cp go.sum /tmp/caddy.sum \
+    && go get -modfile=/tmp/caddy.mod \
+      golang.org/x/net@v0.56.0 \
+      golang.org/x/text@v0.39.0 \
+      google.golang.org/grpc@v1.82.1 \
+    && go mod tidy -modfile=/tmp/caddy.mod \
+    && CGO_ENABLED=0 go build -modfile=/tmp/caddy.mod -p=2 -trimpath \
+      -ldflags '-s -w -X github.com/caddyserver/caddy/v2.CustomVersion=v2.11.4' \
+      -o /usr/bin/caddy ./cmd/caddy
+
+FROM caddy:2.11.4-alpine
+
+RUN apk upgrade --no-cache
+
+COPY --from=caddy-build /usr/bin/caddy /usr/bin/caddy
+
+COPY frontend/dist /srv
+
+COPY docker/Caddyfile.frontend /etc/caddy/Caddyfile
+RUN caddy validate --config /etc/caddy/Caddyfile
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget -q --spider http://localhost:80/ || exit 1

@@ -1,0 +1,4041 @@
+{
+  "scope": "Locally installed packages for source/fixture verification. Not a complete deployed-image SBOM; platform variants and bundled components may differ. License declarations and copied notices are not a legal compatibility determination.",
+  "packages": [
+    {
+      "ecosystem": "npm",
+      "name": "@alloc/quick-lru",
+      "version": "5.3.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@alloc/quick-lru/v/5.3.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/code-frame",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/code-frame/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/compat-data",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/compat-data/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/core",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/core/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/generator",
+      "version": "7.29.8",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/generator/v/7.29.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-compilation-targets",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-compilation-targets/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-globals",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-globals/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-module-imports",
+      "version": "7.18.6",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-module-imports/v/7.18.6",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-module-imports",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-module-imports/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-module-transforms",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-module-transforms/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-plugin-utils",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-plugin-utils/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-string-parser",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-string-parser/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-validator-identifier",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-validator-identifier/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helper-validator-option",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helper-validator-option/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/helpers",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/helpers/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/parser",
+      "version": "7.29.9",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/parser/v/7.29.9",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/plugin-syntax-jsx",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/plugin-syntax-jsx/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/template",
+      "version": "7.29.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/template/v/7.29.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/traverse",
+      "version": "7.29.8",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/traverse/v/7.29.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@babel/types",
+      "version": "7.29.8",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@babel/types/v/7.29.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@corvu/utils",
+      "version": "0.4.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@corvu/utils/v/0.4.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@esbuild/linux-x64",
+      "version": "0.25.12",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@esbuild/linux-x64/v/0.25.12",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint-community/eslint-utils",
+      "version": "4.10.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@eslint-community/eslint-utils/v/4.10.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint-community/regexpp",
+      "version": "4.12.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@eslint-community/regexpp/v/4.12.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint/config-array",
+      "version": "0.21.2",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@eslint/config-array/v/0.21.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint/config-helpers",
+      "version": "0.4.2",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@eslint/config-helpers/v/0.4.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint/core",
+      "version": "0.17.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@eslint/core/v/0.17.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint/eslintrc",
+      "version": "3.3.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@eslint/eslintrc/v/3.3.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint/js",
+      "version": "9.39.5",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@eslint/js/v/9.39.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint/object-schema",
+      "version": "2.1.7",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@eslint/object-schema/v/2.1.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@eslint/plugin-kit",
+      "version": "0.4.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@eslint/plugin-kit/v/0.4.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@floating-ui/core",
+      "version": "1.8.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@floating-ui/core/v/1.8.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@floating-ui/dom",
+      "version": "1.8.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@floating-ui/dom/v/1.8.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@floating-ui/utils",
+      "version": "0.2.12",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@floating-ui/utils/v/0.2.12",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@humanfs/core",
+      "version": "0.19.2",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@humanfs/core/v/0.19.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@humanfs/node",
+      "version": "0.16.8",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@humanfs/node/v/0.16.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@humanfs/types",
+      "version": "0.15.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@humanfs/types/v/0.15.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@humanwhocodes/module-importer",
+      "version": "1.0.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@humanwhocodes/module-importer/v/1.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@humanwhocodes/retry",
+      "version": "0.4.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@humanwhocodes/retry/v/0.4.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@internationalized/number",
+      "version": "3.6.8",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@internationalized/number/v/3.6.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@jridgewell/gen-mapping",
+      "version": "0.3.13",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@jridgewell/gen-mapping/v/0.3.13",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@jridgewell/remapping",
+      "version": "2.3.5",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@jridgewell/remapping/v/2.3.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@jridgewell/resolve-uri",
+      "version": "3.1.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@jridgewell/resolve-uri/v/3.1.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@jridgewell/sourcemap-codec",
+      "version": "1.6.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@jridgewell/sourcemap-codec/v/1.6.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@jridgewell/trace-mapping",
+      "version": "0.3.31",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@jridgewell/trace-mapping/v/0.3.31",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@kobalte/core",
+      "version": "0.13.14",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@kobalte/core/v/0.13.14",
+      "notice_files": [
+        "LICENSE.md",
+        "NOTICE.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@kobalte/utils",
+      "version": "0.9.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@kobalte/utils/v/0.9.2",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@microsoft/signalr",
+      "version": "8.0.29",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@microsoft/signalr/v/8.0.29",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@napi-rs/lzma-linux-x64-gnu",
+      "version": "1.5.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@napi-rs/lzma-linux-x64-gnu/v/1.5.1",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@nodelib/fs.scandir",
+      "version": "2.1.5",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@nodelib/fs.scandir/v/2.1.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@nodelib/fs.stat",
+      "version": "2.0.5",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@nodelib/fs.stat/v/2.0.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@nodelib/fs.walk",
+      "version": "1.2.8",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@nodelib/fs.walk/v/1.2.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@posthog/browser-common",
+      "version": "0.9.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@posthog/browser-common/v/0.9.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@posthog/core",
+      "version": "1.55.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@posthog/core/v/1.55.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@posthog/core",
+      "version": "1.55.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@posthog/core/v/1.55.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@posthog/types",
+      "version": "1.412.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@posthog/types/v/1.412.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@rollup/rollup-linux-x64-gnu",
+      "version": "4.63.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@rollup/rollup-linux-x64-gnu/v/4.63.4",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@rollup/rollup-linux-x64-musl",
+      "version": "4.63.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@rollup/rollup-linux-x64-musl/v/4.63.4",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@sentry/browser",
+      "version": "10.75.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@sentry/browser/v/10.75.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@sentry/browser-utils",
+      "version": "10.75.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@sentry/browser-utils/v/10.75.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@sentry/conventions",
+      "version": "0.16.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@sentry/conventions/v/0.16.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@sentry/core",
+      "version": "10.75.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@sentry/core/v/10.75.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@sentry/feedback",
+      "version": "10.75.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@sentry/feedback/v/10.75.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@sentry/replay",
+      "version": "10.75.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@sentry/replay/v/10.75.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@sentry/replay-canvas",
+      "version": "10.75.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@sentry/replay-canvas/v/10.75.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/event-listener",
+      "version": "2.4.6",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/event-listener/v/2.4.6",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/keyed",
+      "version": "1.5.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/keyed/v/1.5.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/map",
+      "version": "0.4.13",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/map/v/0.4.13",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/media",
+      "version": "2.3.6",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/media/v/2.3.6",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/props",
+      "version": "3.2.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/props/v/3.2.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/refs",
+      "version": "1.1.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/refs/v/1.1.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/resize-observer",
+      "version": "2.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/resize-observer/v/2.2.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/rootless",
+      "version": "1.5.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/rootless/v/1.5.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/static-store",
+      "version": "0.1.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/static-store/v/0.1.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/trigger",
+      "version": "1.2.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/trigger/v/1.2.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solid-primitives/utils",
+      "version": "6.4.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solid-primitives/utils/v/6.4.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@solidjs/router",
+      "version": "0.16.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@solidjs/router/v/0.16.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@swc/helpers",
+      "version": "0.5.23",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/@swc/helpers/v/0.5.23",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@tanstack/query-core",
+      "version": "5.104.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@tanstack/query-core/v/5.104.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@tanstack/solid-query",
+      "version": "5.104.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@tanstack/solid-query/v/5.104.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/babel__core",
+      "version": "7.20.5",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/babel__core/v/7.20.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/babel__generator",
+      "version": "7.27.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/babel__generator/v/7.27.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/babel__template",
+      "version": "7.4.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/babel__template/v/7.4.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/babel__traverse",
+      "version": "7.28.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/babel__traverse/v/7.28.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/estree",
+      "version": "1.0.9",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/estree/v/1.0.9",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/json-schema",
+      "version": "7.0.15",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/json-schema/v/7.0.15",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/node",
+      "version": "22.20.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/node/v/22.20.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@types/trusted-types",
+      "version": "2.0.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@types/trusted-types/v/2.0.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/eslint-plugin",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/eslint-plugin/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/parser",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/parser/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/project-service",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/project-service/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/scope-manager",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/scope-manager/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/tsconfig-utils",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/tsconfig-utils/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/type-utils",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/type-utils/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/types",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/types/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/typescript-estree",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/typescript-estree/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/utils",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/utils/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "@typescript-eslint/visitor-keys",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/@typescript-eslint/visitor-keys/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "abort-controller",
+      "version": "3.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/abort-controller/v/3.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "acorn",
+      "version": "8.18.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/acorn/v/8.18.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "acorn-jsx",
+      "version": "5.3.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/acorn-jsx/v/5.3.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ajv",
+      "version": "6.15.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/ajv/v/6.15.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ansi-styles",
+      "version": "4.3.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/ansi-styles/v/4.3.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "any-promise",
+      "version": "1.3.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/any-promise/v/1.3.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "anymatch",
+      "version": "3.1.3",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/anymatch/v/3.1.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "arg",
+      "version": "5.0.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/arg/v/5.0.2",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "argparse",
+      "version": "2.0.1",
+      "declared_license": "Python-2.0",
+      "source": "https://www.npmjs.com/package/argparse/v/2.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "autoprefixer",
+      "version": "10.6.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/autoprefixer/v/10.6.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "babel-plugin-jsx-dom-expressions",
+      "version": "0.40.10",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/babel-plugin-jsx-dom-expressions/v/0.40.10",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "babel-preset-solid",
+      "version": "1.9.15",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/babel-preset-solid/v/1.9.15",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "balanced-match",
+      "version": "1.0.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/balanced-match/v/1.0.2",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "balanced-match",
+      "version": "4.0.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/balanced-match/v/4.0.4",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "baseline-browser-mapping",
+      "version": "2.11.25",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/baseline-browser-mapping/v/2.11.25",
+      "notice_files": [
+        "LICENSE.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "binary-extensions",
+      "version": "2.3.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/binary-extensions/v/2.3.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "brace-expansion",
+      "version": "1.1.21",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/brace-expansion/v/1.1.21",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "brace-expansion",
+      "version": "5.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/brace-expansion/v/5.0.12",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "braces",
+      "version": "3.0.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/braces/v/3.0.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "browserslist",
+      "version": "4.29.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/browserslist/v/4.29.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "callsites",
+      "version": "3.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/callsites/v/3.1.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "camelcase-css",
+      "version": "2.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/camelcase-css/v/2.0.1",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "caniuse-lite",
+      "version": "1.0.30001810",
+      "declared_license": "CC-BY-4.0",
+      "source": "https://www.npmjs.com/package/caniuse-lite/v/1.0.30001810",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "chalk",
+      "version": "4.1.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/chalk/v/4.1.2",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "chokidar",
+      "version": "3.6.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/chokidar/v/3.6.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "color-convert",
+      "version": "2.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/color-convert/v/2.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "color-name",
+      "version": "1.1.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/color-name/v/1.1.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "commander",
+      "version": "4.1.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/commander/v/4.1.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "concat-map",
+      "version": "0.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/concat-map/v/0.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "convert-source-map",
+      "version": "2.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/convert-source-map/v/2.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "core-js",
+      "version": "3.50.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/core-js/v/3.50.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "cross-spawn",
+      "version": "7.0.6",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/cross-spawn/v/7.0.6",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "cssesc",
+      "version": "3.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/cssesc/v/3.0.0",
+      "notice_files": [
+        "LICENSE-MIT.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "csstype",
+      "version": "3.2.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/csstype/v/3.2.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "debug",
+      "version": "4.4.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/debug/v/4.4.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "deep-is",
+      "version": "0.1.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/deep-is/v/0.1.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "didyoumean",
+      "version": "1.2.2",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/didyoumean/v/1.2.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "dlv",
+      "version": "1.1.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/dlv/v/1.1.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "dompurify",
+      "version": "3.4.15",
+      "declared_license": "(MPL-2.0 OR Apache-2.0)",
+      "source": "https://www.npmjs.com/package/dompurify/v/3.4.15",
+      "notice_files": [
+        "LICENSE",
+        "LICENSE-MPL"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "electron-to-chromium",
+      "version": "1.5.434",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/electron-to-chromium/v/1.5.434",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "entities",
+      "version": "6.0.1",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/entities/v/6.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "es-errors",
+      "version": "1.3.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/es-errors/v/1.3.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "esbuild",
+      "version": "0.25.12",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/esbuild/v/0.25.12",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "escalade",
+      "version": "3.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/escalade/v/3.2.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "escape-string-regexp",
+      "version": "4.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/escape-string-regexp/v/4.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "eslint",
+      "version": "9.39.5",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/eslint/v/9.39.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "eslint-plugin-solid",
+      "version": "0.18.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/eslint-plugin-solid/v/0.18.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "eslint-scope",
+      "version": "8.4.0",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/eslint-scope/v/8.4.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "eslint-visitor-keys",
+      "version": "3.4.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/eslint-visitor-keys/v/3.4.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "eslint-visitor-keys",
+      "version": "4.2.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/eslint-visitor-keys/v/4.2.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "eslint-visitor-keys",
+      "version": "5.0.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/eslint-visitor-keys/v/5.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "espree",
+      "version": "10.4.0",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/espree/v/10.4.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "esquery",
+      "version": "1.7.0",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://www.npmjs.com/package/esquery/v/1.7.0",
+      "notice_files": [
+        "license.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "esrecurse",
+      "version": "4.3.0",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/esrecurse/v/4.3.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "estraverse",
+      "version": "5.3.0",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/estraverse/v/5.3.0",
+      "notice_files": [
+        "LICENSE.BSD"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "esutils",
+      "version": "2.0.3",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/esutils/v/2.0.3",
+      "notice_files": [
+        "LICENSE.BSD"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "event-target-shim",
+      "version": "5.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/event-target-shim/v/5.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "eventsource",
+      "version": "2.0.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/eventsource/v/2.0.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fast-deep-equal",
+      "version": "3.1.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fast-deep-equal/v/3.1.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fast-glob",
+      "version": "3.3.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fast-glob/v/3.3.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fast-json-stable-stringify",
+      "version": "2.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fast-json-stable-stringify/v/2.1.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fast-levenshtein",
+      "version": "2.0.6",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fast-levenshtein/v/2.0.6",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fastq",
+      "version": "1.20.3",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/fastq/v/1.20.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fdir",
+      "version": "6.5.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fdir/v/6.5.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fetch-cookie",
+      "version": "2.2.0",
+      "declared_license": "Unlicense",
+      "source": "https://www.npmjs.com/package/fetch-cookie/v/2.2.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fflate",
+      "version": "0.4.9",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fflate/v/0.4.9",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "file-entry-cache",
+      "version": "8.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/file-entry-cache/v/8.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fill-range",
+      "version": "7.1.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fill-range/v/7.1.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "find-up",
+      "version": "5.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/find-up/v/5.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "flat-cache",
+      "version": "4.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/flat-cache/v/4.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "flatted",
+      "version": "3.4.4",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/flatted/v/3.4.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "fraction.js",
+      "version": "5.3.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/fraction.js/v/5.3.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "function-bind",
+      "version": "1.1.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/function-bind/v/1.1.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "gensync",
+      "version": "1.0.0-beta.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/gensync/v/1.0.0-beta.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "glob-parent",
+      "version": "5.1.2",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/glob-parent/v/5.1.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "glob-parent",
+      "version": "6.0.2",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/glob-parent/v/6.0.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "globals",
+      "version": "14.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/globals/v/14.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "has-flag",
+      "version": "4.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/has-flag/v/4.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "hasown",
+      "version": "2.0.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/hasown/v/2.0.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "html-entities",
+      "version": "2.3.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/html-entities/v/2.3.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "html-tags",
+      "version": "3.3.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/html-tags/v/3.3.1",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ignore",
+      "version": "5.3.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/ignore/v/5.3.2",
+      "notice_files": [
+        "LICENSE-MIT"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ignore",
+      "version": "7.0.9",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/ignore/v/7.0.9",
+      "notice_files": [
+        "LICENSE-MIT"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "import-fresh",
+      "version": "3.3.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/import-fresh/v/3.3.1",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "imurmurhash",
+      "version": "0.1.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/imurmurhash/v/0.1.4",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "inline-style-parser",
+      "version": "0.2.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/inline-style-parser/v/0.2.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "is-binary-path",
+      "version": "2.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/is-binary-path/v/2.1.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "is-core-module",
+      "version": "2.17.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/is-core-module/v/2.17.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "is-extglob",
+      "version": "2.1.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/is-extglob/v/2.1.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "is-glob",
+      "version": "4.0.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/is-glob/v/4.0.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "is-html",
+      "version": "2.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/is-html/v/2.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "is-number",
+      "version": "7.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/is-number/v/7.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "is-what",
+      "version": "4.1.16",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/is-what/v/4.1.16",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "isexe",
+      "version": "2.0.0",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/isexe/v/2.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "jiti",
+      "version": "1.21.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/jiti/v/1.21.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "js-tokens",
+      "version": "4.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/js-tokens/v/4.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "js-yaml",
+      "version": "4.3.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/js-yaml/v/4.3.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "jsesc",
+      "version": "3.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/jsesc/v/3.1.0",
+      "notice_files": [
+        "LICENSE-MIT.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "json-buffer",
+      "version": "3.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/json-buffer/v/3.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "json-schema-traverse",
+      "version": "0.4.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/json-schema-traverse/v/0.4.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "json-stable-stringify-without-jsonify",
+      "version": "1.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/json-stable-stringify-without-jsonify/v/1.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "json5",
+      "version": "2.2.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/json5/v/2.2.3",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "kebab-case",
+      "version": "1.0.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/kebab-case/v/1.0.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "keyv",
+      "version": "4.5.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/keyv/v/4.5.4",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "known-css-properties",
+      "version": "0.30.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/known-css-properties/v/0.30.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "levn",
+      "version": "0.4.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/levn/v/0.4.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lilconfig",
+      "version": "3.1.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/lilconfig/v/3.1.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lines-and-columns",
+      "version": "1.2.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/lines-and-columns/v/1.2.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "locate-path",
+      "version": "6.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/locate-path/v/6.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lodash.merge",
+      "version": "4.6.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/lodash.merge/v/4.6.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "lru-cache",
+      "version": "5.1.1",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/lru-cache/v/5.1.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "merge-anything",
+      "version": "5.1.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/merge-anything/v/5.1.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "merge2",
+      "version": "1.4.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/merge2/v/1.4.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "micromatch",
+      "version": "4.0.8",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/micromatch/v/4.0.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "minimatch",
+      "version": "10.2.6",
+      "declared_license": "BlueOak-1.0.0",
+      "source": "https://www.npmjs.com/package/minimatch/v/10.2.6",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "minimatch",
+      "version": "3.1.5",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/minimatch/v/3.1.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ms",
+      "version": "2.1.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/ms/v/2.1.3",
+      "notice_files": [
+        "license.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "mz",
+      "version": "2.7.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/mz/v/2.7.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "nanoid",
+      "version": "3.3.19",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/nanoid/v/3.3.19",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "natural-compare",
+      "version": "1.4.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/natural-compare/v/1.4.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "node-fetch",
+      "version": "2.7.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/node-fetch/v/2.7.0",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "node-releases",
+      "version": "2.0.56",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/node-releases/v/2.0.56",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "normalize-path",
+      "version": "3.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/normalize-path/v/3.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "object-assign",
+      "version": "4.1.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/object-assign/v/4.1.1",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "object-hash",
+      "version": "3.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/object-hash/v/3.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "optionator",
+      "version": "0.9.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/optionator/v/0.9.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "p-limit",
+      "version": "3.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/p-limit/v/3.1.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "p-locate",
+      "version": "5.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/p-locate/v/5.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "parent-module",
+      "version": "1.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/parent-module/v/1.0.1",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "parse5",
+      "version": "7.3.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/parse5/v/7.3.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "path-exists",
+      "version": "4.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/path-exists/v/4.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "path-key",
+      "version": "3.1.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/path-key/v/3.1.1",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "path-parse",
+      "version": "1.0.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/path-parse/v/1.0.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "picocolors",
+      "version": "1.1.1",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/picocolors/v/1.1.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "picomatch",
+      "version": "2.3.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/picomatch/v/2.3.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "picomatch",
+      "version": "4.0.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/picomatch/v/4.0.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "pirates",
+      "version": "4.0.7",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/pirates/v/4.0.7",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "postcss",
+      "version": "8.5.28",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/postcss/v/8.5.28",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "postcss-import",
+      "version": "15.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/postcss-import/v/15.1.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "postcss-js",
+      "version": "4.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/postcss-js/v/4.1.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "postcss-load-config",
+      "version": "6.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/postcss-load-config/v/6.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "postcss-nested",
+      "version": "6.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/postcss-nested/v/6.2.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "postcss-selector-parser",
+      "version": "6.1.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/postcss-selector-parser/v/6.1.4",
+      "notice_files": [
+        "LICENSE-MIT"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "postcss-value-parser",
+      "version": "4.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/postcss-value-parser/v/4.2.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "posthog-js",
+      "version": "1.434.14",
+      "declared_license": "(Apache-2.0 AND MIT)",
+      "source": "https://www.npmjs.com/package/posthog-js/v/1.434.14",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "preact",
+      "version": "10.29.8",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/preact/v/10.29.8",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "prelude-ls",
+      "version": "1.2.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/prelude-ls/v/1.2.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "psl",
+      "version": "1.15.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/psl/v/1.15.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "punycode",
+      "version": "2.3.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/punycode/v/2.3.1",
+      "notice_files": [
+        "LICENSE-MIT.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "query-selector-shadow-dom",
+      "version": "1.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/query-selector-shadow-dom/v/1.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "querystringify",
+      "version": "2.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/querystringify/v/2.2.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "queue-microtask",
+      "version": "1.2.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/queue-microtask/v/1.2.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "read-cache",
+      "version": "1.0.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/read-cache/v/1.0.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "readdirp",
+      "version": "3.6.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/readdirp/v/3.6.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "requires-port",
+      "version": "1.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/requires-port/v/1.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "resolve",
+      "version": "1.22.12",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/resolve/v/1.22.12",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "resolve-from",
+      "version": "4.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/resolve-from/v/4.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "reusify",
+      "version": "1.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/reusify/v/1.1.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "rollup",
+      "version": "4.63.4",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/rollup/v/4.63.4",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "run-parallel",
+      "version": "1.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/run-parallel/v/1.2.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "semver",
+      "version": "6.3.1",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/semver/v/6.3.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "semver",
+      "version": "7.8.5",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/semver/v/7.8.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "seroval",
+      "version": "1.5.6",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/seroval/v/1.5.6",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "seroval-plugins",
+      "version": "1.5.6",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/seroval-plugins/v/1.5.6",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "set-cookie-parser",
+      "version": "2.7.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/set-cookie-parser/v/2.7.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "shebang-command",
+      "version": "2.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/shebang-command/v/2.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "shebang-regex",
+      "version": "3.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/shebang-regex/v/3.0.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "solid-js",
+      "version": "1.9.15",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/solid-js/v/1.9.15",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "solid-presence",
+      "version": "0.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/solid-presence/v/0.2.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "solid-prevent-scroll",
+      "version": "0.1.11",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/solid-prevent-scroll/v/0.1.11",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "solid-refresh",
+      "version": "0.6.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/solid-refresh/v/0.6.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "source-map-js",
+      "version": "1.2.1",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://www.npmjs.com/package/source-map-js/v/1.2.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "strip-json-comments",
+      "version": "3.1.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/strip-json-comments/v/3.1.1",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "style-to-object",
+      "version": "1.0.14",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/style-to-object/v/1.0.14",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "sucrase",
+      "version": "3.35.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/sucrase/v/3.35.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "supports-color",
+      "version": "7.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/supports-color/v/7.2.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "supports-preserve-symlinks-flag",
+      "version": "1.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/supports-preserve-symlinks-flag/v/1.0.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "tailwindcss",
+      "version": "3.4.19",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/tailwindcss/v/3.4.19",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "thenify",
+      "version": "3.3.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/thenify/v/3.3.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "thenify-all",
+      "version": "1.6.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/thenify-all/v/1.6.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "tinyglobby",
+      "version": "0.2.17",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/tinyglobby/v/0.2.17",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "to-regex-range",
+      "version": "5.0.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/to-regex-range/v/5.0.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "tough-cookie",
+      "version": "4.1.4",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://www.npmjs.com/package/tough-cookie/v/4.1.4",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "tr46",
+      "version": "0.0.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/tr46/v/0.0.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ts-api-utils",
+      "version": "2.5.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/ts-api-utils/v/2.5.0",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ts-interface-checker",
+      "version": "0.1.13",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/ts-interface-checker/v/0.1.13",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "tslib",
+      "version": "2.8.1",
+      "declared_license": "0BSD",
+      "source": "https://www.npmjs.com/package/tslib/v/2.8.1",
+      "notice_files": [
+        "LICENSE.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "type-check",
+      "version": "0.4.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/type-check/v/0.4.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "typescript",
+      "version": "5.9.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/typescript/v/5.9.3",
+      "notice_files": [
+        "LICENSE.txt",
+        "ThirdPartyNoticeText.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "typescript-eslint",
+      "version": "8.70.1",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/typescript-eslint/v/8.70.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "undici-types",
+      "version": "6.21.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/undici-types/v/6.21.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "universalify",
+      "version": "0.2.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/universalify/v/0.2.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "update-browserslist-db",
+      "version": "1.3.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/update-browserslist-db/v/1.3.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "uri-js",
+      "version": "4.4.1",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/uri-js/v/4.4.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "url-parse",
+      "version": "1.5.10",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/url-parse/v/1.5.10",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "util-deprecate",
+      "version": "1.0.2",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/util-deprecate/v/1.0.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "vite",
+      "version": "6.4.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/vite/v/6.4.3",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "vite-plugin-solid",
+      "version": "2.11.14",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/vite-plugin-solid/v/2.11.14",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "npm",
+      "name": "vitefu",
+      "version": "1.1.3",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/vitefu/v/1.1.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "web-vitals",
+      "version": "6.2.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/web-vitals/v/6.2.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "web-vitals",
+      "version": "6.2.2",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.npmjs.com/package/web-vitals/v/6.2.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "webidl-conversions",
+      "version": "3.0.1",
+      "declared_license": "BSD-2-Clause",
+      "source": "https://www.npmjs.com/package/webidl-conversions/v/3.0.1",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "whatwg-url",
+      "version": "5.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/whatwg-url/v/5.0.0",
+      "notice_files": [
+        "LICENSE.txt"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "which",
+      "version": "2.0.2",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/which/v/2.0.2",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "word-wrap",
+      "version": "1.2.5",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/word-wrap/v/1.2.5",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "ws",
+      "version": "7.5.13",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/ws/v/7.5.13",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "yallist",
+      "version": "3.1.1",
+      "declared_license": "ISC",
+      "source": "https://www.npmjs.com/package/yallist/v/3.1.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "npm",
+      "name": "yocto-queue",
+      "version": "0.1.0",
+      "declared_license": "MIT",
+      "source": "https://www.npmjs.com/package/yocto-queue/v/0.1.0",
+      "notice_files": [
+        "license"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "AngleSharp",
+      "version": "1.8.2",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/AngleSharp/1.8.2",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Castle.Core",
+      "version": "5.1.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Castle.Core/5.1.1",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "FSharp.Control.TaskSeq",
+      "version": "1.1.1",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/FSharp.Control.TaskSeq/1.1.1",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "FSharp.Core",
+      "version": "10.1.401",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/FSharp.Core/10.1.401",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Hangfire.AspNetCore",
+      "version": "1.8.25",
+      "declared_license": "LICENSE.md",
+      "source": "https://www.nuget.org/packages/Hangfire.AspNetCore/1.8.25",
+      "notice_files": [
+        "COPYING",
+        "COPYING.LESSER",
+        "LICENSE.md",
+        "LICENSE_ROYALTYFREE",
+        "LICENSE_STANDARD",
+        "NOTICES"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Hangfire.Core",
+      "version": "1.8.25",
+      "declared_license": "LICENSE.md",
+      "source": "https://www.nuget.org/packages/Hangfire.Core/1.8.25",
+      "notice_files": [
+        "COPYING",
+        "COPYING.LESSER",
+        "LICENSE.md",
+        "LICENSE_ROYALTYFREE",
+        "LICENSE_STANDARD",
+        "NOTICES"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Hangfire.NetCore",
+      "version": "1.8.25",
+      "declared_license": "LICENSE.md",
+      "source": "https://www.nuget.org/packages/Hangfire.NetCore/1.8.25",
+      "notice_files": [
+        "COPYING",
+        "COPYING.LESSER",
+        "LICENSE.md",
+        "LICENSE_ROYALTYFREE",
+        "LICENSE_STANDARD",
+        "NOTICES"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Hangfire.Storage.SQLite",
+      "version": "0.4.3",
+      "declared_license": "LICENSE",
+      "source": "https://www.nuget.org/packages/Hangfire.Storage.SQLite/0.4.3",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.AspNetCore.OpenApi",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.AspNetCore.OpenApi/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.CodeCoverage",
+      "version": "17.14.1",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.CodeCoverage/17.14.1",
+      "notice_files": [
+        "ThirdPartyNotices.txt",
+        "build/netstandard2.0/ThirdPartyNotices.txt"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Data.Sqlite.Core",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Data.Sqlite.Core/9.0.20",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.EntityFrameworkCore",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/9.0.20",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.EntityFrameworkCore.Abstractions",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Abstractions/9.0.20",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.EntityFrameworkCore.Analyzers",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Analyzers/9.0.20",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.EntityFrameworkCore.Relational",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Relational/9.0.20",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.EntityFrameworkCore.Sqlite",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/9.0.20",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.EntityFrameworkCore.Sqlite.Core",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite.Core/9.0.20",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.ApiDescription.Server",
+      "version": "10.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.ApiDescription.Server/10.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Caching.Abstractions",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Abstractions/9.0.20",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Caching.Memory",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Memory/9.0.20",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Configuration",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Configuration/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Configuration.Abstractions",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Configuration.Binder",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Binder/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Configuration.EnvironmentVariables",
+      "version": "10.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Configuration.EnvironmentVariables/10.0.0",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.DependencyInjection",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.DependencyInjection.Abstractions",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.DependencyModel",
+      "version": "10.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyModel/10.0.0",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.DependencyModel",
+      "version": "9.0.20",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyModel/9.0.20",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Diagnostics",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Diagnostics/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Diagnostics.Abstractions",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Diagnostics.Abstractions/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.FileProviders.Abstractions",
+      "version": "10.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.FileProviders.Abstractions/10.0.0",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Hosting.Abstractions",
+      "version": "10.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Hosting.Abstractions/10.0.0",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Http",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Http/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Logging",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Logging/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Logging.Abstractions",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Logging.Configuration",
+      "version": "10.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Logging.Configuration/10.0.0",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Options",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Options.ConfigurationExtensions",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options.ConfigurationExtensions/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.Extensions.Primitives",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.Extensions.Primitives/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.NET.Test.Sdk",
+      "version": "17.14.1",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/17.14.1",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.OpenApi",
+      "version": "2.12.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.OpenApi/2.12.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.TestPlatform.ObjectModel",
+      "version": "17.14.1",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.TestPlatform.ObjectModel/17.14.1",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Microsoft.TestPlatform.TestHost",
+      "version": "17.14.1",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Microsoft.TestPlatform.TestHost/17.14.1",
+      "notice_files": [
+        "ThirdPartyNotices.txt"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "NSubstitute",
+      "version": "5.3.0",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://www.nuget.org/packages/NSubstitute/5.3.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Newtonsoft.Json",
+      "version": "13.0.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Newtonsoft.Json/13.0.3",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Newtonsoft.Json",
+      "version": "13.0.4",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Newtonsoft.Json/13.0.4",
+      "notice_files": [
+        "LICENSE.md"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry",
+      "version": "1.19.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/OpenTelemetry/1.19.1",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Api",
+      "version": "1.19.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/OpenTelemetry.Api/1.19.1",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Api.ProviderBuilderExtensions",
+      "version": "1.19.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/OpenTelemetry.Api.ProviderBuilderExtensions/1.19.1",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Exporter.Prometheus.AspNetCore",
+      "version": "1.15.0-beta.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/OpenTelemetry.Exporter.Prometheus.AspNetCore/1.15.0-beta.1",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Extensions.Hosting",
+      "version": "1.19.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/OpenTelemetry.Extensions.Hosting/1.19.1",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.AspNetCore",
+      "version": "1.19.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/OpenTelemetry.Instrumentation.AspNetCore/1.19.0",
+      "notice_files": [
+        "LICENSE.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "OpenTelemetry.Instrumentation.Runtime",
+      "version": "1.19.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/OpenTelemetry.Instrumentation.Runtime/1.19.0",
+      "notice_files": [
+        "LICENSE.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Polly",
+      "version": "8.8.0",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://www.nuget.org/packages/Polly/8.8.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Polly.Core",
+      "version": "8.8.0",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://www.nuget.org/packages/Polly.Core/8.8.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Polly.RateLimiting",
+      "version": "8.8.0",
+      "declared_license": "BSD-3-Clause",
+      "source": "https://www.nuget.org/packages/Polly.RateLimiting/8.8.0",
+      "notice_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "SQLitePCLRaw.bundle_e_sqlite3",
+      "version": "2.1.12",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/SQLitePCLRaw.bundle_e_sqlite3/2.1.12",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "SQLitePCLRaw.bundle_green",
+      "version": "2.1.11",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/SQLitePCLRaw.bundle_green/2.1.11",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "SQLitePCLRaw.core",
+      "version": "2.1.12",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/SQLitePCLRaw.core/2.1.12",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "SQLitePCLRaw.lib.e_sqlite3",
+      "version": "2.1.12",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/SQLitePCLRaw.lib.e_sqlite3/2.1.12",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "SQLitePCLRaw.provider.e_sqlite3",
+      "version": "2.1.12",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/SQLitePCLRaw.provider.e_sqlite3/2.1.12",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Sentry",
+      "version": "5.16.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Sentry/5.16.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Sentry.AspNetCore",
+      "version": "5.16.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Sentry.AspNetCore/5.16.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Sentry.Extensions.Logging",
+      "version": "5.16.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Sentry.Extensions.Logging/5.16.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Sentry.Serilog",
+      "version": "5.16.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Sentry.Serilog/5.16.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog",
+      "version": "4.3.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog/4.3.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.AspNetCore",
+      "version": "10.0.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.AspNetCore/10.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.Extensions.Hosting",
+      "version": "10.0.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.Extensions.Hosting/10.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.Extensions.Logging",
+      "version": "10.0.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.Extensions.Logging/10.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.Formatting.Compact",
+      "version": "3.0.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.Formatting.Compact/3.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.Settings.Configuration",
+      "version": "10.0.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.Settings.Configuration/10.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.Sinks.Console",
+      "version": "6.1.1",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.Sinks.Console/6.1.1",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.Sinks.Debug",
+      "version": "3.0.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.Sinks.Debug/3.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Serilog.Sinks.File",
+      "version": "7.0.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/Serilog.Sinks.File/7.0.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "SpotifyAPI.Web",
+      "version": "7.4.2",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/SpotifyAPI.Web/7.4.2",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Swashbuckle.AspNetCore",
+      "version": "10.2.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Swashbuckle.AspNetCore/10.2.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Swashbuckle.AspNetCore.Swagger",
+      "version": "10.2.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Swashbuckle.AspNetCore.Swagger/10.2.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Swashbuckle.AspNetCore.SwaggerGen",
+      "version": "10.2.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Swashbuckle.AspNetCore.SwaggerGen/10.2.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "Swashbuckle.AspNetCore.SwaggerUI",
+      "version": "10.2.3",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/Swashbuckle.AspNetCore.SwaggerUI/10.2.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "System.ComponentModel.Annotations",
+      "version": "5.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/System.ComponentModel.Annotations/5.0.0",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "System.Diagnostics.EventLog",
+      "version": "6.0.0",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/System.Diagnostics.EventLog/6.0.0",
+      "notice_files": [
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "System.Threading.RateLimiting",
+      "version": "10.0.12",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/System.Threading.RateLimiting/10.0.12",
+      "notice_files": [
+        "THIRD-PARTY-NOTICES.TXT"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "coverlet.collector",
+      "version": "6.0.4",
+      "declared_license": "MIT",
+      "source": "https://www.nuget.org/packages/coverlet.collector/6.0.4",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "sqlite-net-pcl",
+      "version": "1.9.172",
+      "declared_license": "LICENSE.txt",
+      "source": "https://www.nuget.org/packages/sqlite-net-pcl/1.9.172",
+      "notice_files": [
+        "LICENSE.txt"
+      ]
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit",
+      "version": "2.9.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/xunit/2.9.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit.abstractions",
+      "version": "2.0.3",
+      "declared_license": "SEE LICENSE: https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "source": "https://www.nuget.org/packages/xunit.abstractions/2.0.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit.analyzers",
+      "version": "1.18.0",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/xunit.analyzers/1.18.0",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit.assert",
+      "version": "2.9.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/xunit.assert/2.9.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit.core",
+      "version": "2.9.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/xunit.core/2.9.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit.extensibility.core",
+      "version": "2.9.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/xunit.extensibility.core/2.9.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit.extensibility.execution",
+      "version": "2.9.3",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/xunit.extensibility.execution/2.9.3",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "nuget",
+      "name": "xunit.runner.visualstudio",
+      "version": "3.1.5",
+      "declared_license": "Apache-2.0",
+      "source": "https://www.nuget.org/packages/xunit.runner.visualstudio/3.1.5",
+      "notice_files": []
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "hatchling",
+      "version": "1.32.4",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/hatchling/1.32.4/",
+      "notice_files": [
+        "licenses/LICENSE.txt"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "nodeenv",
+      "version": "1.10.0",
+      "declared_license": "BSD",
+      "source": "https://pypi.org/project/nodeenv/1.10.0/",
+      "notice_files": [
+        "licenses/AUTHORS",
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "packaging",
+      "version": "26.3",
+      "declared_license": "Apache-2.0 OR BSD-2-Clause",
+      "source": "https://pypi.org/project/packaging/26.3/",
+      "notice_files": [
+        "licenses/LICENSE",
+        "licenses/LICENSE.APACHE",
+        "licenses/LICENSE.BSD"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "pathspec",
+      "version": "1.1.1",
+      "declared_license": "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+      "source": "https://pypi.org/project/pathspec/1.1.1/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "pluggy",
+      "version": "1.7.0",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/pluggy/1.7.0/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "pyright",
+      "version": "1.1.414",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/pyright/1.1.414/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "ruff",
+      "version": "0.16.9",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/ruff/0.16.9/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "tomlkit",
+      "version": "0.15.2",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/tomlkit/0.15.2/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "tree-sitter",
+      "version": "0.25.2",
+      "declared_license": "License :: OSI Approved :: MIT License",
+      "source": "https://pypi.org/project/tree-sitter/0.25.2/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "tree-sitter-c-sharp",
+      "version": "0.23.5",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/tree-sitter-c-sharp/0.23.5/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "tree-sitter-embedded-template",
+      "version": "0.25.0",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/tree-sitter-embedded-template/0.25.0/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "tree-sitter-language-pack",
+      "version": "0.13.0",
+      "declared_license": "MIT OR Apache-2.0",
+      "source": "https://pypi.org/project/tree-sitter-language-pack/0.13.0/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "tree-sitter-yaml",
+      "version": "0.7.2",
+      "declared_license": "MIT",
+      "source": "https://pypi.org/project/tree-sitter-yaml/0.7.2/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "trove-classifiers",
+      "version": "2026.9.21.13",
+      "declared_license": "License :: OSI Approved :: Apache Software License",
+      "source": "https://pypi.org/project/trove-classifiers/2026.9.21.13/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    },
+    {
+      "ecosystem": "pypi",
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "declared_license": "PSF-2.0",
+      "source": "https://pypi.org/project/typing_extensions/4.16.0/",
+      "notice_files": [
+        "licenses/LICENSE"
+      ]
+    }
+  ]
+}

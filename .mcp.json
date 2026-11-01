@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "backlog": {
+      "command": "/usr/local/bin/backlog",
+      "args": ["mcp", "start", "--cwd", "/home/scowalt/Code/ignite-for-spotify-2"]
+    }
+  }
+}

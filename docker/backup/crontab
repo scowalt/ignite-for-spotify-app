@@ -1,0 +1,3 @@
+# Daily at 10:00 UTC. Output is forwarded to the container log.
+0 10 * * * /usr/local/bin/backup-database >> /proc/1/fd/1 2>> /proc/1/fd/2
+

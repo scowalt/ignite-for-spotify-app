@@ -1,0 +1,36 @@
+{
+  "name": "ignite-for-spotify-app-frontend",
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && bun run scripts/verify-search-discoverability.ts --dist dist",
+    "check:search": "bun run scripts/verify-search-discoverability.ts --url https://igniteforspotify.com",
+    "preview": "vite preview",
+    "test": "bun test",
+    "lint": "eslint src tests scripts --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kobalte/core": "^0.13.14",
+    "@microsoft/signalr": "^8.0.29",
+    "@sentry/browser": "^10.75.3",
+    "@solidjs/router": "^0.16.3",
+    "@tanstack/solid-query": "^5.104.0",
+    "posthog-js": "^1.434.14",
+    "solid-js": "^1.9.15"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "autoprefixer": "^10.6.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-solid": "^0.18.0",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^6.4.3",
+    "vite-plugin-solid": "^2.11.14"
+  }
+}

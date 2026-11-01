@@ -1,0 +1,22 @@
+{
+  "https://glitchtip.scowalt.com/api/0/organizations/scowalt/issues/?query=is%3Aunresolved&project=1": {
+    "link": "<https://glitchtip.scowalt.com/api/0/organizations/scowalt/issues/?cursor=next-1>; rel=\"next\"",
+    "body": [
+      {"id": "101", "status": "unresolved", "title": "Frontend error", "count": "3", "firstSeen": "2026-07-20T10:00:00Z", "lastSeen": "2026-07-22T10:00:00Z", "project": {"id": "1", "slug": "ignite-for-spotify-frontend", "name": "Ignite frontend"}, "assignedTo": null, "culprit": "render", "firstRelease": null, "lastRelease": null, "level": "error", "logger": "", "matchingEventId": null, "metadata": {"value": "fixture-metadata-secret"}, "numComments": 0, "permalink": "https://glitchtip.scowalt.com/issues/101/", "shareId": null, "shortId": "IGNITE-FRONTEND-1", "stats": {"24h": [[0, 1]]}, "statusDetails": {}, "subscriptionDetails": null, "type": "error", "userCount": 1},
+      {"id": "100", "status": "unresolved", "title": "Duplicate error", "count": "2", "firstSeen": "2026-07-20T09:00:00Z", "lastSeen": "2026-07-22T09:00:00Z", "project": {"id": "1", "slug": "ignite-for-spotify-frontend"}}
+    ]
+  },
+  "https://glitchtip.scowalt.com/api/0/organizations/scowalt/issues/?cursor=next-1": {
+    "link": "<https://glitchtip.scowalt.com/api/0/organizations/scowalt/issues/?cursor=next-1>; rel=\"next\"; results=\"false\"",
+    "body": [
+      {"id": "100", "status": "unresolved", "title": "Duplicate error", "count": "2", "firstSeen": "2026-07-20T09:00:00Z", "lastSeen": "2026-07-22T11:00:00Z", "project": {"id": "1", "slug": "ignite-for-spotify-frontend"}},
+      {"id": "102", "status": "unresolved", "title": "Another frontend error", "count": "1", "firstSeen": "2026-07-20T08:00:00Z", "lastSeen": "2026-07-22T08:00:00Z", "project": {"id": "1", "slug": "ignite-for-spotify-frontend"}}
+    ]
+  },
+  "https://glitchtip.scowalt.com/api/0/organizations/scowalt/issues/?query=is%3Aunresolved&project=2": {
+    "link": "",
+    "body": [
+      {"id": "201", "status": "unresolved", "title": "Backend error", "count": "1", "firstSeen": "2026-07-20T12:00:00Z", "lastSeen": "2026-07-22T12:00:00Z", "project": {"id": "2", "slug": "ignite-for-spotify-backend"}}
+    ]
+  }
+}

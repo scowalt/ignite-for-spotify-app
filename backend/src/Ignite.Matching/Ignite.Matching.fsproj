@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ignite.Core\Ignite.Core.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="StringNormalization.fs" />
+    <Compile Include="SearchStrategies.fs" />
+    <Compile Include="SongMatchingService.fs" />
+  </ItemGroup>
+
+</Project>

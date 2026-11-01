@@ -1,0 +1,247 @@
+name: Deploy
+
+on:
+  workflow_call:
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-2/backend
+  BACKUP_IMAGE: ghcr.io/scowalt/ignite-for-spotify-2/backup
+  FRONTEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-2/frontend
+
+jobs:
+  build-and-push:
+    if: >-
+      github.repository == 'scowalt/ignite-for-spotify-app' &&
+      github.ref == 'refs/heads/main' &&
+      github.workflow_ref == 'scowalt/ignite-for-spotify-app/.github/workflows/ci.yml@refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      vars.PRODUCTION_PUBLISHING_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production
+    concurrency:
+      group: ignite-production-publisher
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Verify release configuration
+        env:
+          CUTOVER_COMPLETE: ${{ vars.LOCAL_SQLITE_CUTOVER_COMPLETE }}
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+        run: |
+          test "$CUTOVER_COMPLETE" = true
+          test -n "$VITE_POSTHOG_KEY"
+          test -n "$VITE_SENTRY_DSN"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: "1.4.2"
+
+      - name: Build frontend
+        env:
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+        run: |
+          cd frontend
+          bun install --frozen-lockfile
+          bun run build
+
+      - name: Upload source maps to GlitchTip
+        if: vars.GLITCHTIP_SOURCEMAPS_ENABLED == 'true'
+        continue-on-error: true
+        run: |
+          npx --yes @sentry/cli@3.8.2 sourcemaps inject frontend/dist
+          npx --yes @sentry/cli@3.8.2 sourcemaps upload frontend/dist
+        env:
+          SENTRY_URL: https://glitchtip.scowalt.com
+          SENTRY_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}
+          SENTRY_ORG: scowalt
+          SENTRY_PROJECT: ignite-for-spotify-frontend
+
+      - name: Remove source maps from the image input
+        if: always()
+        run: |
+          if [ -d frontend/dist ]; then
+            find frontend/dist -name '*.map' -delete
+          fi
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        with:
+          images: ${{ env.BACKEND_IMAGE }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && vars.LOCAL_SQLITE_CUTOVER_COMPLETE == 'true' }}
+
+      - name: Build backend image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: docker/Dockerfile.backend
+          push: false
+          load: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan backend image with Trivy
+        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        with:
+          image-ref: ${{ env.BACKEND_IMAGE }}:${{ steps.meta-backend.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-backend.sarif'
+          scanners: 'vuln'
+
+      - name: Enforce backend security gate
+        env:
+          IMAGE_REF: ${{ env.BACKEND_IMAGE }}:${{ steps.meta-backend.outputs.version }}
+        run: |
+          trivy image \
+            --cache-dir "$GITHUB_WORKSPACE/.cache/trivy" \
+            --scanners vuln \
+            --ignore-unfixed \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            "$IMAGE_REF"
+          if ! trivy image --quiet \
+            --cache-dir "$GITHUB_WORKSPACE/.cache/trivy" \
+            --scanners secret --format json \
+            --output "$RUNNER_TEMP/backend-secret-scan.json" \
+            --exit-code 1 "$IMAGE_REF"; then
+            echo '::error::Secret scan failed; findings are not published in logs or artifacts.'
+            exit 1
+          fi
+
+      - name: Extract metadata for backup
+        id: meta-backup
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        with:
+          images: ${{ env.BACKUP_IMAGE }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && vars.LOCAL_SQLITE_CUTOVER_COMPLETE == 'true' }}
+
+      - name: Build backup image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: docker/Dockerfile.backup
+          push: false
+          load: true
+          tags: ${{ steps.meta-backup.outputs.tags }}
+          labels: ${{ steps.meta-backup.outputs.labels }}
+          cache-from: type=gha,scope=backup
+          cache-to: type=gha,mode=max,scope=backup
+
+      - name: Scan backup image with Trivy
+        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        with:
+          image-ref: ${{ env.BACKUP_IMAGE }}:${{ steps.meta-backup.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-backup.sarif'
+          scanners: 'vuln'
+
+      - name: Enforce backup security gate
+        env:
+          IMAGE_REF: ${{ env.BACKUP_IMAGE }}:${{ steps.meta-backup.outputs.version }}
+        run: |
+          trivy image \
+            --cache-dir "$GITHUB_WORKSPACE/.cache/trivy" \
+            --scanners vuln \
+            --ignore-unfixed \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            "$IMAGE_REF"
+          if ! trivy image --quiet \
+            --cache-dir "$GITHUB_WORKSPACE/.cache/trivy" \
+            --scanners secret --format json \
+            --output "$RUNNER_TEMP/backup-secret-scan.json" \
+            --exit-code 1 "$IMAGE_REF"; then
+            echo '::error::Secret scan failed; findings are not published in logs or artifacts.'
+            exit 1
+          fi
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        with:
+          images: ${{ env.FRONTEND_IMAGE }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build frontend image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: docker/Dockerfile.frontend
+          push: false
+          load: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan frontend image with Trivy
+        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        with:
+          image-ref: ${{ env.FRONTEND_IMAGE }}:${{ steps.meta-frontend.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-frontend.sarif'
+          scanners: 'vuln'
+
+      - name: Enforce frontend security gate
+        env:
+          IMAGE_REF: ${{ env.FRONTEND_IMAGE }}:${{ steps.meta-frontend.outputs.version }}
+        run: |
+          trivy image \
+            --cache-dir "$GITHUB_WORKSPACE/.cache/trivy" \
+            --scanners vuln \
+            --ignore-unfixed \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            "$IMAGE_REF"
+          if ! trivy image --quiet \
+            --cache-dir "$GITHUB_WORKSPACE/.cache/trivy" \
+            --scanners secret --format json \
+            --output "$RUNNER_TEMP/frontend-secret-scan.json" \
+            --exit-code 1 "$IMAGE_REF"; then
+            echo '::error::Secret scan failed; findings are not published in logs or artifacts.'
+            exit 1
+          fi
+
+      - name: Publish verified images
+        run: |
+          for image in "$BACKEND_IMAGE" "$BACKUP_IMAGE" "$FRONTEND_IMAGE"; do
+            docker push --all-tags "$image"
+          done
+
+      - name: Upload Trivy scan reports
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: trivy-sarif-${{ github.sha }}
+          path: trivy-*.sarif
+          if-no-files-found: warn

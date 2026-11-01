@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ignite.Api/Ignite.Api.fsproj" />
+    <Project Path="src/Ignite.Core/Ignite.Core.fsproj" />
+    <Project Path="src/Ignite.Infrastructure/Ignite.Infrastructure.fsproj" />
+    <Project Path="src/Ignite.Jobs/Ignite.Jobs.fsproj" />
+    <Project Path="src/Ignite.Matching/Ignite.Matching.fsproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Ignite.Core.Tests/Ignite.Core.Tests.fsproj" />
+    <Project Path="tests/Ignite.Api.Tests/Ignite.Api.Tests.fsproj" />
+    <Project Path="tests/Ignite.Infrastructure.Tests/Ignite.Infrastructure.Tests.fsproj" />
+    <Project Path="tests/Ignite.Matching.Tests/Ignite.Matching.Tests.fsproj" />
+  </Folder>
+</Solution>

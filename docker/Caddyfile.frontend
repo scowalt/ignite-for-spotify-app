@@ -1,0 +1,43 @@
+:{$PORT:80} {
+	root * {$FRONTEND_ROOT:/srv}
+
+	# Enable gzip compression
+	encode gzip
+
+	# Consolidate legacy and trailing-slash URLs before serving route HTML.
+	redir /spotify-to-ignition /match permanent
+	redir /ignition-to-spotify /discover permanent
+	redir /match/ /match permanent
+	redir /discover/ /discover permanent
+	redir /privacy/ /privacy permanent
+
+	# Each public route has its own generated HTML document. Unknown paths stay
+	# unknown so crawlers receive a real 404 instead of a soft app-shell 200.
+	@home path /
+	rewrite @home /index.html
+	@match path /match
+	rewrite @match /match/index.html
+	@discover path /discover
+	rewrite @discover /discover/index.html
+	@privacy path /privacy
+	rewrite @privacy /privacy/index.html
+
+	file_server
+
+	# Cache static assets
+	@static {
+		path *.js *.css *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2
+	}
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	# Don't cache index.html
+	@html {
+		path / /match /discover /privacy *.html
+	}
+	header @html Cache-Control "no-cache, no-store, must-revalidate"
+
+	@crawlerFiles {
+		path /robots.txt /sitemap.xml
+	}
+	header @crawlerFiles Cache-Control "public, max-age=3600"
+}

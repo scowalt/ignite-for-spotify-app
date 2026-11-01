@@ -1,0 +1,141 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-ghcr.io/scowalt/ignite-for-spotify-2/backend:latest}
+    container_name: ignite-backend
+    restart: unless-stopped
+    network_mode: host   
+    dns:
+      - 127.0.0.53
+    labels:
+      logging: "true"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://127.0.0.1:5050   
+      - ConnectionStrings__Database=Data Source=/app/data/ignite.db;Default Timeout=60
+      - ConnectionStrings__Hangfire=Data Source=/app/data/hangfire.db
+      - Database__RequireExisting=true
+      - Spotify__ClientId=${SPOTIFY_CLIENT_ID}
+      - Spotify__ClientSecret=${SPOTIFY_CLIENT_SECRET}
+      - Spotify__RedirectUri=${SPOTIFY_REDIRECT_URI}
+      - CdlcScraper__Username=${CDLC_SCRAPER_USERNAME:-}
+      - CdlcScraper__Password=${CDLC_SCRAPER_PASSWORD:-}
+      - CdlcScraper__CookieKey=${CDLC_SCRAPER_COOKIE_KEY:-}
+      - CdlcScraper__CookieValue=${CDLC_SCRAPER_COOKIE_VALUE:-}
+      - CdlcScraper__Cookies=${CDLC_SCRAPER_COOKIES:-}
+      - Hangfire__DashboardPassword=${HANGFIRE_DASHBOARD_PASSWORD:-}
+    volumes:
+      - ignite-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050/health/ready"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  backup:
+    image: ${BACKUP_IMAGE:-ghcr.io/scowalt/ignite-for-spotify-2/backup:latest}
+    container_name: ignite-backup
+    restart: unless-stopped
+    network_mode: host   
+    dns:
+      - 127.0.0.53
+    labels:
+      logging: "true"
+    environment:
+      - RESTIC_REPOSITORY=${RESTIC_REPOSITORY}
+      - RESTIC_PASSWORD=${RESTIC_PASSWORD}
+      - AWS_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=auto
+      - BACKUP_HOST=ignite-production
+      - BACKUP_TAG=ignite-database
+      - BACKUP_ON_START=${BACKUP_ON_START:-false}
+    volumes:
+      - ignite-data:/data
+      - backup-state:/state
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/backup-healthcheck"]
+      interval: 30m
+      timeout: 10s
+      retries: 2
+      start_period: 2m
+
+  frontend:
+    image: ghcr.io/scowalt/ignite-for-spotify-2/frontend:latest
+    container_name: ignite-frontend
+    restart: unless-stopped
+    labels:
+      logging: "true"
+    ports:
+      - "127.0.0.1:3000:80"   
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: ignite-caddy
+    restart: unless-stopped
+    labels:
+      logging: "true"
+    network_mode: host   
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ../Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - backend
+      - frontend
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: ignite-watchtower
+    restart: unless-stopped
+    network_mode: host   
+    dns:
+      - 127.0.0.53
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/scowalt/.docker/config.json:/config.json:ro   
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=30
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+      - DOCKER_API_VERSION=1.44
+    command: ignite-backend ignite-backup ignite-frontend
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: ignite-alloy
+    restart: unless-stopped
+    network_mode: host
+    dns:
+      - 127.0.0.53
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+    environment:
+      - LOKI_URL=${LOKI_URL}
+      - LOKI_USERNAME=${LOKI_USERNAME}
+      - LOKI_API_KEY=${LOKI_API_KEY}
+      - PROMETHEUS_URL=${PROMETHEUS_URL}
+      - PROMETHEUS_USERNAME=${PROMETHEUS_USERNAME}
+      - PROMETHEUS_API_KEY=${PROMETHEUS_API_KEY}
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --stability.level=generally-available
+
+volumes:
+  ignite-data:
+  backup-state:
+  caddy-data:
+  caddy-config:
+
+networks:
+  ignite-network:
+    driver: bridge

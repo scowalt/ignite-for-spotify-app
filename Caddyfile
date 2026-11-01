@@ -1,0 +1,63 @@
+{
+	auto_https disable_redirects
+}
+
+ignite-for-spotify.scowalt.com {
+	tls internal
+	redir https://igniteforspotify.com{uri} permanent
+}
+
+http://{$DOMAIN:ignite.example.com}, http://www.{$DOMAIN:ignite.example.com} {
+	redir https://{$DOMAIN:ignite.example.com}{uri} permanent
+}
+
+www.{$DOMAIN:ignite.example.com} {
+	tls internal
+	redir https://{$DOMAIN:ignite.example.com}{uri} permanent
+}
+
+{$DOMAIN:ignite.example.com} {
+	tls internal
+
+	handle /api/* {
+		reverse_proxy 127.0.0.1:5050
+	}
+
+	handle /hubs/* {
+		reverse_proxy 127.0.0.1:5050
+	}
+
+	@health path /health /health/ready
+	handle @health {
+		reverse_proxy 127.0.0.1:5050
+	}
+
+	handle /hangfire* {
+		respond "Access denied - use SSH tunnel to localhost:5050" 403
+	}
+
+	handle /metrics {
+		respond "Access denied" 403
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	encode gzip zstd
+
+	log {
+		output file /data/access.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}

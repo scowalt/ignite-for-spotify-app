@@ -1,0 +1,23 @@
+[Unit]
+Description=Ignite GlitchTip Paseo controller dispatch tick
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=%h/src/ignite-for-spotify-2/automation/glitchtip-paseo-controller/config/controller.toml
+
+[Service]
+Type=oneshot
+TimeoutStartSec=5min
+WorkingDirectory=%h/src/ignite-for-spotify-2/automation/glitchtip-paseo-controller
+Environment=XDG_STATE_HOME=%h/.local/state
+Environment=PASEO_HOME=%h/.paseo
+Environment=PASEO_HOST=127.0.0.1:6767
+Environment=PYTHONUNBUFFERED=1
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/state/ignite-glitchtip-paseo-controller %h/.local/state/ignite-glitchtip-paseo-controller-workspace %h/.paseo
+StandardOutput=journal
+StandardError=journal
+ExecStart=/usr/bin/env doppler run --project ignite-for-spotify --config prd -- uv run --locked --python 3.14 glitchtip-paseo-controller dispatch --config config/controller.toml --once --enable-dispatch --capability-env glitchtip_api_token=GLITCHTIP_API_TOKEN --capability-env github_automation_token=GITHUB_AUTOMATION_TOKEN

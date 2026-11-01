@@ -1,0 +1,65 @@
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_logging"]
+    regex         = "true"
+    action        = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "service_name"
+  }
+}
+
+loki.source.docker "containers" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.containers.output
+  forward_to = [loki.process.containers.receiver]
+}
+
+loki.process "containers" {
+  stage.docker {}
+  forward_to = [loki.write.grafana_cloud.receiver]
+}
+
+// Ship logs to Grafana Cloud Loki
+loki.write "grafana_cloud" {
+  endpoint {
+    url = sys.env("LOKI_URL")
+
+    basic_auth {
+      username = sys.env("LOKI_USERNAME")
+      password = sys.env("LOKI_API_KEY")
+    }
+  }
+}
+
+prometheus.scrape "ignite_backend" {
+  targets = [
+    {
+      __address__ = "127.0.0.1:5050",
+      service     = "ignite-api",
+    },
+  ]
+  metrics_path    = "/metrics"
+  scrape_interval = "30s"
+  forward_to      = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = sys.env("PROMETHEUS_URL")
+
+    basic_auth {
+      username = sys.env("PROMETHEUS_USERNAME")
+      password = sys.env("PROMETHEUS_API_KEY")
+    }
+  }
+}

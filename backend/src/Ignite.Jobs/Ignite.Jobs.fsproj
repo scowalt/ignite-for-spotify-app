@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ignite.Core\Ignite.Core.fsproj" />
+    <ProjectReference Include="..\Ignite.Infrastructure\Ignite.Infrastructure.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.Core" Version="1.8.25" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Jobs.fs" />
+  </ItemGroup>
+
+</Project>

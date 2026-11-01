@@ -1,0 +1,61 @@
+FROM golang:1.27.1-alpine AS restic-build
+
+ARG RESTIC_VERSION=v0.19.1
+ARG RESTIC_COMMIT=6aa3a516ce654808a1f28f9fa21e9b7c8e6e90bf
+
+WORKDIR /src
+
+RUN apk add --no-cache git \
+    && git init \
+    && git remote add origin https://github.com/restic/restic.git \
+    && git fetch --depth 1 origin "$RESTIC_COMMIT" \
+    && git fetch --depth 1 origin "refs/tags/$RESTIC_VERSION:refs/tags/$RESTIC_VERSION" \
+    && test "$(git rev-parse "$RESTIC_VERSION^{commit}")" = "$RESTIC_COMMIT" \
+    && git checkout --detach "$RESTIC_VERSION"
+
+RUN cp go.mod /tmp/restic.mod \
+    && cp go.sum /tmp/restic.sum \
+    && go get -modfile=/tmp/restic.mod \
+      golang.org/x/net@v0.56.0 \
+      golang.org/x/text@v0.39.0 \
+      google.golang.org/grpc@v1.82.1 \
+    && go mod tidy -modfile=/tmp/restic.mod \
+    && GOFLAGS='-modfile=/tmp/restic.mod -p=2' go run build.go
+
+FROM alpine:3.24.2 AS runtime
+
+RUN apk upgrade --no-cache \
+    && apk add --no-cache ca-certificates sqlite tzdata
+
+COPY --from=restic-build /src/restic /usr/local/bin/restic
+COPY docker/backup/backup.sh /usr/local/bin/backup-database
+COPY docker/backup/restore.sh /usr/local/bin/restore-database
+COPY docker/backup/entrypoint.sh /usr/local/bin/backup-entrypoint
+COPY docker/backup/healthcheck.sh /usr/local/bin/backup-healthcheck
+COPY docker/backup/crontab /etc/crontabs/root
+
+RUN chmod 0755 \
+    /usr/local/bin/backup-database \
+    /usr/local/bin/restore-database \
+    /usr/local/bin/backup-entrypoint \
+    /usr/local/bin/backup-healthcheck \
+    && chmod 0600 /etc/crontabs/root
+
+ENTRYPOINT ["/usr/local/bin/backup-entrypoint"]
+CMD ["daemon"]
+HEALTHCHECK --interval=30m --timeout=10s --start-period=2m --retries=2 \
+    CMD ["/usr/local/bin/backup-healthcheck"]
+
+FROM runtime AS test
+
+RUN mkdir -p /data /state /repository /restore \
+    && sqlite3 /data/ignite.db \
+      "CREATE TABLE songs(id INTEGER PRIMARY KEY, spotify_track_id TEXT); CREATE TABLE user_sessions(id TEXT PRIMARY KEY); CREATE TABLE scraping_jobs(id INTEGER PRIMARY KEY); INSERT INTO songs VALUES(1, 'track-1');" \
+    && RESTIC_REPOSITORY=/repository RESTIC_PASSWORD=container-build-test-password \
+      /usr/local/bin/backup-database \
+    && /usr/local/bin/backup-healthcheck \
+    && RESTIC_REPOSITORY=/repository RESTIC_PASSWORD=container-build-test-password \
+      /usr/local/bin/restore-database /restore \
+    && test "$(sqlite3 /restore/ignite.db "SELECT COUNT(*) FROM songs WHERE spotify_track_id = 'track-1';")" = "1"
+
+FROM runtime AS final

@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="https://glitchtip.scowalt.com"
+ORG_SLUG="scowalt"
+
+if [[ -z "${GLITCHTIP_API_TOKEN:-}" ]]; then
+  if command -v doppler &>/dev/null; then
+    GLITCHTIP_API_TOKEN=$(doppler secrets get GLITCHTIP_API_TOKEN --plain 2>/dev/null) || true
+  fi
+fi
+
+if [[ -z "${GLITCHTIP_API_TOKEN:-}" ]]; then
+  echo "Error: GLITCHTIP_API_TOKEN is not set and could not be read from Doppler." >&2
+  echo "Set it with: export GLITCHTIP_API_TOKEN=<your-token>" >&2
+  exit 1
+fi
+
+api() {
+  local method="$1" path="$2"
+  shift 2
+  curl -s -X "$method" \
+    -H "Authorization: Bearer $GLITCHTIP_API_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$@" \
+    "${BASE_URL}/api/0${path}"
+}
+
+cmd_list() {
+  local project_filter=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --project) project_filter="&project=$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+
+  local response
+  response=$(api GET "/organizations/${ORG_SLUG}/issues/?query=is:unresolved${project_filter}")
+
+  local count
+  count=$(echo "$response" | jq 'length')
+
+  if [[ "$count" -eq 0 ]]; then
+    echo "No unresolved issues found."
+    return
+  fi
+
+  echo "$response" | jq -r '.[] |
+    "ID: \(.id) | Project: \(.project.slug | gsub("ignite-for-spotify-"; "")) | Events: \(.count) | First: \(.firstSeen | split("T")[0]) | Last: \(.lastSeen | split("T")[0])\n  \(.title)\n"'
+}
+
+cmd_show() {
+  if [[ $# -lt 1 ]]; then
+    echo "Usage: scripts/glitchtip show <issue_id>" >&2
+    exit 1
+  fi
+  local issue_id="$1"
+
+  local issue
+  issue=$(api GET "/issues/${issue_id}/")
+
+  local title status count first_seen last_seen project
+  title=$(echo "$issue" | jq -r '.title')
+  status=$(echo "$issue" | jq -r '.status')
+  count=$(echo "$issue" | jq -r '.count')
+  first_seen=$(echo "$issue" | jq -r '.firstSeen | split("T")[0]')
+  last_seen=$(echo "$issue" | jq -r '.lastSeen | split("T")[0]')
+  project=$(echo "$issue" | jq -r '.project.slug | gsub("ignite-for-spotify-"; "")')
+
+  echo "Issue #${issue_id}: ${title}"
+  echo "Status: ${status} | Events: ${count} | First: ${first_seen} | Last: ${last_seen}"
+  echo "Project: ${project}"
+
+  local event
+  event=$(api GET "/issues/${issue_id}/events/latest/")
+
+  local has_exception
+  has_exception=$(echo "$event" | jq '[.entries[] | select(.type == "exception")] | length')
+  if [[ "$has_exception" -gt 0 ]]; then
+    echo ""
+    echo "--- Stack Trace ---"
+    echo "$event" | jq -r '
+      .entries[] | select(.type == "exception") | .data.values[] |
+      "\(.type): \(.value)\n" +
+      (if .stacktrace then
+        (.stacktrace.frames | reverse | map(
+          "  \(.filename // "?"):\(.lineNo // "?") in \(.function // "?")"
+        ) | join("\n"))
+      else "" end)'
+  fi
+
+  local has_message
+  has_message=$(echo "$event" | jq '[.entries[] | select(.type == "message")] | length')
+  if [[ "$has_exception" -eq 0 && "$has_message" -gt 0 ]]; then
+    echo ""
+    echo "--- Message ---"
+    echo "$event" | jq -r '.entries[] | select(.type == "message") | .data.formatted // .data.message'
+  fi
+
+  local has_breadcrumbs
+  has_breadcrumbs=$(echo "$event" | jq '[.entries[] | select(.type == "breadcrumbs")] | length')
+  if [[ "$has_breadcrumbs" -gt 0 ]]; then
+    echo ""
+    echo "--- Breadcrumbs (last 10) ---"
+    echo "$event" | jq -r '
+      .entries[] | select(.type == "breadcrumbs") | .data.values |
+      sort_by(.timestamp) | .[-10:] | .[] |
+      "\(.timestamp) [\(.level // "info")] \(.category // ""): \(.message // "")"'
+  fi
+}
+
+cmd_resolve() {
+  if [[ $# -lt 1 ]]; then
+    echo "Usage: scripts/glitchtip resolve <issue_id>" >&2
+    exit 1
+  fi
+  local issue_id="$1"
+
+  local result
+  result=$(api PUT "/issues/${issue_id}/" -d '{"status":"resolved"}')
+
+  local new_status
+  new_status=$(echo "$result" | jq -r '.status')
+
+  if [[ "$new_status" == "resolved" ]]; then
+    echo "Issue #${issue_id} resolved."
+  else
+    echo "Failed to resolve issue #${issue_id}. Response:" >&2
+    echo "$result" | jq . >&2
+    exit 1
+  fi
+}
+
+usage() {
+  cat <<EOF
+Usage: scripts/glitchtip <command> [options]
+
+Commands:
+  list [--project 1|2]    List unresolved issues (1=frontend, 2=backend)
+  show <issue_id>         Show issue details with stack trace
+  resolve <issue_id>      Mark issue as resolved
+
+Authentication:
+  Set GLITCHTIP_API_TOKEN env var, or have Doppler CLI configured
+  with the ignite-for-spotify project (doppler setup).
+EOF
+}
+
+case "${1:-}" in
+  list) shift; cmd_list "$@" ;;
+  show) shift; cmd_show "$@" ;;
+  resolve) shift; cmd_resolve "$@" ;;
+  *) usage ;;
+esac

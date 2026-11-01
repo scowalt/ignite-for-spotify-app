@@ -1,0 +1,7 @@
+{
+  "version": "0.3.1",
+  "commands": ["ls", "inspect", "archive", "run", "worktree"],
+  "pi_version": "0.50.0",
+  "pi_model_available": true,
+  "agent": {"id": "agent-123", "labels": {"role": "remediation", "issue": "101"}, "archived": true, "result": {"status": "complete", "head_sha": "aaaaaaaa"}}
+}

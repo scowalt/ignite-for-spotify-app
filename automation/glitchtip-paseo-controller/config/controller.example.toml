@@ -1,0 +1,31 @@
+[controller]
+state_directory = "${XDG_STATE_HOME:-~/.local/state}/ignite-glitchtip-paseo-controller"
+workspace_root = "${XDG_STATE_HOME:-~/.local/state}/ignite-glitchtip-paseo-controller-workspace"
+dispatch_enabled = false
+
+[glitchtip]
+base_url = "https://glitchtip.scowalt.com"
+organization = "scowalt"
+project_ids = [1, 2]
+credential_capability = "glitchtip_api_token"
+
+[github]
+repository = "scowalt/ignite-for-spotify-app"
+credential_capability = "github_automation_token"
+
+[paseo]
+required_version = "0.3.1"
+
+[pi]
+model = "gpt-5.6-terra"
+thinking = "xhigh"
+
+[legacy_cleanup]
+enabled = false
+marker = ""
+local_root = "${XDG_STATE_HOME:-~/.local/state}/ignite-legacy-glitchtip-remediator"
+repositories = []
+artifacts = []
+
+[capabilities]
+required = ["glitchtip_api_token", "github_automation_token"]

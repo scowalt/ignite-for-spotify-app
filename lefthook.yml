@@ -1,0 +1,22 @@
+pre-commit:
+  parallel: false
+  commands:
+    frontend-lint:
+      glob: frontend/**/*.{ts,tsx}
+      root: frontend/
+      run: bun run lint --fix {staged_files}
+      stage_fixed: true
+    frontend-typecheck:
+      glob: frontend/**/*.{ts,tsx}
+      run: cd frontend && bun run typecheck
+    backend-format:
+      glob: backend/**/*.cs
+      run: 'export PATH="$HOME/.dotnet:$PATH"
+
+        dotnet format backend/Ignite.sln --include {staged_files} --verify-no-changes
+
+        '
+    gitleaks:
+      run: gitleaks protect --staged --no-banner
+    no-comments:
+      run: uv run --no-project --python 3.14 --with-requirements .comment-policy/requirements.txt python .comment-policy/check.py --staged
