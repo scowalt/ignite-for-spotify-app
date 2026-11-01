@@ -3,8 +3,8 @@
 Bridge between Spotify and Rocksmith CDLC (Custom Downloadable Content).
 
 The intended development and production source of truth is
-`scowalt/ignite-for-spotify-app`. This clean-source migration candidate is not yet
-activated. Follow the [full handover plan](docs/operations/public-repository-handover.md)
+`scowalt/ignite-for-spotify-app`. Source and validation CI are public; production
+publishing is not yet activated. Follow the [full handover plan](docs/operations/public-repository-handover.md)
 before moving development, automation or publishing. The old repository retains
 private history; it is not intended to remain a development or deployment mirror.
 
@@ -52,6 +52,10 @@ bun run dev
 ```
 
 ## Deployment
+
+During the migration, use the separately approved
+[first-release procedure](docs/operations/fresh-image-cutover.md), not the generic
+commands below. The new publisher remains disabled until the operational handover.
 
 Uses Docker Compose with Caddy reverse proxy. Secrets are managed via Doppler.
 
@@ -119,8 +123,8 @@ docker compose --env-file .env -f docker/docker-compose.prod.yml up -d
 If Watchtower isn't pulling updates, verify GHCR auth is set up (see above) or pull manually:
 
 ```bash
-docker pull ghcr.io/scowalt/ignite-for-spotify-2/backend:latest
-docker pull ghcr.io/scowalt/ignite-for-spotify-2/frontend:latest
+docker pull ghcr.io/scowalt/ignite-for-spotify-app/backend:latest
+docker pull ghcr.io/scowalt/ignite-for-spotify-app/frontend:latest
 docker compose --env-file .env -f docker/docker-compose.prod.yml up -d --force-recreate
 ```
 

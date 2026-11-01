@@ -46,7 +46,7 @@ jobs:
       - name: Setup .NET 10
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
-          dotnet-version: "10.0.401"
+          dotnet-version: "10.0.402"
 
       - name: Restore dependencies
         run: dotnet restore backend/Ignite.slnx
@@ -84,15 +84,36 @@ jobs:
       - name: Build
         run: cd frontend && bun run build
 
+  release-images:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/verify-images.yml
+
   backup:
+    if: always()
+    needs: [backup-tests, release-images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require backup tests and all image verification
+        env:
+          BACKUP_RESULT: ${{ needs['backup-tests'].result }}
+          IMAGE_RESULT: ${{ needs['release-images'].result }}
+        run: |
+          test "$BACKUP_RESULT" = success
+          test "$IMAGE_RESULT" = success
+
+  backup-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
 
-      - name: Lint backup scripts
-        run: shellcheck docker/backup/*.sh
+      - name: Lint backup and image verification scripts
+        run: shellcheck docker/backup/*.sh scripts/verify-release-image.sh
+
+      - name: Test publication and cutover guards
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
 
       - name: Build backup image
         run: docker build -f docker/Dockerfile.backup -t ignite-backup:test .

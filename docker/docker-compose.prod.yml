@@ -1,6 +1,8 @@
+name: ignite-for-spotify
+
 services:
   backend:
-    image: ${BACKEND_IMAGE:-ghcr.io/scowalt/ignite-for-spotify-2/backend:latest}
+    image: ${BACKEND_IMAGE:-ghcr.io/scowalt/ignite-for-spotify-app/backend:latest}
     container_name: ignite-backend
     restart: unless-stopped
     network_mode: host   
@@ -33,7 +35,7 @@ services:
       start_period: 10s
 
   backup:
-    image: ${BACKUP_IMAGE:-ghcr.io/scowalt/ignite-for-spotify-2/backup:latest}
+    image: ${BACKUP_IMAGE:-ghcr.io/scowalt/ignite-for-spotify-app/backup:latest}
     container_name: ignite-backup
     restart: unless-stopped
     network_mode: host   
@@ -64,7 +66,7 @@ services:
       start_period: 2m
 
   frontend:
-    image: ghcr.io/scowalt/ignite-for-spotify-2/frontend:latest
+    image: ${FRONTEND_IMAGE:-ghcr.io/scowalt/ignite-for-spotify-app/frontend:latest}
     container_name: ignite-frontend
     restart: unless-stopped
     labels:

@@ -5,9 +5,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  BACKEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-2/backend
-  BACKUP_IMAGE: ghcr.io/scowalt/ignite-for-spotify-2/backup
-  FRONTEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-2/frontend
+  BACKEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-app/backend
+  BACKUP_IMAGE: ghcr.io/scowalt/ignite-for-spotify-app/backup
+  FRONTEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-app/frontend
 
 jobs:
   build-and-push:
@@ -183,6 +183,16 @@ jobs:
             exit 1
           fi
 
+      - name: Verify browser dependencies and collect notices
+        run: |
+          trivy fs --quiet --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL \
+            --exit-code 1 --skip-dirs frontend/node_modules frontend
+          trivy fs --quiet --skip-dirs frontend/node_modules --format cyclonedx \
+            --output "$RUNNER_TEMP/frontend.cdx.json" frontend
+          python3 scripts/collect-frontend-notices.py \
+            --sbom "$RUNNER_TEMP/frontend.cdx.json" --node-modules frontend/node_modules \
+            --output frontend/dist/third-party-licenses
+
       - name: Extract metadata for frontend
         id: meta-frontend
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
@@ -231,6 +241,16 @@ jobs:
             echo '::error::Secret scan failed; findings are not published in logs or artifacts.'
             exit 1
           fi
+
+      - name: Verify final image notices and security before any push
+        env:
+          BACKEND_REF: ${{ env.BACKEND_IMAGE }}:${{ steps.meta-backend.outputs.version }}
+          BACKUP_REF: ${{ env.BACKUP_IMAGE }}:${{ steps.meta-backup.outputs.version }}
+          FRONTEND_REF: ${{ env.FRONTEND_IMAGE }}:${{ steps.meta-frontend.outputs.version }}
+        run: |
+          sh scripts/verify-release-image.sh backend "$BACKEND_REF" "$RUNNER_TEMP/release-reports/backend"
+          sh scripts/verify-release-image.sh backup "$BACKUP_REF" "$RUNNER_TEMP/release-reports/backup"
+          sh scripts/verify-release-image.sh frontend "$FRONTEND_REF" "$RUNNER_TEMP/release-reports/frontend"
 
       - name: Publish verified images
         run: |
