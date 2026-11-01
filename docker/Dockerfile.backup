@@ -1,11 +1,12 @@
-FROM golang:1.27.1-alpine AS restic-build
+FROM golang:1.27.3-alpine AS restic-build
+ENV GOTOOLCHAIN=local
 
 ARG RESTIC_VERSION=v0.19.1
 ARG RESTIC_COMMIT=6aa3a516ce654808a1f28f9fa21e9b7c8e6e90bf
 
 WORKDIR /src
 
-RUN apk add --no-cache git \
+RUN apk add --no-cache git python3 \
     && git init \
     && git remote add origin https://github.com/restic/restic.git \
     && git fetch --depth 1 origin "$RESTIC_COMMIT" \
@@ -16,11 +17,20 @@ RUN apk add --no-cache git \
 RUN cp go.mod /tmp/restic.mod \
     && cp go.sum /tmp/restic.sum \
     && go get -modfile=/tmp/restic.mod \
-      golang.org/x/net@v0.56.0 \
-      golang.org/x/text@v0.39.0 \
-      google.golang.org/grpc@v1.82.1 \
+      github.com/klauspost/compress@v1.18.7 \
+      golang.org/x/crypto@v0.57.0 \
+      golang.org/x/net@v0.60.0 \
+      golang.org/x/text@v0.42.0 \
+      google.golang.org/grpc@v1.83.2 \
     && go mod tidy -modfile=/tmp/restic.mod \
     && GOFLAGS='-modfile=/tmp/restic.mod -p=2' go run build.go
+
+COPY scripts/collect-image-notices.py /tmp/collect-image-notices.py
+RUN go list -modfile=/tmp/restic.mod -m -json all > /tmp/modules.json \
+    && python3 /tmp/collect-image-notices.py go --binary /src/restic \
+      --modules /tmp/modules.json --main-version "$RESTIC_VERSION" \
+      --main-source "https://github.com/restic/restic/archive/$RESTIC_COMMIT.tar.gz" \
+      --modfile /tmp/restic.mod --sumfile /tmp/restic.sum --output /image-notices/go
 
 FROM alpine:3.24.2 AS runtime
 
@@ -28,6 +38,9 @@ RUN apk upgrade --no-cache \
     && apk add --no-cache ca-certificates sqlite tzdata
 
 COPY --from=restic-build /src/restic /usr/local/bin/restic
+COPY --from=restic-build /image-notices /usr/share/licenses/ignite/components
+COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/licenses/ignite/
+COPY third-party/ /usr/share/licenses/ignite/source-inventory/
 COPY docker/backup/backup.sh /usr/local/bin/backup-database
 COPY docker/backup/restore.sh /usr/local/bin/restore-database
 COPY docker/backup/entrypoint.sh /usr/local/bin/backup-entrypoint

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402 AS build
 WORKDIR /src
 
 COPY backend/src/Ignite.Core/Ignite.Core.fsproj Ignite.Core/
@@ -11,12 +11,19 @@ RUN dotnet restore Ignite.Api/Ignite.Api.fsproj
 COPY backend/src/ .
 RUN dotnet publish Ignite.Api/Ignite.Api.fsproj -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS test
+RUN apt-get update && apt-get install -y --no-install-recommends python3 \
+    && rm -rf /var/lib/apt/lists/*
+COPY scripts/collect-image-notices.py /tmp/collect-image-notices.py
+RUN python3 /tmp/collect-image-notices.py dotnet \
+    --deps /app/publish/Ignite.Api.deps.json \
+    --packages /root/.nuget/packages --output /image-notices/dotnet
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402 AS test
 WORKDIR /src
 COPY backend/ .
 RUN dotnet test Ignite.slnx --verbosity minimal
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.12 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.13 AS runtime
 WORKDIR /app
 
 RUN apt-get update && apt-get upgrade -y \
@@ -28,6 +35,9 @@ RUN groupadd -r ignite && useradd -r -g ignite ignite
 RUN mkdir -p /app/data && chown -R ignite:ignite /app/data
 
 COPY --from=build /app/publish .
+COPY --from=build /image-notices /usr/share/licenses/ignite/components
+COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/licenses/ignite/
+COPY third-party/ /usr/share/licenses/ignite/source-inventory/
 
 ENV ASPNETCORE_URLS=http://+:5050
 ENV ASPNETCORE_ENVIRONMENT=Production

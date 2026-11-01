@@ -1,0 +1,68 @@
+name: Verify release images
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    name: Verify ${{ matrix.component }} image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        component: [backend, backup, frontend]
+    env:
+      IMAGE_REF: ignite-verify-${{ matrix.component }}:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567
+        with:
+          version: v0.72.0
+          cache: true
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        if: matrix.component == 'frontend'
+        with:
+          bun-version: "1.4.2"
+
+      - name: Build frontend and collect browser dependency notices
+        if: matrix.component == 'frontend'
+        run: |
+          cd frontend
+          bun install --frozen-lockfile
+          bun run build
+          cd ..
+          trivy fs --quiet --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL \
+            --exit-code 1 --skip-dirs frontend/node_modules frontend
+          trivy fs --quiet --skip-dirs frontend/node_modules --format cyclonedx \
+            --output "$RUNNER_TEMP/frontend.cdx.json" frontend
+          python3 scripts/collect-frontend-notices.py \
+            --sbom "$RUNNER_TEMP/frontend.cdx.json" --node-modules frontend/node_modules \
+            --output frontend/dist/third-party-licenses
+          find frontend/dist -name '*.map' -delete
+
+      - name: Build final runtime image without publishing
+        env:
+          COMPONENT: ${{ matrix.component }}
+        run: docker build --pull -f "docker/Dockerfile.$COMPONENT" -t "$IMAGE_REF" .
+
+      - name: Verify security and notice coverage
+        env:
+          COMPONENT: ${{ matrix.component }}
+        run: sh scripts/verify-release-image.sh "$COMPONENT" "$IMAGE_REF" "$RUNNER_TEMP/reports/$COMPONENT"
+
+      - name: Upload filtered verification evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-image-verification-${{ matrix.component }}-${{ github.sha }}
+          path: ${{ runner.temp }}/reports/${{ matrix.component }}
+          if-no-files-found: error

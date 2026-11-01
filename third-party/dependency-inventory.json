@@ -1349,9 +1349,9 @@
     {
       "ecosystem": "npm",
       "name": "dompurify",
-      "version": "3.4.15",
+      "version": "3.4.17",
       "declared_license": "(MPL-2.0 OR Apache-2.0)",
-      "source": "https://www.npmjs.com/package/dompurify/v/3.4.15",
+      "source": "https://www.npmjs.com/package/dompurify/v/3.4.17",
       "notice_files": [
         "LICENSE",
         "LICENSE-MPL"
@@ -2403,7 +2403,9 @@
       "version": "1.434.14",
       "declared_license": "(Apache-2.0 AND MIT)",
       "source": "https://www.npmjs.com/package/posthog-js/v/1.434.14",
-      "notice_files": []
+      "notice_files": [
+        "LICENSE"
+      ]
     },
     {
       "ecosystem": "npm",
@@ -2578,9 +2580,9 @@
     {
       "ecosystem": "npm",
       "name": "seroval",
-      "version": "1.5.6",
+      "version": "1.6.12",
       "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/seroval/v/1.5.6",
+      "source": "https://www.npmjs.com/package/seroval/v/1.6.12",
       "notice_files": [
         "LICENSE"
       ]
@@ -2588,9 +2590,9 @@
     {
       "ecosystem": "npm",
       "name": "seroval-plugins",
-      "version": "1.5.6",
+      "version": "1.6.12",
       "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/seroval-plugins/v/1.5.6",
+      "source": "https://www.npmjs.com/package/seroval-plugins/v/1.6.12",
       "notice_files": [
         "LICENSE"
       ]
@@ -2628,9 +2630,9 @@
     {
       "ecosystem": "npm",
       "name": "solid-js",
-      "version": "1.9.15",
+      "version": "1.9.16",
       "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/solid-js/v/1.9.15",
+      "source": "https://www.npmjs.com/package/solid-js/v/1.9.16",
       "notice_files": [
         "LICENSE"
       ]
@@ -3061,9 +3063,9 @@
     {
       "ecosystem": "nuget",
       "name": "FSharp.Core",
-      "version": "10.1.401",
+      "version": "10.1.402",
       "declared_license": "MIT",
-      "source": "https://www.nuget.org/packages/FSharp.Core/10.1.401",
+      "source": "https://www.nuget.org/packages/FSharp.Core/10.1.402",
       "notice_files": []
     },
     {

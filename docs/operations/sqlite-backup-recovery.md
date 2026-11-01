@@ -89,7 +89,7 @@ plaintext restore after recording non-sensitive results.
    docker run --rm --user root \
      --volume "$data_volume:/app/data" \
      --volume "$restore_root:/restore:ro" \
-     --entrypoint sh ghcr.io/scowalt/ignite-for-spotify-2/backend:latest \
+     --entrypoint sh ghcr.io/scowalt/ignite-for-spotify-app/backend:latest \
      -c 'cp /restore/ignite.db /app/data/ignite.db && chown ignite:ignite /app/data/ignite.db'
    ```
 

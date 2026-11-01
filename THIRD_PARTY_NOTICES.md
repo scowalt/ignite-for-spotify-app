@@ -43,7 +43,32 @@ Primary Hangfire terms: [package](https://www.nuget.org/packages/Hangfire.Core/1
 [LGPL](https://github.com/HangfireIO/Hangfire/blob/v1.8.25/COPYING.LESSER),
 [GPL](https://github.com/HangfireIO/Hangfire/blob/v1.8.25/COPYING).
 
-## Release-image review still required
+## Release-image notice evidence
+
+All app images carry the original-code license and this document under
+`/usr/share/licenses/ignite`. Their `components` directory contains actual shipped
+Go/.NET component manifests, copied package/upstream license texts, and source
+references. Go manifests are derived from the compiled binary, not every downloaded
+build dependency; the effective module files and Go toolchain license are retained.
+.NET manifests follow the published `deps.json` and supplement missing package
+texts from pinned upstream source commits. SQLitePCLRaw 2.1.12 uses its verified
+upstream v2.1.12 commit, including its Apache/SQLite notices.
+
+The frontend also serves `third-party-licenses/manifest.json` and its notice files,
+covering the conservative production Bun graph. For `tr46@0.0.3`, upstream declares
+MIT but ships no standalone license file at its recorded source commit. Exact SPDX
+MIT standard terms are supplied, with original package-author metadata and an
+explicit note; no new copyright holder/year is invented. This is documented
+supplementation, not a claim that a missing file proves absent licensing.
+
+`verify-images.yml` builds without secrets or registry writes and checks the
+existing fixable HIGH/CRITICAL and secret gates, plus notice-file coverage. A
+separate frontend lockfile check covers JavaScript that binary-image scanning may
+not identify after bundling. Public artifacts contain filtered component and
+notice inventories, not raw image environment/history or secret findings.
+Mechanical checks and scanner license labels are not legal compatibility opinions.
+
+## Release-owner obligations
 
 The Dockerfiles rebuild Caddy and restic with explicitly adjusted Go dependencies.
 The resulting Go modules, .NET runtime/native dependencies and base OS packages

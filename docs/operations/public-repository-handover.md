@@ -24,7 +24,10 @@ is not a secret scanner or a substitute for content review.
 - `ci.yml` runs validation on main pushes, main PRs and manual dispatch. Public PR
   jobs use GitHub-hosted runners and a read-only token, with no inherited secrets.
 - The publish job depends on successful backend, frontend, backup and public-source
-  validation in that same workflow execution. The controller remains non-required.
+  validation in that same workflow execution. The existing required `backup` context
+  now aggregates backup tests and all three non-publishing release-image checks; it
+  runs even when a dependency fails and fails closed. No branch-protection setting
+  or controller requirement is changed.
 - `deploy.yml` is reusable only; it has no independent push/dispatch trigger. Both
   caller and publisher require the exact destination repository, main, a push or
   manual event, and repository variable `PRODUCTION_PUBLISHING_ENABLED=true`.
@@ -39,11 +42,17 @@ is not a secret scanner or a substitute for content review.
   Secret scans write temporary JSON on the runner, not public logs or SARIF
   artifacts. A failed scan blocks publishing; reproduce it privately from the exact
   revision rather than attach a possibly sensitive report to a public issue.
-- GHCR image names intentionally remain
-  `ghcr.io/scowalt/ignite-for-spotify-2/{backend,backup,frontend}` to avoid changing
-  running containers merely for repository naming. Confirm and explicitly approve
-  new-repository package access; do not assume `GITHUB_TOKEN` can write old packages.
-  Package visibility is independent of public source visibility.
+- New image coordinates are
+  `ghcr.io/scowalt/ignite-for-spotify-app/{backend,backup,frontend}`. Do not grant the
+  public repository access to legacy private package history: GitHub warns that
+  forks may also gain package access. Package visibility alone is not a fork-access
+  boundary. Only inspected, secret-free artifacts with appropriate notices/source
+  coverage may be published to the new namespace.
+- Production Compose explicitly retains project name `ignite-for-spotify`, so its
+  data/backup/proxy volumes retain their existing identities. All three app image
+  references support digest overrides. Render and validate the configuration with
+  `scripts/verify-production-config.py` before any separately approved deployment;
+  the validator never deploys or prints environment values.
 - No production Doppler token is needed by this workflow. Set only the reviewed
   public client variables `VITE_POSTHOG_KEY` and `VITE_SENTRY_DSN` in `production`.
   `LOCAL_SQLITE_CUTOVER_COMPLETE=true` must reflect the already-verified deployment,
@@ -90,9 +99,10 @@ is not a secret scanner or a substitute for content review.
    explicitly approved live inspection. Fence old publishers and drain/cancel any
    authorized in-flight release runs before enabling the new publisher. Updating
    a Watchtower-consumed tag is a deployment, not a harmless setup test.
-8. Grant reviewed package/environment access, enable the new publisher and approve
-   one first release from the validated new-repository commit. Verify deployed
-   digests, readiness and unchanged data/backup continuity. Do not recreate volumes,
+8. Complete the [first-release and rollback procedure](fresh-image-cutover.md),
+   provision only approved environment access, and authorize one release from the
+   validated new-repository commit. Verify new-package pulls before changing image
+   references, then verify deployed digests, readiness and data/backup continuity. Do not recreate volumes,
    rerun the SQLite cutover, change DNS or rotate credentials as a side effect.
 9. Confirm all development entrypoints, bots, controller, infrastructure workflow,
    CI and CD now point to the public repository, with no active writer/publisher on

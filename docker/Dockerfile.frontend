@@ -1,11 +1,12 @@
-FROM golang:1.27.1-alpine AS caddy-build
+FROM golang:1.27.3-alpine AS caddy-build
+ENV GOTOOLCHAIN=local
 
 ARG CADDY_VERSION=v2.11.4
 ARG CADDY_COMMIT=e2eee6a7fce366321294c9c2a79f3146891dcbdf
 
 WORKDIR /src
 
-RUN apk add --no-cache git \
+RUN apk add --no-cache git python3 \
     && git init \
     && git remote add origin https://github.com/caddyserver/caddy.git \
     && git fetch --depth 1 origin "$CADDY_COMMIT" \
@@ -16,19 +17,32 @@ RUN apk add --no-cache git \
 RUN cp go.mod /tmp/caddy.mod \
     && cp go.sum /tmp/caddy.sum \
     && go get -modfile=/tmp/caddy.mod \
-      golang.org/x/net@v0.56.0 \
-      golang.org/x/text@v0.39.0 \
-      google.golang.org/grpc@v1.82.1 \
+      github.com/go-jose/go-jose/v4@v4.1.6 \
+      github.com/klauspost/compress@v1.18.7 \
+      golang.org/x/crypto@v0.57.0 \
+      golang.org/x/net@v0.60.0 \
+      golang.org/x/text@v0.42.0 \
+      google.golang.org/grpc@v1.83.2 \
     && go mod tidy -modfile=/tmp/caddy.mod \
     && CGO_ENABLED=0 go build -modfile=/tmp/caddy.mod -p=2 -trimpath \
       -ldflags '-s -w -X github.com/caddyserver/caddy/v2.CustomVersion=v2.11.4' \
       -o /usr/bin/caddy ./cmd/caddy
+
+COPY scripts/collect-image-notices.py /tmp/collect-image-notices.py
+RUN go list -modfile=/tmp/caddy.mod -m -json all > /tmp/modules.json \
+    && python3 /tmp/collect-image-notices.py go --binary /usr/bin/caddy \
+      --modules /tmp/modules.json --main-version "$CADDY_VERSION" \
+      --main-source "https://github.com/caddyserver/caddy/archive/$CADDY_COMMIT.tar.gz" \
+      --modfile /tmp/caddy.mod --sumfile /tmp/caddy.sum --output /image-notices/go
 
 FROM caddy:2.11.4-alpine
 
 RUN apk upgrade --no-cache
 
 COPY --from=caddy-build /usr/bin/caddy /usr/bin/caddy
+COPY --from=caddy-build /image-notices /usr/share/licenses/ignite/components
+COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/licenses/ignite/
+COPY third-party/ /usr/share/licenses/ignite/source-inventory/
 
 COPY frontend/dist /srv
 
