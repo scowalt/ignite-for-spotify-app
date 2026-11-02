@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from release_record import CONTRACT_PATHS, ReleaseRejected, SignatureProof, create_release_record, deployment_contract, validate_release
+from release_record import CONTRACT_PATHS, ReleasePending, ReleaseRejected, SignatureProof, create_release_record, deployment_contract, validate_release
 
 
 class ReleaseRecordTests(unittest.TestCase):
@@ -139,6 +139,13 @@ class ReleaseRecordTests(unittest.TestCase):
             for changed in [{'GITHUB_REF': 'refs/pull/1/merge'}, {'GITHUB_REPOSITORY': 'other/repo'}, {'GITHUB_RUN_ID': 'no'}, {'GITHUB_EVENT_NAME': 'pull_request'}]:
                 with self.subTest(changed=changed), self.assertRaises(ReleaseRejected):
                     create_release_record(root, {**env, **changed}, self.record['images'])
+
+    def test_finishing_trusted_workflow_is_deferred_not_treated_as_a_deployment_failure(self):
+        with self.assertRaises(ReleasePending):
+            validate_release(json.dumps(self.record).encode(), self.proof, {**self.run, 'status': 'in_progress', 'conclusion': None}, 'b' * 64)
+        with self.assertRaises(ReleaseRejected) as failure:
+            validate_release(json.dumps(self.record).encode(), self.proof, {**self.run, 'status': 'in_progress', 'head_sha': '0' * 40}, 'b' * 64)
+        self.assertNotIsInstance(failure.exception, ReleasePending)
 
     def test_unsigned_release_is_not_deployable(self):
         with self.assertRaises(ReleaseRejected):

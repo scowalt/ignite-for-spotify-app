@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 22:00'
-updated_date: '2026-11-02 22:43'
+updated_date: '2026-11-02 23:07'
 labels: []
 dependencies: []
 ---
@@ -47,4 +47,6 @@ Owner explicitly approved completion of remaining migration work. Proposed direc
 - Extended the still-disabled publisher to check current main, publish a scanned metadata-only release artifact after all app pushes, sign/verify with pinned Cosign v3.1.4, and promote one pointer only after verification. Native actionlint and workflow guard tests pass; real keyless registry compatibility is not yet claimed.
 - Pinned Cosign binary checksum/help verified. Production has a functioning user-systemd manager with lingering enabled and Docker/buildx; no new updater or signer was installed there. Read-only actual buildx descriptor output matches the already-published backend receipt.
 - Remaining before activation: real crypto/transport fixtures, VPS guarded transaction/state/restart/rollback module, controlled signed-release/live verification and one-updater activation. Keep this source work draft until those checks pass.
+
+Signed-release preparation is in draft PR #10. Added tested decision rules for no-op active releases, stale/failed release fencing and interrupted-operation recovery priority; a rollback already started cannot be retried automatically. A trusted CI run still finishing is explicitly deferred rather than treated as a failed deployment attempt. Durable state, real verifier/transport adapters and the actual VPS transaction/updater remain unfinished; nothing new is activated.
 <!-- SECTION:NOTES:END -->

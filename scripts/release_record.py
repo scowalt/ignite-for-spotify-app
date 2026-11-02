@@ -28,6 +28,10 @@ class ReleaseRejected(ValueError):
     pass
 
 
+class ReleasePending(ReleaseRejected):
+    pass
+
+
 @dataclass(frozen=True)
 class SignatureProof:
     artifact_digest: str
@@ -139,7 +143,7 @@ def validate_release(
         raise ReleaseRejected('Workflow evidence is unavailable.')
     required_run = {'id': record['run_id'], 'run_attempt': record['run_attempt'],
                     'run_number': record['run_number'], 'head_sha': record['source_sha'],
-                    'head_branch': 'main', 'status': 'completed', 'conclusion': 'success',
+                    'head_branch': 'main',
                     'workflow_id': WORKFLOW_ID, 'path': '.github/workflows/ci.yml'}
     if any(type(run.get(key)) is not type(value) or run.get(key) != value for key, value in required_run.items()):
         raise ReleaseRejected('Workflow evidence does not match the completed release.')
@@ -149,6 +153,10 @@ def validate_release(
         repository = run.get(key)
         if not isinstance(repository, dict) or type(repository.get('id')) is not int or repository['id'] != REPOSITORY_ID:
             raise ReleaseRejected('Workflow repository identity changed.')
+    if run.get('status') in ['queued', 'in_progress', 'waiting', 'pending', 'requested']:
+        raise ReleasePending('Trusted workflow has not completed yet.')
+    if run.get('status') != 'completed' or run.get('conclusion') != 'success':
+        raise ReleaseRejected('Only a successfully completed workflow is deployable.')
     return ReleaseRecord(record['source_sha'], record['run_id'], record['run_attempt'],
                          record['run_number'], record['contract_sha256'],
                          tuple(sorted(record['images'].items())), proof.artifact_digest)
