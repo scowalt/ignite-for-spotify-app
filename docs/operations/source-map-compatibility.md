@@ -32,6 +32,24 @@ This uses the separate operator credential, not the CI upload token. Default CLI
 queries still target `scowalt`. Mission Control's single-org reader is a separate
 integration follow-up; no claims are made that it already includes the new target.
 
+## Protected credential delivery
+
+The CI caller explicitly passes only `GLITCHTIP_AUTH_TOKEN`; the reusable publisher
+requires that name in its `workflow_call` contract and still binds `production` on
+its job. The value remains an environment secret, with existing approval and main-only
+policy. Do not copy it to repository scope or use broad `secrets: inherit`.
+
+[GitHub requires explicit forwarding even for environment-only secrets](https://docs.github.com/en/actions/sharing-automations/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow).
+A declaration alone silently receives an empty value when the caller omits the
+mapping. `required: true` enforces the caller's name, not runtime nonempty presence.
+The release-configuration step separately rejects an empty credential when source
+maps are enabled, before building the frontend or attempting any upload.
+
+Protected presence-only comparisons verified direct delivery, failure without caller
+mapping, and successful delivery after adding only the named mapping. See
+[the recovery evidence](upload-secret-recovery.md). The credential was not rotated,
+re-provisioned or broadened. These checks do not establish live GlitchTip upload success.
+
 ## Pinned command and no-finalization requirement
 
 The deploy workflow pins `@sentry/cli@3.8.2` and invokes:

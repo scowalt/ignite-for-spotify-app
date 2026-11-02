@@ -35,6 +35,8 @@ jobs:
       contents: read
       packages: write
     uses: ./.github/workflows/deploy.yml
+    secrets:
+      GLITCHTIP_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}
 
   backend:
     runs-on: ubuntu-latest

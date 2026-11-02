@@ -1,34 +1,46 @@
-# Upload-secret recovery: temporary protected diagnostics
+# Upload-secret delivery recovery
 
 The first publication run reached source-map injection but the upload step received
 an empty `SENTRY_AUTH_TOKEN` and returned 401. Registry login and all image pushes
-were skipped. Both publishers are fenced; the desired new flag is false too.
-No publication retry or upload is authorized by this diagnostic.
+were skipped. Both publishers were fenced; desired new publication is false too.
+No publication retry or live upload was authorized by this recovery.
 
-The temporary `Diagnose upload secret presence` workflow compares three paths in
-one exact-head manual run:
+## Protected comparison
 
-1. A direct job bound to the protected `production` environment.
-2. An equivalent reusable job with no secret declaration, matching the original path.
-3. An equivalent reusable job declaring the same optional secret, with an explicit
-   mapping of that one secret name at the caller (no broad inheritance).
+Temporary diagnostics used normal required-owner approval, the same main-only
+`production` environment and the same existing secret. Jobs had no workflow-token
+permissions, checkout/action dependencies, upload/registry/service commands or
+credential outputs beyond constant presence status.
 
-All three require the existing environment approval/main-only policy. Tokens have
-no workflow permissions, no checkout/action dependency is used, and the only shell
-operation tests nonempty presence and emits a constant present/absent result. The
-credential is never printed, hashed or measured. No endpoint, registry or service
-request is made by the jobs. There is no broad secret inheritance or repository-level
-secret copy. The caller has no environment binding; its explicit named mapping is
-being tested as a delivery contract, not as permission to copy a credential there.
+| Run | Direct environment | Reusable without mapping | Declared reusable |
+| --- | --- | --- | --- |
+| [41484155322](https://github.com/scowalt/ignite-for-spotify-app/actions/runs/41484155322), `b952036` | Present | Absent | Absent without mapping |
+| [41486334373](https://github.com/scowalt/ignite-for-spotify-app/actions/runs/41486334373), `f98579b` | Present | Absent | Present with single-name mapping |
 
-Initial protected run 41484155322 at `b952036` found direct=present,
-reusable=absent and optional-declared=absent without forwarding. The stored environment
-value is available; a declaration alone did not fix the call boundary. The next
-comparison changes only the optional-declared caller's explicit single-name mapping.
-Do not alter the existing credential or claim a scope failure from these results.
+Only the explicit caller mapping changed between comparisons. Declaration alone did
+not deliver the environment secret. The mapped job received it without a repository-level
+copy, broad inheritance, credential replacement or scope change.
 
-Capture evidence, repair only the verified cause, and repeat the same presence seam.
-Remove these temporary diagnostic workflows after verification, or replace them with
-a specifically reviewed permanent preflight. Keep an early missing-credential guard
-in the real publisher. Never treat local fake-token protocol tests as evidence that
-GitHub delivered a real environment secret. Publication remains a separate approval.
+[GitHub documents this contract](https://docs.github.com/en/actions/sharing-automations/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow):
+the caller must pass the secret name even if its value exists only in the environment;
+the called job's environment value takes precedence. Omitting the mapping silently
+resolves the secret to an empty string. A required declaration catches omission of
+the caller's name but does not validate its runtime value.
+
+## Maintained repair and verification limits
+
+The CI caller now maps only `GLITCHTIP_AUTH_TOKEN`, and the publisher declares that
+name required. The existing protected environment remains the value's owner. An early
+configuration guard rejects an empty credential when source maps are enabled, before
+frontend build or upload. Tests exercise the actual guard body with synthetic
+present/absent values and enforce the exact caller/callee contract. The pinned
+source-map protocol fixture remains credential-free and unchanged.
+
+Temporary diagnostic workflows and their temporary safety tests were removed after
+evidence capture. History and recorded results remain available. No credential values,
+hashes or lengths were emitted by the probes; no re-provisioning was needed.
+
+The comparisons verify the secret-delivery boundary, not actual GlitchTip authentication,
+artifact processing or symbolication. Both publishers remain fenced. Publication retry
+requires separate approval, exact-head validation and the normal environment review.
+Keep the isolated token's scope, environment protections and existing runtime unchanged.
