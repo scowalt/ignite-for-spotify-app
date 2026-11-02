@@ -2,9 +2,10 @@
 
 The maintained application still uses GlitchTip; retirement of Paseo dispatch does
 not retire SDK reporting or source maps. Production uses hidden maps, injects debug
-IDs, uploads before deleting `.map` files from the frontend image input, and keeps
-its existing best-effort upload behavior. The credentialed production upload is
-still disabled/unexecuted during this preparation.
+IDs, and uploads before deleting `.map` files from the frontend image input.
+When source-map uploading is enabled, a failed upload now fails the publisher before
+any image push. This fail-closed behavior is part of the approved first-publication
+handover. A successful publication is still not a runtime deployment.
 
 ## Isolated frontend target
 
@@ -20,8 +21,8 @@ only to the new organization, containing only project 8. Preserve this invariant
 teams do not provide project isolation within a GlitchTip organization.
 
 Credential and routing staging do not activate the new DSN in running production.
-Keep repository publishing false until the separately approved first release, and
-verify actual upload success then. Operator read tooling can opt into the new org:
+Enable publication only through the approved exclusive-publisher handover, and
+verify actual upload success for the exact release run. Operator read tooling can opt into the new org:
 
 ```sh
 GLITCHTIP_ORG=ignite-for-spotify-app-frontend scripts/glitchtip list --project 8
@@ -79,8 +80,8 @@ This proves the pinned client's no-finalization behavior against the supported
 artifact-bundle contract. It does **not** prove the deployed GlitchTip version,
 project/organization routing or production credential accepts those requests.
 At the separately approved first release, verify actual upload success before
-switching application services. The current upload step is best-effort, so a green
-workflow alone is insufficient evidence. Stop for missing credentials, endpoint
+switching application services. A successful upload command alone does not prove
+server-side processing or symbolication. Stop for missing credentials, endpoint
 incompatibility or upload failure rather than silently removing observability.
 
 ## Primary sources

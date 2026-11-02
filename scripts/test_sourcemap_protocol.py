@@ -30,6 +30,7 @@ class SourceMapWorkflowTests(unittest.TestCase):
         self.assertIn("SENTRY_PROJECT: ignite-for-spotify-frontend", step)
         self.assertIn("SENTRY_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}", step)
         self.assertNotIn("SENTRY_ORG: scowalt", step)
+        self.assertNotIn("continue-on-error", step)
 
     def test_upload_step_is_pinned_and_has_no_release_commands(self):
         self.assertEqual(

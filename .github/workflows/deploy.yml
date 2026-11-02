@@ -58,7 +58,6 @@ jobs:
 
       - name: Upload source maps to GlitchTip
         if: vars.GLITCHTIP_SOURCEMAPS_ENABLED == 'true'
-        continue-on-error: true
         run: |
           npx --yes @sentry/cli@3.8.2 sourcemaps inject frontend/dist
           npx --yes @sentry/cli@3.8.2 sourcemaps upload frontend/dist
