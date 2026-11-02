@@ -61,15 +61,20 @@ is not a secret scanner or a substitute for content review.
   the validator never deploys or prints environment values.
 - No production Doppler token is needed by this workflow. Set only the reviewed
   public client variables `VITE_POSTHOG_KEY` and `VITE_SENTRY_DSN` in `production`.
-  `LOCAL_SQLITE_CUTOVER_COMPLETE=true` must reflect the already-verified deployment,
-  not trigger a new database migration. Missing values fail the publishing job.
+  The four approved environment inputs are managed by the isolated IaC root; the
+  upload secret is securely provisioned outside Terraform. `VITE_SENTRY_DSN` must
+  use isolated frontend project 8, not legacy project 1. Keep old Doppler build
+  inputs unchanged until the old publisher is fenced. `LOCAL_SQLITE_CUTOVER_COMPLETE=true`
+  reflects the already-verified deployment, not a new database migration. Missing
+  values fail the publishing job.
 - Optional source-map upload requires `GLITCHTIP_SOURCEMAPS_ENABLED=true` and the
   environment-scoped `GLITCHTIP_AUTH_TOKEN`. Keep this enabled for the eventual
   operational handover unless the owner explicitly approves dropping source-map
   observability. Never substitute a broader incident-management token silently.
   Maps are removed from the frontend image input even if upload fails. See
-  [pinned-tool compatibility](source-map-compatibility.md); no release finalization
-  is performed. Keep logs/artifacts free of sensitive data.
+  [isolated routing and pinned-tool compatibility](source-map-compatibility.md);
+  the new token has only `project:releases` and no legacy-organization membership.
+  No release finalization is performed. Keep logs/artifacts free of sensitive data.
 - Actions cache keys/artifacts must never be a channel from untrusted PR execution
   into privileged release commands. Publishing checks out its own trusted revision
   and rebuilds; it does not execute a PR artifact.

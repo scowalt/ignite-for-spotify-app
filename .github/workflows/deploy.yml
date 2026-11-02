@@ -65,7 +65,7 @@ jobs:
         env:
           SENTRY_URL: https://glitchtip.scowalt.com
           SENTRY_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}
-          SENTRY_ORG: scowalt
+          SENTRY_ORG: ignite-for-spotify-app-frontend
           SENTRY_PROJECT: ignite-for-spotify-frontend
 
       - name: Remove source maps from the image input

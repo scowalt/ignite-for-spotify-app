@@ -21,6 +21,16 @@ def workflow_commands():
 
 
 class SourceMapWorkflowTests(unittest.TestCase):
+    def test_upload_targets_only_the_isolated_frontend_organization(self):
+        workflow = (ROOT / ".github/workflows/deploy.yml").read_text()
+        step = workflow.split("      - name: Upload source maps to GlitchTip\n", 1)[
+            1
+        ].split("\n      - name:", 1)[0]
+        self.assertIn("SENTRY_ORG: ignite-for-spotify-app-frontend", step)
+        self.assertIn("SENTRY_PROJECT: ignite-for-spotify-frontend", step)
+        self.assertIn("SENTRY_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}", step)
+        self.assertNotIn("SENTRY_ORG: scowalt", step)
+
     def test_upload_step_is_pinned_and_has_no_release_commands(self):
         self.assertEqual(
             workflow_commands(),

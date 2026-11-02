@@ -1,3 +1,8 @@
+variables {
+  frontend_posthog_key = "phc_fixture_browser_key"
+  frontend_sentry_dsn  = "https://fixture-key@glitchtip.scowalt.com/8"
+}
+
 mock_provider "github" {
   mock_data "github_repository" {
     defaults = {
@@ -54,6 +59,60 @@ run "preserve_repository_and_gate_production" {
     )
     error_message = "Infrastructure adoption must leave publication disabled."
   }
+
+  assert {
+    condition = (
+      length(github_actions_environment_variable.release_inputs) == 4 &&
+      alltrue([for input in github_actions_environment_variable.release_inputs :
+        input.repository == "ignite-for-spotify-app" && input.environment == "production"
+      ]) &&
+      github_actions_environment_variable.release_inputs["VITE_POSTHOG_KEY"].value == var.frontend_posthog_key &&
+      github_actions_environment_variable.release_inputs["VITE_SENTRY_DSN"].value == var.frontend_sentry_dsn &&
+      github_actions_environment_variable.release_inputs["LOCAL_SQLITE_CUTOVER_COMPLETE"].value == "true" &&
+      github_actions_environment_variable.release_inputs["GLITCHTIP_SOURCEMAPS_ENABLED"].value == "true"
+    )
+    error_message = "Exactly the four approved production inputs must be staged without publishing."
+  }
+}
+
+run "reject_empty_analytics_key" {
+  command = plan
+
+  variables {
+    frontend_posthog_key = " "
+  }
+
+  expect_failures = [var.frontend_posthog_key]
+}
+
+run "reject_personal_analytics_token" {
+  command = plan
+
+  variables {
+    frontend_posthog_key = "phx_fixture_personal_token"
+  }
+
+  expect_failures = [var.frontend_posthog_key]
+}
+
+run "reject_legacy_frontend_dsn" {
+  command = plan
+
+  variables {
+    frontend_sentry_dsn = "https://fixture-key@glitchtip.scowalt.com/1"
+  }
+
+  expect_failures = [var.frontend_sentry_dsn]
+}
+
+run "reject_unreviewed_dsn_host" {
+  command = plan
+
+  variables {
+    frontend_sentry_dsn = "https://fixture-key@example.invalid/8"
+  }
+
+  expect_failures = [var.frontend_sentry_dsn]
 }
 
 run "reject_wrong_repository_id" {

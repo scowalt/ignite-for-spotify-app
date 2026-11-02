@@ -6,6 +6,31 @@ IDs, uploads before deleting `.map` files from the frontend image input, and kee
 its existing best-effort upload behavior. The credentialed production upload is
 still disabled/unexecuted during this preparation.
 
+## Isolated frontend target
+
+The upload workflow targets organization `ignite-for-spotify-app-frontend`, project
+slug `ignite-for-spotify-frontend` (project ID **8**). The protected environment's
+`VITE_SENTRY_DSN` must reference that project. Legacy frontend project 1 and backend
+project 2 remain in `scowalt`; their history and identities are unchanged.
+
+The dedicated API-only identity has no password login, staff/superuser status or
+legacy-organization membership. Its token grants only `project:releases`, which the
+inspected GlitchTip 6.2.6 upload endpoints accept. The token's issuing identity belongs
+only to the new organization, containing only project 8. Preserve this invariant:
+teams do not provide project isolation within a GlitchTip organization.
+
+Credential and routing staging do not activate the new DSN in running production.
+Keep repository publishing false until the separately approved first release, and
+verify actual upload success then. Operator read tooling can opt into the new org:
+
+```sh
+GLITCHTIP_ORG=ignite-for-spotify-app-frontend scripts/glitchtip list --project 8
+```
+
+This uses the separate operator credential, not the CI upload token. Default CLI
+queries still target `scowalt`. Mission Control's single-org reader is a separate
+integration follow-up; no claims are made that it already includes the new target.
+
 ## Pinned command and no-finalization requirement
 
 The deploy workflow pins `@sentry/cli@3.8.2` and invokes:
