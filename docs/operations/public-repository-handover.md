@@ -1,10 +1,11 @@
 # Public repository handover
 
-**Status: public source and local development moved; production not activated.**
+**Status: public source, development and digest-pinned runtime moved; continuing CD pending.**
 The development repository is `scowalt/ignite-for-spotify-app`; the owner's checkout
-is `~/Code/ignite-for-spotify-app`. Production still uses the old images until the
-separately approved operational cutover. Old private history and uncommitted work
-are preserved. BB's default source/path is new, but its stored remote URL remains
+is `~/Code/ignite-for-spotify-app`. Production runs the verified new images after
+the [guarded cutover](runtime-cutover-plan.md). Watchtower and both publishers remain
+paused; wider integration/updater handover is not complete. Old private history and
+uncommitted work are preserved. BB's default source/path is new, but its stored remote URL remains
 stale because the installed API cannot update it: use the actual Git origin and
 explicit new URL for any additional-host clone.
 
