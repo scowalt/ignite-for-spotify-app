@@ -1,0 +1,3 @@
+FROM scratch
+COPY release.json /release.json
+COPY LICENSE /usr/share/licenses/ignite/LICENSE

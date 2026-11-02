@@ -11,6 +11,7 @@ env:
   BACKEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-app/backend
   BACKUP_IMAGE: ghcr.io/scowalt/ignite-for-spotify-app/backup
   FRONTEND_IMAGE: ghcr.io/scowalt/ignite-for-spotify-app/frontend
+  RELEASE_IMAGE: ghcr.io/scowalt/ignite-for-spotify-app/release
 
 jobs:
   build-and-push:
@@ -29,6 +30,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -260,11 +262,65 @@ jobs:
           sh scripts/verify-release-image.sh backup "$BACKUP_REF" "$RUNNER_TEMP/release-reports/backup"
           sh scripts/verify-release-image.sh frontend "$FRONTEND_REF" "$RUNNER_TEMP/release-reports/frontend"
 
+      - name: Verify current release head
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(gh api repos/scowalt/ignite-for-spotify-app/commits/main --jq .sha)" = "$GITHUB_SHA"
+
       - name: Publish verified images
         run: |
           for image in "$BACKEND_IMAGE" "$BACKUP_IMAGE" "$FRONTEND_IMAGE"; do
             docker push --all-tags "$image"
           done
+
+      - name: Install pinned release signer
+        uses: sigstore/cosign-installer@b9c35392b7c1401bcc77d30c9b07cf4b1c7a7b07
+        with:
+          cosign-release: v3.1.4
+          install-dir: ${{ runner.temp }}/cosign
+
+      - name: Create coherent release record
+        run: |
+          printf '424e2c97d0b45fd7a6b608a87f090f35633f4c23ece5f092d48bba11aaf4bbfa  %s\n' "$(command -v cosign)" | sha256sum --check
+          python3 scripts/prepare-release-record.py --root . --output "$RUNNER_TEMP/release/release.json"
+          cp LICENSE "$RUNNER_TEMP/release/LICENSE"
+          docker build --file ops/deployer/Dockerfile.release \
+            --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --tag "$RELEASE_IMAGE:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" "$RUNNER_TEMP/release"
+          trivy image --quiet --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 \
+            "$RELEASE_IMAGE:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          if ! trivy image --quiet --scanners secret --format json \
+            --output "$RUNNER_TEMP/release-record-secret-scan.json" --exit-code 1 \
+            "$RELEASE_IMAGE:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"; then
+            echo '::error::Release-record secret gate failed; raw findings withheld.'
+            exit 1
+          fi
+          docker push "$RELEASE_IMAGE:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+
+      - name: Sign and verify release record
+        run: |
+          digest=$(docker buildx imagetools inspect "$RELEASE_IMAGE:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+            --format '{{json .Manifest}}' | jq -er '.digest | select(test("^sha256:[a-f0-9]{64}$"))')
+          cosign sign --yes "$RELEASE_IMAGE@$digest"
+          cosign verify "$RELEASE_IMAGE@$digest" \
+            --certificate-identity 'https://github.com/scowalt/ignite-for-spotify-app/.github/workflows/deploy.yml@refs/heads/main' \
+            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+            --certificate-github-workflow-repository "$GITHUB_REPOSITORY" \
+            --certificate-github-workflow-ref 'refs/heads/main' \
+            --certificate-github-workflow-sha "$GITHUB_SHA"
+          printf 'RELEASE_RECORD_DIGEST=%s\n' "$digest" >> "$GITHUB_ENV"
+
+      - name: Promote signed release pointer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(gh api repos/scowalt/ignite-for-spotify-app/commits/main --jq .sha)" = "$GITHUB_SHA"
+          docker tag "$RELEASE_IMAGE:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" "$RELEASE_IMAGE:latest"
+          docker push "$RELEASE_IMAGE:latest"
+          actual=$(docker buildx imagetools inspect "$RELEASE_IMAGE:latest" --format '{{json .Manifest}}' | jq -er .digest)
+          test "$actual" = "$RELEASE_RECORD_DIGEST"
 
       - name: Upload Trivy scan reports
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
