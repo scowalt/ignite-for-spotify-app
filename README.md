@@ -3,7 +3,8 @@
 Bridge between Spotify and Rocksmith CDLC (Custom Downloadable Content).
 
 The development source of truth is `scowalt/ignite-for-spotify-app`. Source and
-validation CI are public; production publishing is not yet activated. The owner's
+validation CI are public, and production runs the verified digest-pinned release
+from this repository. Automatic publishing/updating remains paused. The owner's
 permanent development checkout is `~/Code/ignite-for-spotify-app`. Follow the
 [full handover plan](docs/operations/public-repository-handover.md) before changing
 production, integrations or publishing. The old repository retains
@@ -54,16 +55,13 @@ bun run dev
 
 ## Deployment
 
-During the migration, use the separately approved
-[first-release procedure](docs/operations/fresh-image-cutover.md), not the generic
-commands below. The new publisher remains disabled until the operational handover.
+The [runtime cutover record](docs/operations/runtime-cutover-plan.md) identifies the
+active digest override, public Compose file and retained base directory. Use those
+explicit identities for any separately approved operation, not a generic whole-stack
+`compose up`. Existing volumes, Caddy/Alloy binds and credentials must be preserved.
 
-Uses Docker Compose with Caddy reverse proxy. Secrets are managed via Doppler.
-
-```bash
-doppler run --project ignite-for-spotify --config prd -- \
-  docker compose -f docker/docker-compose.prod.yml up -d
-```
+Docker Compose and Caddy remain in use, with secrets supplied by Doppler. Watchtower
+and both publishers are intentionally paused pending the continuing-CD decision.
 
 Production requires an existing `/app/data/ignite.db` in the `ignite-data`
 volume and will not silently create an empty replacement. Follow the
@@ -96,9 +94,8 @@ by CI.
 
 ### Registry access and production updates
 
-Keep existing GHCR credentials and Watchtower configuration unchanged during
-preparation. After approved publication into the fresh namespace, verify that the
-production client can pull all three exact digests. If access fails, stop for a
+The production client has verified pull access to all three deployed digests using
+existing GHCR credentials. Watchtower is stopped, with its configuration retained. If access fails, stop for a
 separately approved minimum-access credential plan; do not grant the public
 repository access to legacy private package history.
 

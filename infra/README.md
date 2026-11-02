@@ -1,7 +1,8 @@
 # Infrastructure ownership and adoption
 
-**Secret-delivery recovery is complete and one publication retry is approved.
-Desired publication is true; live enablement still requires the reviewed plan.** Committed
+**Runtime cutover is complete, but publishing remains intentionally fenced.**
+Source policy desires true while the live flag is false; do not apply merely to
+remove this recorded safety drift. Publisher/updater activation needs separate review. Committed
 configuration alone is not proof of live values or deployment. Run infrastructure from
 the public source checkout, but keep the two ownership roots separate. New source
 ownership does not require renaming existing operational identities.
@@ -81,10 +82,11 @@ The separately approved setup was applied and verified with:
 - Reviewer Scott Walters (GitHub user ID 1100550), with admin bypass disabled.
 - Self-review permitted so a sole owner can approve their manually initiated release;
   approval is still required. Revisit this policy explicitly if another reviewer joins.
-- Repository publish-enable variable desires `true` under the separately approved
-  single publication retry. Keep the legacy publisher disabled and drained. Apply
-  only the reviewed flag change after exact-head validation; a failed gate/upload/access
-  check fences the new publisher false and stops. No runtime cutover is authorized.
+- Repository publish-enable variable still desires `true` from the completed approved
+  publication retry, but the live variable is intentionally `false`. Both publishers
+  and the existing Watchtower remain paused after the completed runtime cutover.
+  Preserve these fences until a separate continuing-CD/activation decision; no apply
+  or activation is implied by desired-state drift.
 
 ### Release-input staging
 

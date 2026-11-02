@@ -4,8 +4,12 @@
 
 Ongoing development uses `scowalt/ignite-for-spotify-app`. The owner's permanent
 checkout is `~/Code/ignite-for-spotify-app`; the old private repository/checkouts
-retain history and uncommitted work. Production remains on the old image namespace
-until the separately approved cutover. Publication is not deployment.
+retain history and uncommitted work. Production now runs verified, digest-pinned
+`ignite-for-spotify-app` images. Watchtower and both publishers remain paused.
+Before service changes or publisher/updater activation, read
+`docs/operations/runtime-cutover-plan.md` and preserve its active digest override.
+Source publishing policy still desires true while the live flag is intentionally
+false; an IaC apply must not silently undo that fence.
 
 When acting for Scott Walters, use repository-local author email
 `scowalt@gmail.com`. Preserve previously approved `me@scowalt.com` history. Merge
@@ -32,7 +36,7 @@ Container logs are shipped to Grafana Cloud Loki via Alloy agent. Alloy config: 
 
 **Log labels:** Containers with Docker label `logging: "true"` are collected. The `service_name` label is the container name:
 - `ignite-backend` — .NET API
-- `ignite-frontend` — Nginx serving SPA
+- `ignite-frontend` — Static SPA
 - `ignite-caddy` — Reverse proxy
 
 **Querying logs in Grafana Cloud Explore:**
@@ -58,7 +62,7 @@ Error tracking uses the Sentry SDK at `glitchtip.scowalt.com`:
 |-----------|--------------|---------|
 | 1 | `scowalt` | Legacy frontend/history, retained through cutover |
 | 2 | `scowalt` | Backend, unchanged |
-| 8 | `ignite-for-spotify-app-frontend` | Isolated new frontend target, activated only by an approved release |
+| 8 | `ignite-for-spotify-app-frontend` | Active isolated frontend target after the approved runtime cutover |
 
 The frontend reads `VITE_SENTRY_DSN`; backend configuration remains in
 `backend/src/Ignite.Api/appsettings.json`. CI's dedicated upload token belongs only

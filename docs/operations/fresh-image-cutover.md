@@ -1,10 +1,11 @@
 # Fresh-image first release and rollback
 
-**Publication and runtime cutover require distinct approvals.** Protected CI inputs
-are staged, and one publication retry is approved after the verified named-secret
-handoff repair. The old publisher remains fenced. Check live workflow/flag state
-and exact release evidence rather than infer
-activation from this file. Running-container cutover remains a separate operation.
+**Publication and the separately approved runtime cutover are complete.** Production
+runs the verified digest-pinned `4ef6b03` release. See the
+[runtime execution record](runtime-cutover-plan.md) for active operator paths and
+preserved identities. Watchtower and both publishers remain intentionally paused;
+continuing CD/activation requires a separate decision. The procedure below remains
+reference material, not authorization to repeat the completed operations.
 
 ## Invariants
 
