@@ -3,7 +3,9 @@ infra/**/*.tfstate
 infra/**/*.tfstate.*
 infra/.terraform.lock.hcl
 infra/**/terraform.tfvars
+infra/**/terraform.tfvars.json
 infra/**/*.auto.tfvars
+infra/**/*.auto.tfvars.json
 infra/**/*.tfplan
 
 backend/**/bin/

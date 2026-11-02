@@ -2,7 +2,12 @@
 set -euo pipefail
 
 BASE_URL="https://glitchtip.scowalt.com"
-ORG_SLUG="scowalt"
+ORG_SLUG="${GLITCHTIP_ORG:-scowalt}"
+
+case "$ORG_SLUG" in
+  scowalt|ignite-for-spotify-app-frontend) ;;
+  *) echo "Error: unsupported GlitchTip organization." >&2; exit 1 ;;
+esac
 
 if [[ -z "${GLITCHTIP_API_TOKEN:-}" ]]; then
   if command -v doppler &>/dev/null; then
@@ -137,9 +142,13 @@ usage() {
 Usage: scripts/glitchtip <command> [options]
 
 Commands:
-  list [--project 1|2]    List unresolved issues (1=frontend, 2=backend)
+  list [--project ID]     List unresolved issues (1=legacy frontend, 2=backend, 8=isolated frontend)
   show <issue_id>         Show issue details with stack trace
   resolve <issue_id>      Mark issue as resolved
+
+Organization:
+  GLITCHTIP_ORG defaults to scowalt (legacy frontend/backend).
+  Set it to ignite-for-spotify-app-frontend when listing isolated project 8.
 
 Authentication:
   Set GLITCHTIP_API_TOKEN env var, or have Doppler CLI configured

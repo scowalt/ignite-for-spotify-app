@@ -52,12 +52,18 @@ doppler run --project ignite-for-spotify --config prd -- \
 
 ### Production Errors (GlitchTip)
 
-Error tracking is hosted at `glitchtip.scowalt.com` using the Sentry SDK. Two projects are configured:
+Error tracking uses the Sentry SDK at `glitchtip.scowalt.com`:
 
-| Project ID | Name | DSN Location |
-|-----------|------|-------------|
-| 1 | frontend | `frontend/src/index.tsx` |
-| 2 | backend | `backend/src/Ignite.Api/appsettings.json` |
+| Project ID | Organization | Purpose |
+|-----------|--------------|---------|
+| 1 | `scowalt` | Legacy frontend/history, retained through cutover |
+| 2 | `scowalt` | Backend, unchanged |
+| 8 | `ignite-for-spotify-app-frontend` | Isolated new frontend target, activated only by an approved release |
+
+The frontend reads `VITE_SENTRY_DSN`; backend configuration remains in
+`backend/src/Ignite.Api/appsettings.json`. CI's dedicated upload token belongs only
+to the isolated organization and grants `project:releases`, not incident access.
+The broad operator `GLITCHTIP_API_TOKEN` remains separate.
 
 #### Authentication
 
@@ -69,8 +75,11 @@ The script reads `GLITCHTIP_API_TOKEN` from the environment, falling back to Dop
 # List all unresolved issues
 scripts/glitchtip list
 
-# List unresolved issues for a specific project
-scripts/glitchtip list --project 2   # backend only
+# List unresolved backend issues in the unchanged organization
+scripts/glitchtip list --project 2
+
+# Explicitly select the isolated frontend (default remains legacy scowalt)
+GLITCHTIP_ORG=ignite-for-spotify-app-frontend scripts/glitchtip list --project 8
 
 # Show issue details with stack trace and breadcrumbs
 scripts/glitchtip show <issue_id>
@@ -78,6 +87,9 @@ scripts/glitchtip show <issue_id>
 # Mark an issue as resolved
 scripts/glitchtip resolve <issue_id>
 ```
+
+The operator CLI can display private issue/event content. Use it only within an
+approved private diagnostic scope; its output is not safe to publish in chat or CI.
 
 #### Workflow
 

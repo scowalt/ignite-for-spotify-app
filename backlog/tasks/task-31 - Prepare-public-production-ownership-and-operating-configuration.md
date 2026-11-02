@@ -1,11 +1,11 @@
 ---
 id: TASK-31
 title: Prepare public production ownership and operating configuration
-status: In Progress
+status: Done
 assignee:
   - '@pi'
 created_date: '2026-11-01 23:53'
-updated_date: '2026-11-02 00:15'
+updated_date: '2026-11-02 13:51'
 labels: []
 dependencies: []
 ---
@@ -21,7 +21,7 @@ Prepare the maintained public source and IaC for later controlled production ado
 - [x] #1 Separate public-repository and protected main-only production-environment definitions have an explicit adoption plan; legacy repository, DNS, backup resources and backend identity are preserved.
 - [x] #2 Contributor, agent and operational instructions describe the current repository, owner authorship, least-privilege release inputs and retired Paseo dispatch without removing application GlitchTip integration.
 - [x] #3 Pinned source-map tooling has verified no-finalization-compatible behavior and credential-free regression coverage; any necessary workflow change preserves release gates and PR isolation.
-- [ ] #4 Relevant local and protected-PR validation passes before merge with explicit scowalt@gmail.com author and expected head; no live state, credentials, publishing or production settings are changed.
+- [x] #4 Relevant local and protected-PR validation passes before merge with explicit scowalt@gmail.com author and expected head; no live state, credentials, publishing or production settings are changed.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -46,4 +46,29 @@ Owner explicitly approved this source-only scope and protected validation/merge.
 - Static workflow assertions and comment-policy tests passed; no live backend access, state mutation, credentials, registry or production operations.
 
 Final local validation also passed: 94 backend tests, 37 frontend tests plus lint/typecheck/build, 102 retained controller tests plus lint/types, 28 script tests (binary protocol case separately passed), 13 comment-policy tests, actionlint, shellcheck, full staged source/comment guards and redacted source scanning. Both IaC roots validate with backend disabled; legacy root reports only its existing vulnerability-alert attribute deprecation. No live provider calls or state access were used for validation.
+
+- PR #2 merged as bf154b6c71da3d224ee69b1a1cdc578d44cf5848 with explicit Gmail author and expected head bf2fe98. PR CI 41366362465 and both comment-policy runs succeeded. Hosted protocol fixture actually ran; all three image artifact summaries passed and captured CI logs/reports had zero redacted secret-scan findings.
+- Post-merge CI 41366835064 and comment-policy run 41366835040 succeeded. All ten validation jobs passed; publisher skipped. Main protection readback is unchanged; production environments/variables/secrets remain absent.
+- Only source preparation is complete. Real IaC state adoption, minimum credentials/configuration, exclusive-publisher cutover, registry publication, runtime verification and remaining bot/open-work handover are unexecuted. BB cached remote remains a separate tool limitation.
+- Final task completion metadata is local after merge, pending a later approved documentation commit.
+
+After this source-only task, separately approved operations adopted the public state, created the protected environment with publishing false, and provisioned an isolated GlitchTip frontend target/credential in Doppler. Those later operations are distinct from this task’s original no-live-change implementation.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Prepared public-source infrastructure adoption and operating instructions without live changes.
+
+Changes:
+- Separate identity-guarded public-repository/state root, protected main-only production environment, pinned provider and disabled publishing definition. Preserved legacy resources/backend and corrected the unsupported OpenTofu minimum.
+- Declarative protection policy with read-only drift guard preserves app-bound checks unsupported by the pinned provider for a user-owned repository.
+- Credential-free test executes the actual pinned source-map client against a loopback fixture, verifying debug-ID/chunk upload without release finalization. Existing deploy commands remain unchanged.
+- Updated current repository/author/minimum-secret guidance and marked owner-retired Paseo instructions historical while preserving GlitchTip reporting and old source/state.
+
+Validation:
+- Four mocked IaC plans; both roots validate backend-disabled. Application, script, protocol, lint/type, comment-policy, source/secret and workflow checks passed.
+- PR #2 and post-merge CI passed with all image checks and publisher skipped. No branch-protection change.
+
+No live backend/state operation, environment/credential provisioning, registry push or production mutation occurred. Operational adoption and cutover still require separate approvals.
+<!-- SECTION:FINAL_SUMMARY:END -->

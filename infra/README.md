@@ -1,13 +1,15 @@
 # Infrastructure ownership and adoption
 
-**Definitions prepared; no live backend initialization, import or apply performed.**
-Run infrastructure from the public source checkout, but keep the two ownership roots
-separate. New source ownership does not require renaming existing operational identities.
+**Public repository/default branch adopted; protected environment created. Publishing
+remains disabled.** Release-input definitions below are for controlled staging; committed
+configuration alone is not proof of live values or deployment. Run infrastructure from
+the public source checkout, but keep the two ownership roots separate. New source
+ownership does not require renaming existing operational identities.
 
 | Root | Resources | R2 state key in existing `opentofu-state` bucket |
 | --- | --- | --- |
 | `infra/` | Old private repository, its protection/default branch, existing DNS and backup bucket | `ignite-for-spotify/terraform.tfstate` (unchanged) |
-| `infra/public-source/` | Existing public repository/default branch, protected production environment, main-only deployment policy, disabled publish flag | `ignite-for-spotify-app/github.tfstate` (new, separate state) |
+| `infra/public-source/` | Public repository/default branch, protected environment/main-only policy, disabled publisher and four release variables | `ignite-for-spotify-app/github.tfstate` (new, separate state) |
 
 The public root has no Cloudflare provider, DNS, server, backup or legacy-repository
 resources. The existing root retains its resource addresses, inputs, outputs and backend.
@@ -17,7 +19,9 @@ Both roots' maintained source now lives in the public repository.
 
 ## Offline validation
 
-Use OpenTofu 1.13.2 and the committed public-root provider lock. The former minimum
+Use OpenTofu 1.13.2 and the committed public-root provider lock. Native S3 state
+locking is encoded in the backend. Existing installations must retain the same key
+and locking during any separately authorized reinitialization. The former minimum
 `1.16.4` was unsatisfiable with the latest published OpenTofu release at verification;
 only that minimum was corrected in the legacy root. Its backend/resources are unchanged.
 
@@ -69,9 +73,9 @@ outside the pinned provider's resource support; preserve their existing read-onl
 approval setting and do not mistake `github_actions_repository_permissions` (allowed
 Actions) for a workflow-token-permission resource.
 
-## Proposed protected production environment
+## Protected production environment
 
-After separate approval, the desired environment has:
+The separately approved setup was applied and verified with:
 
 - Exact branch policy `main`, not all protected branches and not a matching tag.
 - Reviewer Scott Walters (GitHub user ID 1100550), with admin bypass disabled.
@@ -79,11 +83,35 @@ After separate approval, the desired environment has:
   approval is still required. Revisit this policy explicitly if another reviewer joins.
 - Repository publish-enable variable explicitly `false`.
 
-No secret/client values are defined or fetched by this root. Later secure provisioning
-may set only reviewed production client variables, the existing-SQLite confirmation
-and the source-map credential/flag. Keep runtime credentials, broad Doppler tokens and
-secret values out of code, plans, public logs and Terraform state. Never silently reuse
-a broader incident-management credential for source-map uploads.
+### Release-input staging
+
+`release-inputs.tf` owns exactly four environment variables:
+
+| Variable | Approved value/source |
+| --- | --- |
+| `VITE_POSTHOG_KEY` | Existing browser key from app Doppler `prd` |
+| `VITE_SENTRY_DSN` | Public DSN from isolated GlitchTip project **8**, organization `ignite-for-spotify-app-frontend` |
+| `LOCAL_SQLITE_CUTOVER_COMPLETE` | `true`, confirming the existing verified deployment; never a request to rerun migration |
+| `GLITCHTIP_SOURCEMAPS_ENABLED` | `true`, effective only when the separately gated publisher runs |
+
+The two required Terraform inputs are `frontend_posthog_key` and
+`frontend_sentry_dsn`. Supply them through a private process environment. They are
+**public browser values** and are stored in private state, but are marked sensitive
+for plan-output redaction. Missing/non-public analytics keys, wrong DSN hosts and
+legacy project DSNs are rejected. CI tests supply only synthetic values; CI does
+not fetch real inputs.
+
+The operator/API upload credential is different: it remains managed in Doppler and
+is securely transferred as environment secret `GLITCHTIP_AUTH_TOKEN`, outside Terraform.
+There is deliberately no plaintext-token input/resource in this root. Keep runtime
+credentials, broad Doppler/incident tokens and operator secret values out of code,
+plans, logs and Terraform state. Use only the dedicated non-admin identity's
+`project:releases` token for the isolated organization.
+
+Keep the old publisher's inputs unchanged. In particular, do not set the generic
+Doppler `VITE_SENTRY_DSN` while it can still be injected into old-repository builds.
+The new environment receives project 8's value directly from reviewed GlitchTip
+metadata. Staging these inputs neither uploads maps nor publishes/deploys images.
 
 ## Later adoption — separate authorization required
 
@@ -101,16 +129,21 @@ a broader incident-management credential for source-map uploads.
    tofu -chdir=infra/public-source import github_branch_default.main ignite-for-spotify-app
    ```
 
-4. The environment/policy/publish variable were absent at preparation time. Recheck now:
-   import any that already exist rather than treating absence in this document as current.
+4. The public repository/default branch, environment/policy and false publish flag
+   were adopted/applied in this handover. Recheck actual state before any import;
+   do not recreate them. For additional already-existing values, use the provider's
+   documented import identity rather than overwriting unmanaged configuration.
    Environment import ID is `ignite-for-spotify-app:production`; deployment-policy import
    is `ignite-for-spotify-app:production:<verified-policy-id>`; Actions-variable import is
    `ignite-for-spotify-app:PRODUCTION_PUBLISHING_ENABLED`. Import does not authorize apply.
-5. Review a private plan. Expected effects after successful imports are only the approved
-   new environment, exact main policy and false publish flag. Stop for repository
-   replacement, unexpected setting updates, deletes, legacy resources, secrets or any
-   other drift. Do not use broad `ignore_changes` or targeted apply to hide it. Obtain
-   approval for the exact plan before apply; recheck policy and disabled publishing after.
+5. Review a private plan. Initial adoption permitted only the environment, main policy
+   and false publishing flag. The separately approved CI-staging extension permits only
+   four release-variable additions from the sources above, plus the dedicated secret
+   transfer outside Terraform. Stop for repository replacement, unexpected setting
+   updates, deletes, legacy resources, operator credentials in Terraform, or other drift.
+   Do not use broad `ignore_changes` or targeted apply to hide it. Execute
+   only the exact approved changes; obtain a new review for any additional effect.
+   Recheck values privately, protections and disabled publishing after provisioning.
 6. Keep publishing false until the separately approved exclusive-publisher handover.
    Enabling it later requires an explicit reviewed desired-state change **and** approved
    apply, after the old publisher is fenced/drained. Ad-hoc changes would drift from the
