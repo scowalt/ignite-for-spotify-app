@@ -104,7 +104,8 @@ is not a secret scanner or a substitute for content review.
 6. Reconcile infrastructure through [the adoption plan](../../infra/README.md).
    `infra/` retains the old private repository, DNS/backups and existing state key.
    `infra/public-source/` adopts the existing public repository in distinct state
-   and prepares its protected environment, with publishing false. **Never change
+   and owns its protected environment/release inputs. Publication is enabled only
+   through the separately approved exclusive-publisher handover. **Never change
    the old root's repository name to simulate a move.** Preserve the exact existing
    public branch protection, including `backup`'s app binding: the pinned provider
    cannot model this policy for a user-owned repository, so a read-only policy

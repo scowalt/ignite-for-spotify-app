@@ -55,9 +55,9 @@ run "preserve_repository_and_gate_production" {
   assert {
     condition = (
       github_actions_variable.publishing_enabled.variable_name == "PRODUCTION_PUBLISHING_ENABLED" &&
-      github_actions_variable.publishing_enabled.value == "false"
+      github_actions_variable.publishing_enabled.value == "true"
     )
-    error_message = "Infrastructure adoption must leave publication disabled."
+    error_message = "Publication follows the reviewed exclusive-publisher policy; environment approval remains required."
   }
 
   assert {

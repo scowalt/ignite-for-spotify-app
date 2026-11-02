@@ -1,8 +1,9 @@
 # Fresh-image first release and rollback
 
-**Prepared procedure, not executed. Production approval is separate.** This repository
-has no production secrets or enabled publisher yet. Do not run the generic README
-update commands to perform this migration.
+**Publication and runtime cutover require distinct approvals.** Protected CI inputs
+are staged, and the source publication policy is approved for the exclusive-publisher
+handover. Check live workflow/flag state and exact release evidence rather than infer
+activation from this file. Running-container cutover remains a separate operation.
 
 ## Invariants
 
@@ -21,7 +22,8 @@ update commands to perform this migration.
 ## Release-readiness evidence
 
 The existing required `backup` check aggregates the synthetic backup/restore tests
-and all three release-image verification jobs. A failed/skipped image job produces
+and all three release-image verification jobs plus credential-free IaC checks.
+A failed/skipped verification job produces
 an explicit failing aggregate check; no branch-protection settings are changed.
 
 Image verification uses the same fixed HIGH/CRITICAL and secret policy as publishing,
@@ -70,7 +72,22 @@ availability where required. No broad license waiver is implied by green CI.
 
 ## Approved first-release sequence
 
-After explicit authorization, run the new workflow for the approved main commit.
+Fence and drain old Deploy workflow `218752864` in private
+`scowalt/ignite-for-spotify-2` before applying the reviewed new publication flag.
+Verify old workflow state is `disabled_manually` and no old release run remains
+queued/running/waiting. Do not cancel unknown work or enable a second publisher.
+Wait for any already-started new validation runs to finish with publishing skipped
+before enabling the flag, then dispatch only the exact approved main revision.
+
+The source/IaC policy now desires publication enabled; applying it is not permission
+for runtime cutover. The protected environment still requires the owner's ordinary
+review, with no admin bypass. Approve only the identified exact-head release run.
+If a gate, source-map upload or registry/pull check fails, fence the new publisher
+(`PRODUCTION_PUBLISHING_ENABLED=false`), preserve evidence and stop. Leave the old
+publisher fenced. Record emergency flag drift and reconcile the reviewed source
+policy before any later apply; never let an apply silently undo a safety fence.
+
+After these checks and explicit authorization, run the new workflow for the approved main commit.
 Do not bypass gates, branch protection or environment approval. All images must be
 built/scanned before publishing; multi-image registry pushes are not atomic.
 Publishing into the new namespace does not by itself change the running old-image

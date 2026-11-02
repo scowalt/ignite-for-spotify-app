@@ -1,7 +1,7 @@
 # Infrastructure ownership and adoption
 
-**Public repository/default branch adopted; protected environment created. Publishing
-remains disabled.** Release-input definitions below are for controlled staging; committed
+**Public repository/default branch and protected inputs are adopted. The publication
+policy is approved for exclusive handover.** Committed
 configuration alone is not proof of live values or deployment. Run infrastructure from
 the public source checkout, but keep the two ownership roots separate. New source
 ownership does not require renaming existing operational identities.
@@ -9,7 +9,7 @@ ownership does not require renaming existing operational identities.
 | Root | Resources | R2 state key in existing `opentofu-state` bucket |
 | --- | --- | --- |
 | `infra/` | Old private repository, its protection/default branch, existing DNS and backup bucket | `ignite-for-spotify/terraform.tfstate` (unchanged) |
-| `infra/public-source/` | Public repository/default branch, protected environment/main-only policy, disabled publisher and four release variables | `ignite-for-spotify-app/github.tfstate` (new, separate state) |
+| `infra/public-source/` | Public repository/default branch, protected environment/main-only policy, reviewed publisher flag and four release variables | `ignite-for-spotify-app/github.tfstate` (new, separate state) |
 
 The public root has no Cloudflare provider, DNS, server, backup or legacy-repository
 resources. The existing root retains its resource addresses, inputs, outputs and backend.
@@ -81,7 +81,9 @@ The separately approved setup was applied and verified with:
 - Reviewer Scott Walters (GitHub user ID 1100550), with admin bypass disabled.
 - Self-review permitted so a sole owner can approve their manually initiated release;
   approval is still required. Revisit this policy explicitly if another reviewer joins.
-- Repository publish-enable variable explicitly `false`.
+- Repository publish-enable variable now desires `true` under the approved first-publication
+  handover. Apply only after the legacy publisher is fenced/drained; environment review
+  and all validation/security gates remain mandatory.
 
 ### Release-input staging
 
@@ -144,10 +146,13 @@ metadata. Staging these inputs neither uploads maps nor publishes/deploys images
    Do not use broad `ignore_changes` or targeted apply to hide it. Execute
    only the exact approved changes; obtain a new review for any additional effect.
    Recheck values privately, protections and disabled publishing after provisioning.
-6. Keep publishing false until the separately approved exclusive-publisher handover.
-   Enabling it later requires an explicit reviewed desired-state change **and** approved
-   apply, after the old publisher is fenced/drained. Ad-hoc changes would drift from the
-   committed false value. Do not enable Renovate/Paseo as a provisioning side effect.
+6. The separately approved first-publication extension permits only the publication
+   flag change from false to true, after old Deploy workflow 218752864 is fenced/drained.
+   It does not authorize running-container cutover. Verify the exact run/head before
+   required owner environment approval. On a failed gate/upload/access check, fence the
+   new flag false and stop, leaving the old publisher fenced. Record emergency drift;
+   a later apply must not silently restore publication before a reviewed recovery.
+   Do not enable Renovate/Paseo as a provisioning side effect.
 
 No first release, deployed digest, backup continuity or complete operational migration
 is claimed by these definitions. Continue with the [application cutover](../docs/operations/fresh-image-cutover.md)
