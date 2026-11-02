@@ -1,8 +1,9 @@
 # Fresh-image first release and rollback
 
 **Publication and runtime cutover require distinct approvals.** Protected CI inputs
-are staged, and the source publication policy is approved for the exclusive-publisher
-handover. Check live workflow/flag state and exact release evidence rather than infer
+are staged, and one publication retry is approved after the verified named-secret
+handoff repair. The old publisher remains fenced. Check live workflow/flag state
+and exact release evidence rather than infer
 activation from this file. Running-container cutover remains a separate operation.
 
 ## Invariants
@@ -79,8 +80,10 @@ queued/running/waiting. Do not cancel unknown work or enable a second publisher.
 Wait for any already-started new validation runs to finish with publishing skipped
 before enabling the flag, then dispatch only the exact approved main revision.
 
-The source/IaC policy now desires publication enabled; applying it is not permission
-for runtime cutover. The protected environment still requires the owner's ordinary
+The source/IaC policy now desires publication enabled for the approved retry. The
+first attempt failed before image publication; retain its evidence. The old workflow
+is already disabled: verify its fence and drain status, never re-enable it to repeat
+handover. Applying the new flag is not permission for runtime cutover. The protected environment still requires the owner's ordinary
 review, with no admin bypass. Approve only the identified exact-head release run.
 If a gate, source-map upload or registry/pull check fails, fence the new publisher
 (`PRODUCTION_PUBLISHING_ENABLED=false`), preserve evidence and stop. Leave the old

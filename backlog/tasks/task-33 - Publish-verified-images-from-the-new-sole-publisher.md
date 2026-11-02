@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 14:43'
-updated_date: '2026-11-02 15:34'
+updated_date: '2026-11-02 17:18'
 labels: []
 dependencies: []
 ---
@@ -27,14 +27,12 @@ Perform the owner-approved first-publication handover without changing running c
 ## Implementation Plan
 
 <!-- SECTION:PLAN:BEGIN -->
-1. Prepare minimal source/IaC enablement with fail-closed source-map upload, consistent verification tooling and updated publication-versus-deployment guidance. Validate locally and through a protected PR; merge with explicit Gmail author/expected head.
-2. Wait for post-merge validation to finish with publisher skipped; capture production/rollback metadata and verify protection/input invariants.
-3. Disable original workflow 218752864 and verify all legacy release runs drained. Apply only the new publish-flag change via reviewed private IaC plan.
-4. Dispatch one CI run on exact reviewed main; verify all validation jobs and head before approving its production environment through the normal reviewer API. Preserve every security/notice gate.
-5. Verify source-map upload and fresh-image publication, record immutable digests, check production pull access/UID metadata, and prove containers/mounts unchanged.
-6. If a release gate, identity or access check fails, fence the new publisher and stop with evidence. No service deployment, volume/database/backup/DNS changes, legacy package grant or bot activation.
-
-Owner explicitly approved first publication only, including old-publisher fencing, scoped new enablement, isolated source-map upload and fresh image pushes/pull verification.
+1. Carry the known TASK-33/TASK-34 notes in a protected source PR changing only publication policy to true and corresponding tests/docs. Preserve the verified named-secret contract and every release gate. Keep live publishing false through PR and post-merge validation.
+2. Refresh production identity/health/storage/rollback metadata and recheck exact main/environment/input invariants. Verify old workflow 218752864 is already disabled and has no active runs; never re-enable it.
+3. Review a fresh private IaC plan: only false-to-true publication-variable update, with only the known emergency flag drift allowed. Apply it and verify no-op follow-up and unchanged protections/unrelated state.
+4. Dispatch exactly one fresh CI run on the validated main head. Verify all validation jobs and identity before normal required-owner environment approval.
+5. Verify real isolated source-map upload, all three actual release-image security/notice gates before pushes, immutable published digests, existing production pull access and image UID metadata. Prove running containers/mounts unchanged.
+6. Any failed release gate, upload, identity or access check fences the new publisher and stops. Leave old publisher fenced. No rerun, scope broadening, service/database/backup/DNS changes or bots. Publication is not runtime cutover.
 <!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
@@ -48,4 +46,9 @@ Prepared the reviewed publisher desired-state change to true, while the live fla
 - BLOCKED: source-map upload returned HTTP 401. The captured release-step environment shows SENTRY_AUTH_TOKEN empty, although the expected environment secret metadata is present. This identifies a secret-availability boundary, not a demonstrated scope failure. No replacement credential or broader scope was attempted.
 - Fail-closed behavior stopped before registry login or any image build/push. New publication flag was immediately fenced false; old Deploy remains disabled_manually. Do not apply the current true desired-state policy or retry publication until reviewed recovery is approved.
 - Production container IDs/start times/images/projects/mounts match the pre-release baseline. Pull checks are unperformed because no candidate images were published. Preserve the failed run and value-redacted evidence; source-map secret-path diagnosis requires a protected presence-only probe, with no values/uploads/publication.
+
+- TASK-34 completed the approved narrow recovery through PRs #5/#6/#7. Main is now b278db534b91e54a09362f42a0d88f412432a0c5. Protected comparisons verified that explicit single-name forwarding restores the environment-secret value in a reusable job; no credential changes or broader scope were needed.
+- Required secret contract and early empty-value guard are merged and green. Both publishers remain fenced, and source policy now also desires false. Publication is still incomplete: a separately approved exact-head retry must prove real upload, image publication/digests and production pull access. No runtime cutover is authorized.
+
+- Owner explicitly approved one publication retry after TASK-34 recovery: reviewed flag enablement, one exact-head release with normal environment approval, real source-map/image/digest/pull checks, no running-container change or credential-scope expansion. Old publisher must stay fenced. Any release/access failure fences the new publisher and stops this attempt.
 <!-- SECTION:NOTES:END -->
