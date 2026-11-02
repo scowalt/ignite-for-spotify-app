@@ -10,19 +10,22 @@ one exact-head manual run:
 
 1. A direct job bound to the protected `production` environment.
 2. An equivalent reusable job with no secret declaration, matching the original path.
-3. An equivalent reusable job declaring the same optional secret, without caller forwarding.
+3. An equivalent reusable job declaring the same optional secret, with an explicit
+   mapping of that one secret name at the caller (no broad inheritance).
 
 All three require the existing environment approval/main-only policy. Tokens have
 no workflow permissions, no checkout/action dependency is used, and the only shell
 operation tests nonempty presence and emits a constant present/absent result. The
 credential is never printed, hashed or measured. No endpoint, registry or service
 request is made by the jobs. There is no broad secret inheritance or repository-level
-secret copy.
+secret copy. The caller has no environment binding; its explicit named mapping is
+being tested as a delivery contract, not as permission to copy a credential there.
 
-Interpret results before changing anything: all absent suggests storage/context;
-direct present and reusable absent isolates the call boundary; declared versus
-undeclared isolates declaration behavior. If all pass without a change, examine the
-original run's context/timing rather than assuming the bug is fixed.
+Initial protected run 41484155322 at `b952036` found direct=present,
+reusable=absent and optional-declared=absent without forwarding. The stored environment
+value is available; a declaration alone did not fix the call boundary. The next
+comparison changes only the optional-declared caller's explicit single-name mapping.
+Do not alter the existing credential or claim a scope failure from these results.
 
 Capture evidence, repair only the verified cause, and repeat the same presence seam.
 Remove these temporary diagnostic workflows after verification, or replace them with

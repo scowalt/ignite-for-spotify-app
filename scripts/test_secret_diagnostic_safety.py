@@ -13,6 +13,14 @@ PROBES = [
 
 
 class SecretDiagnosticSafetyTests(unittest.TestCase):
+    def test_named_probe_forwards_only_the_upload_secret(self):
+        source = (ROOT / ".github/workflows/diagnose-upload-secret.yml").read_text()
+        declared = source.split("  declared:\n", 1)[1]
+        self.assertEqual(
+            declared.split("    secrets:\n", 1)[1].strip(),
+            "GLITCHTIP_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}",
+        )
+
     def test_checks_disclose_only_presence_and_fail_when_missing(self):
         for name in PROBES:
             with self.subTest(workflow=name):
