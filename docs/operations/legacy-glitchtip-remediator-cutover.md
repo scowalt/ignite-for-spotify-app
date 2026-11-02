@@ -1,4 +1,9 @@
-# Legacy GlitchTip Remediator Cutover
+# Legacy GlitchTip Remediator Cutover — historical
+
+**Not part of the current migration:** the owner no longer uses Paseo. The former
+replacement/cutover procedure below is retained as history, not permission to run
+cleanup or start a dispatcher. Keep GlitchTip application error reporting. No old
+service, state, branch or artifact deletion is authorized by dispatch retirement.
 
 ## Stop conditions
 

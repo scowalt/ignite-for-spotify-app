@@ -84,6 +84,35 @@ jobs:
       - name: Build
         run: cd frontend && bun run build
 
+      - name: Verify pinned source-map upload protocol without credentials
+        run: |
+          mkdir -p "$RUNNER_TEMP/sourcemap-cli"
+          bun add --cwd "$RUNNER_TEMP/sourcemap-cli" @sentry/cli@3.8.2
+          SENTRY_CLI_EXECUTABLE="$RUNNER_TEMP/sourcemap-cli/node_modules/.bin/sentry-cli" \
+            python3 -m unittest discover -s scripts -p test_sourcemap_protocol.py -v
+
+  infrastructure:
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: "true"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f
+        with:
+          tofu_version: "1.13.2"
+          tofu_wrapper: false
+
+      - name: Validate isolated public-source infrastructure
+        run: |
+          tofu -chdir=infra/public-source init -backend=false -input=false -lockfile=readonly
+          tofu -chdir=infra/public-source fmt -check -recursive
+          tofu -chdir=infra/public-source validate
+          tofu -chdir=infra/public-source test
+
   release-images:
     permissions:
       contents: read
@@ -91,16 +120,18 @@ jobs:
 
   backup:
     if: always()
-    needs: [backup-tests, release-images]
+    needs: [backup-tests, release-images, infrastructure]
     runs-on: ubuntu-latest
     steps:
-      - name: Require backup tests and all image verification
+      - name: Require backup, image and infrastructure verification
         env:
           BACKUP_RESULT: ${{ needs['backup-tests'].result }}
           IMAGE_RESULT: ${{ needs['release-images'].result }}
+          INFRASTRUCTURE_RESULT: ${{ needs.infrastructure.result }}
         run: |
           test "$BACKUP_RESULT" = success
           test "$IMAGE_RESULT" = success
+          test "$INFRASTRUCTURE_RESULT" = success
 
   backup-tests:
     runs-on: ubuntu-latest

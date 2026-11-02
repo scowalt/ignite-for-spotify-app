@@ -1,13 +1,18 @@
 # Public repository handover
 
-**Status: prepared, not activated.** The intended authoritative repository is
-`scowalt/ignite-for-spotify-app`. Until an explicitly approved operational cutover,
-the existing private repository and production deployment remain unchanged.
+**Status: public source and local development moved; production not activated.**
+The development repository is `scowalt/ignite-for-spotify-app`; the owner's checkout
+is `~/Code/ignite-for-spotify-app`. Production still uses the old images until the
+separately approved operational cutover. Old private history and uncommitted work
+are preserved. BB's default source/path is new, but its stored remote URL remains
+stale because the installed API cannot update it: use the actual Git origin and
+explicit new URL for any additional-host clone.
 
 The destination must become the only home for ongoing development, issues and pull
-requests, dependency updates, automated remediation, GitHub Actions CI and production
-publishing. This is not a permanent public mirror. The old private repository retains
-historical evidence only after handover. Do not copy its Git ancestry, database
+requests, dependency updates, GitHub Actions CI and production publishing.
+Paseo-based remediation is excluded: the owner no longer uses Paseo. This is not a
+permanent public mirror. The old private repository retains historical evidence only
+after handover. Do not copy its Git ancestry, database
 sidecars, PR refs, historical logs/artifacts, attachments or runtime state into this
 repository.
 
@@ -25,8 +30,9 @@ is not a secret scanner or a substitute for content review.
   jobs use GitHub-hosted runners and a read-only token, with no inherited secrets.
 - The publish job depends on successful backend, frontend, backup and public-source
   validation in that same workflow execution. The existing required `backup` context
-  now aggregates backup tests and all three non-publishing release-image checks; it
-  runs even when a dependency fails and fails closed. No branch-protection setting
+  now aggregates backup tests, all three non-publishing release-image checks and
+  credential-free infrastructure validation. It runs even when a dependency fails
+  and fails closed. No branch-protection setting
   or controller requirement is changed.
 - `deploy.yml` is reusable only; it has no independent push/dispatch trigger. Both
   caller and publisher require the exact destination repository, main, a push or
@@ -58,8 +64,12 @@ is not a secret scanner or a substitute for content review.
   `LOCAL_SQLITE_CUTOVER_COMPLETE=true` must reflect the already-verified deployment,
   not trigger a new database migration. Missing values fail the publishing job.
 - Optional source-map upload requires `GLITCHTIP_SOURCEMAPS_ENABLED=true` and the
-  environment-scoped `GLITCHTIP_AUTH_TOKEN`. Maps are removed from the frontend
-  image input even if upload fails. Keep logs/artifacts free of sensitive data.
+  environment-scoped `GLITCHTIP_AUTH_TOKEN`. Keep this enabled for the eventual
+  operational handover unless the owner explicitly approves dropping source-map
+  observability. Never substitute a broader incident-management token silently.
+  Maps are removed from the frontend image input even if upload fails. See
+  [pinned-tool compatibility](source-map-compatibility.md); no release finalization
+  is performed. Keep logs/artifacts free of sensitive data.
 - Actions cache keys/artifacts must never be a channel from untrusted PR execution
   into privileged release commands. Publishing checks out its own trusted revision
   and rebuilds; it does not execute a PR artifact.
@@ -82,19 +92,19 @@ is not a secret scanner or a substitute for content review.
    targets and minimum required token access for the new repository. Confirm these
    operate only on the intended target. Disable old-repository automation as part
    of the coordinated handover, not during unrelated preparation.
-5. Migrate the in-repo GlitchTip/Paseo controller deliberately. Its allowlist accepts
-   only the new repository; old/fork targets are rejected. Before starting it, pause
-   the old dispatcher, inventory in-flight jobs/PR associations and preserve state.
-   Do not rewrite pending jobs to the new repo or replay old jobs blindly. Review
-   generated public PR content for private error/session data. Install/repoint the
-   existing controller rather than create a duplicate. Legacy cleanup remains an
-   unrelated opt-in action, not a way to retire this controller.
-6. Reconcile infrastructure ownership separately. `infra/main.tf` still describes
-   the old private repository and its existing state may also manage DNS/backups.
-   **Do not apply it with a changed repository name.** Prepare reviewed, separate
-   new-repository resources/state ownership; preserve the old repository resource,
-   DNS, server and backup bucket. The new repository must ultimately own the
-   maintained infrastructure definitions, not depend on ongoing old-repo changes.
+5. Keep owner-retired Paseo dispatch inactive. Do not install a replacement or
+   provision controller credentials. Retained code/tests are historical; cleanup
+   of old services/state/history remains a separate action. GlitchTip SDK error
+   reporting and source-map uploads remain maintained.
+6. Reconcile infrastructure through [the adoption plan](../../infra/README.md).
+   `infra/` retains the old private repository, DNS/backups and existing state key.
+   `infra/public-source/` adopts the existing public repository in distinct state
+   and prepares its protected environment, with publishing false. **Never change
+   the old root's repository name to simulate a move.** Preserve the exact existing
+   public branch protection, including `backup`'s app binding: the pinned provider
+   cannot model this policy for a user-owned repository, so a read-only policy
+   guard verifies it without importing it into a weaker resource. No state
+   ownership or environment provisioning is implied by committed definitions.
 7. Record current deployed image digests and backup/readiness evidence using an
    explicitly approved live inspection. Fence old publishers and drain/cancel any
    authorized in-flight release runs before enabling the new publisher. Updating
@@ -104,7 +114,7 @@ is not a secret scanner or a substitute for content review.
    validated new-repository commit. Verify new-package pulls before changing image
    references, then verify deployed digests, readiness and data/backup continuity. Do not recreate volumes,
    rerun the SQLite cutover, change DNS or rotate credentials as a side effect.
-9. Confirm all development entrypoints, bots, controller, infrastructure workflow,
+9. Confirm all development entrypoints, retained bots/integrations, infrastructure workflow,
    CI and CD now point to the public repository, with no active writer/publisher on
    the old repository. Keep the latter private for history. Archiving it is optional
    and requires separate approval. Remove temporary staging resources only when

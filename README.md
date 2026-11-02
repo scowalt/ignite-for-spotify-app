@@ -2,10 +2,11 @@
 
 Bridge between Spotify and Rocksmith CDLC (Custom Downloadable Content).
 
-The intended development and production source of truth is
-`scowalt/ignite-for-spotify-app`. Source and validation CI are public; production
-publishing is not yet activated. Follow the [full handover plan](docs/operations/public-repository-handover.md)
-before moving development, automation or publishing. The old repository retains
+The development source of truth is `scowalt/ignite-for-spotify-app`. Source and
+validation CI are public; production publishing is not yet activated. The owner's
+permanent development checkout is `~/Code/ignite-for-spotify-app`. Follow the
+[full handover plan](docs/operations/public-repository-handover.md) before changing
+production, integrations or publishing. The old repository retains
 private history; it is not intended to remain a development or deployment mirror.
 
 Original code and custom artwork are [MIT-licensed](LICENSE). Dependencies retain
@@ -31,7 +32,7 @@ CDLC (Custom Downloadable Content) are community-created songs for Rocksmith, a 
 
 ### Prerequisites
 
-- .NET 10 SDK (preview)
+- .NET 10 SDK (use the version pinned in `.mise.toml`)
 - Bun
 - OpenTofu (for infrastructure)
 
@@ -80,53 +81,32 @@ ssh -L 5050:localhost:5050 your-server
 
 Then open http://localhost:5050/hangfire in your browser.
 
-## Local GlitchTip/Paseo Controller
+## Error reporting and infrastructure
 
-The GlitchTip/Paseo controller is a local user operation, not part of the Docker
-application deployment. It reads only GlitchTip projects 1 and 2 and relies on GitHub
-protected-branch CI plus auto-merge as its only merge decision. Its initial CI job is
-intentionally non-required.
+GlitchTip remains the application error tracker. Source-map uploads retain the
+pinned debug-ID workflow; see [compatibility evidence and testing](docs/operations/source-map-compatibility.md).
+The owner no longer uses Paseo, so its dispatch is retired from the handover.
+Controller source/tests remain historical and inactive; do not install or enable them.
 
-Start with the fixture-backed or live **observe** gate. Dispatch is disabled by default
-and requires both the persisted `controller.dispatch_enabled` policy and an explicit
-`dispatch --once --enable-dispatch` command; normal `report` cannot dispatch. Each tick
-launches at most one queued job and never auto-retries. The controller passes the shared
-`GITHUB_AUTOMATION_TOKEN` to the Paseo coding agent with its explicit per-agent `--env`
-option, never in a prompt, log, status output, or static configuration. GitHub required CI
-and auto-merge are the only merge authority; after a confirmed linked PR merge, the
-controller makes a normal current-state read and GlitchTip resolved-status update before
-cleanup. Dispatch templates remain disabled by default. No live dispatch, Doppler use,
-or service installation/enablement was performed for this change. See the [controller
-operations runbook](docs/operations/glitchtip-paseo-controller.md) and [guarded legacy
-cutover runbook](docs/operations/legacy-glitchtip-remediator-cutover.md).
+[Infrastructure adoption](infra/README.md) uses a separate root/state for the existing
+public repository and its protected production environment. The retained infrastructure
+root still owns the old private repository, DNS and backup bucket. Changing its repository
+name is not a migration procedure. No import, apply or live configuration is performed
+by CI.
 
-### Setting Up GHCR Authentication
+### Registry access and production updates
 
-Watchtower needs GHCR credentials to pull private images. On the server, run:
+Keep existing GHCR credentials and Watchtower configuration unchanged during
+preparation. After approved publication into the fresh namespace, verify that the
+production client can pull all three exact digests. If access fails, stop for a
+separately approved minimum-access credential plan; do not grant the public
+repository access to legacy private package history.
 
-```bash
-# Create a GitHub PAT with read:packages scope, then:
-echo $GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
-```
-
-This creates `/root/.docker/config.json` which Watchtower mounts for authentication. After this one-time setup, Watchtower will automatically pull new images.
-
-### Updating Production
-
-Watchtower automatically pulls new images, but it **cannot** apply docker-compose.yml changes (port bindings, volumes, env vars). For compose changes:
-
-```bash
-git pull
-docker compose --env-file .env -f docker/docker-compose.prod.yml up -d
-```
-
-If Watchtower isn't pulling updates, verify GHCR auth is set up (see above) or pull manually:
-
-```bash
-docker pull ghcr.io/scowalt/ignite-for-spotify-app/backend:latest
-docker pull ghcr.io/scowalt/ignite-for-spotify-app/frontend:latest
-docker compose --env-file .env -f docker/docker-compose.prod.yml up -d --force-recreate
-```
+Watchtower can update consumed image tags but cannot apply Compose changes. The
+[first-release procedure](docs/operations/fresh-image-cutover.md) coordinates the
+single updater/publisher, pins images and preserves the existing project, volumes,
+backup identity and proxy binds. Do not substitute a whole-stack recreation or a
+`git pull` in an old checkout for that procedure.
 
 ### IPv6-Only VPS Architecture
 

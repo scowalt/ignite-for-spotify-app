@@ -1,11 +1,27 @@
-# Ignite for Spotify 2
+# Ignite for Spotify
+
+## Repository authority
+
+Ongoing development uses `scowalt/ignite-for-spotify-app`. The owner's permanent
+checkout is `~/Code/ignite-for-spotify-app`; the old private repository/checkouts
+retain history and uncommitted work. Production remains on the old image namespace
+until the separately approved cutover. Publication is not deployment.
+
+When acting for Scott Walters, use repository-local author email
+`scowalt@gmail.com`. Preserve previously approved `me@scowalt.com` history. Merge
+through the explicit GitHub `authorEmail` and `expectedHeadOid` controls after
+exact-head validation. Other contributors retain their own identities.
+
+Before infrastructure adoption, environment provisioning or state changes, read
+`infra/README.md`. Before publishing images or changing services, read
+`docs/operations/fresh-image-cutover.md`. Those operations require separate approval.
 
 ## Secrets Management (Doppler)
 
 Secrets are managed in **Doppler** (project: `ignite-for-spotify`, configurations: `dev` and `prd`).
 
 - **Local dev**: Run `doppler setup` once, then prefix commands with `doppler run --`
-- **CI/CD**: The `DOPPLER_TOKEN` GitHub Actions secret provides access to the `prd` config
+- **CI/CD**: The new workflow does not use a production Doppler token. Its protected `production` environment needs only the reviewed public client variables and, when enabled, the scoped GlitchTip source-map credential. Follow `docs/operations/public-repository-handover.md`; provisioning is not authorized by these instructions.
 - **Production VPS**: Doppler CLI is installed; use `doppler run --project ignite-for-spotify --config prd -- docker compose ...` to inject secrets
 
 ## External Integrations
@@ -68,30 +84,20 @@ scripts/glitchtip resolve <issue_id>
 1. Run `scripts/glitchtip list --project 2` to see unresolved backend errors
 2. Run `scripts/glitchtip show <id>` to get the stack trace
 3. Fix the code
-4. Run `scripts/glitchtip resolve <id>` to mark it resolved
+4. After the approved deployment and verification, run `scripts/glitchtip resolve <id>` to mark it resolved
 
-### Local GlitchTip/Paseo Controller
+### Retired Paseo dispatch
 
-The controller is a local user service outside the Docker deployment. It receives
-GlitchTip/GitHub secrets through Doppler configuration `prd` only. Do not put those
-values in controller TOML, agent prompts, status output, or journal logs. The controller
-passes the shared `GITHUB_AUTOMATION_TOKEN` through Paseo's explicit per-agent `--env`
-option so the coding agent can push and open its linked PR. GitHub auto-merge
-waits for protected-branch CI; do not change GitHub branch protection or make the
-controller CI job required during this rollout.
+The owner no longer uses Paseo. Its dispatch is excluded from this migration;
+keep it inactive and provision no controller credentials or services. Retained
+source/tests/runbooks are historical material, not an activation request. Cleanup
+of old services, state or history requires separate approval. This retirement does
+not remove GlitchTip SDK error reporting, source-map uploads or `scripts/glitchtip`.
 
-`report` remains read-only. Dispatch is disabled by default and requires the persisted
-policy plus `dispatch --once --enable-dispatch`; each tick launches at most one queued
-job with no auto-retry. After GitHub confirms the exact linked PR merged, the controller
-reads current GlitchTip state and performs its ordinary resolved-status update before
-cleanup. The dispatch systemd templates are not installed or enabled by this work.
-
-Use the fixture/live observe gate before enabling the local service. Legacy cleanup is a
-separate, explicitly confirmed operator action; it must stop the legacy service first,
-requires exact marker/repository/PR/branch/local-registration evidence, and leaves the
-controller paused if any remote deletion or absence verification fails. Follow
-`docs/operations/glitchtip-paseo-controller.md` and
-`docs/operations/legacy-glitchtip-remediator-cutover.md`.
+Before changing source-map tooling, read
+`docs/operations/source-map-compatibility.md` and run its credential-free protocol
+fixture. The pinned upload command performs no release finalization; appending an
+unsupported flag would break uploads.
 
 # Instructions for the usage of Backlog.md CLI Tool
 
