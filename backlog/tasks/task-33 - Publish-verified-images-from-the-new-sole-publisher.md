@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 14:43'
-updated_date: '2026-11-02 14:47'
+updated_date: '2026-11-02 15:34'
 labels: []
 dependencies: []
 ---
@@ -18,8 +18,8 @@ Perform the owner-approved first-publication handover without changing running c
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Protected source/IaC changes authorize the new publisher without weakening security, notice, source-map or environment gates.
-- [ ] #2 The original Deploy workflow is disabled and drained before only the new publication flag is enabled; no unrelated settings or package permissions change.
+- [x] #1 Protected source/IaC changes authorize the new publisher without weakening security, notice, source-map or environment gates.
+- [x] #2 The original Deploy workflow is disabled and drained before only the new publication flag is enabled; no unrelated settings or package permissions change.
 - [ ] #3 One exact-head approved workflow publishes the three fully verified fresh-namespace images and isolated frontend source maps, with evidence of successful gates and immutable digests.
 - [ ] #4 Existing production credentials can pull the exact candidate digests while existing running containers, mounts, database/backups and settings remain unchanged; failures fence publication and stop.
 <!-- AC:END -->
@@ -41,4 +41,11 @@ Owner explicitly approved first publication only, including old-publisher fencin
 
 <!-- SECTION:NOTES:BEGIN -->
 Prepared the reviewed publisher desired-state change to true, while the live flag remains false. Source-map upload is now fail-closed before image pushes, matching the approved stop-on-failure rule. Existing pinned Trivy action already defaults to v0.72.0, matching verification; no tool/dependency change was necessary. Mocked IaC, source-map protocol/routing, script and static checks passed. Operational fencing/enablement has not yet occurred.
+
+- PR #4 merged as ab2df41e34604d3a4afa5eed51a87bcf2609c5e2 with explicit Gmail author/expected head. PR CI 41465766517 and post-merge CI 41467150074 passed all validation jobs with publication skipped.
+- Original Deploy workflow 218752864 was disabled and all runs drained before applying the sole new flag change to true; a follow-up plan was empty.
+- Exact-head workflow_dispatch run 41469762051 passed all ten validation jobs and received normal owner-required environment approval (no bypass).
+- BLOCKED: source-map upload returned HTTP 401. The captured release-step environment shows SENTRY_AUTH_TOKEN empty, although the expected environment secret metadata is present. This identifies a secret-availability boundary, not a demonstrated scope failure. No replacement credential or broader scope was attempted.
+- Fail-closed behavior stopped before registry login or any image build/push. New publication flag was immediately fenced false; old Deploy remains disabled_manually. Do not apply the current true desired-state policy or retry publication until reviewed recovery is approved.
+- Production container IDs/start times/images/projects/mounts match the pre-release baseline. Pull checks are unperformed because no candidate images were published. Preserve the failed run and value-redacted evidence; source-map secret-path diagnosis requires a protected presence-only probe, with no values/uploads/publication.
 <!-- SECTION:NOTES:END -->

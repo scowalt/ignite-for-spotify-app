@@ -55,9 +55,9 @@ run "preserve_repository_and_gate_production" {
   assert {
     condition = (
       github_actions_variable.publishing_enabled.variable_name == "PRODUCTION_PUBLISHING_ENABLED" &&
-      github_actions_variable.publishing_enabled.value == "true"
+      github_actions_variable.publishing_enabled.value == "false"
     )
-    error_message = "Publication follows the reviewed exclusive-publisher policy; environment approval remains required."
+    error_message = "Publication must remain fenced until a separately reviewed retry is approved."
   }
 
   assert {

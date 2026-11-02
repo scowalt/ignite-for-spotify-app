@@ -1,7 +1,7 @@
 # Infrastructure ownership and adoption
 
-**Public repository/default branch and protected inputs are adopted. The publication
-policy is approved for exclusive handover.** Committed
+**Both publishers are fenced after the first publication attempt failed at secret
+delivery. Desired publication is false pending reviewed recovery.** Committed
 configuration alone is not proof of live values or deployment. Run infrastructure from
 the public source checkout, but keep the two ownership roots separate. New source
 ownership does not require renaming existing operational identities.
@@ -81,9 +81,9 @@ The separately approved setup was applied and verified with:
 - Reviewer Scott Walters (GitHub user ID 1100550), with admin bypass disabled.
 - Self-review permitted so a sole owner can approve their manually initiated release;
   approval is still required. Revisit this policy explicitly if another reviewer joins.
-- Repository publish-enable variable now desires `true` under the approved first-publication
-  handover. Apply only after the legacy publisher is fenced/drained; environment review
-  and all validation/security gates remain mandatory.
+- Repository publish-enable variable desires `false`, matching the safety fence after
+  the first publication failure. The legacy publisher remains disabled. Presence-only
+  recovery is not approval to re-enable publication or retry a release.
 
 ### Release-input staging
 
