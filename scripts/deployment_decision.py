@@ -1,4 +1,6 @@
-def decide_deployment(active, candidate, failed_digests, interrupted):
+def decide_deployment(state, candidate):
+    active = state['active']
+    interrupted = state['transaction']
     if interrupted is not None:
         phase = interrupted.get('phase')
         if phase in ['verified', 'committed'] and interrupted.get('candidate_digest') == active['artifact_digest']:
@@ -12,8 +14,8 @@ def decide_deployment(active, candidate, failed_digests, interrupted):
         return 'waiting'
     if active['artifact_digest'] == candidate['artifact_digest']:
         return 'unchanged'
-    if candidate['artifact_digest'] in failed_digests:
+    if candidate['artifact_digest'] in state['failed_digests']:
         return 'failed_release_fenced'
-    if tuple(candidate['order']) <= tuple(active['order']):
+    if tuple(candidate['order']) <= tuple(state['high_water_order']):
         return 'stale_release'
     return 'deploy'
