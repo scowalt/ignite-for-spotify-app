@@ -1,7 +1,7 @@
 # Infrastructure ownership and adoption
 
-**Both publishers are fenced after the first publication attempt failed at secret
-delivery. Desired publication is false pending reviewed recovery.** Committed
+**Secret-delivery recovery is complete and one publication retry is approved.
+Desired publication is true; live enablement still requires the reviewed plan.** Committed
 configuration alone is not proof of live values or deployment. Run infrastructure from
 the public source checkout, but keep the two ownership roots separate. New source
 ownership does not require renaming existing operational identities.
@@ -81,9 +81,10 @@ The separately approved setup was applied and verified with:
 - Reviewer Scott Walters (GitHub user ID 1100550), with admin bypass disabled.
 - Self-review permitted so a sole owner can approve their manually initiated release;
   approval is still required. Revisit this policy explicitly if another reviewer joins.
-- Repository publish-enable variable desires `false`, matching the safety fence after
-  the first publication failure. The legacy publisher remains disabled. Presence-only
-  recovery is not approval to re-enable publication or retry a release.
+- Repository publish-enable variable desires `true` under the separately approved
+  single publication retry. Keep the legacy publisher disabled and drained. Apply
+  only the reviewed flag change after exact-head validation; a failed gate/upload/access
+  check fences the new publisher false and stops. No runtime cutover is authorized.
 
 ### Release-input staging
 

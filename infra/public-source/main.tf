@@ -82,5 +82,5 @@ resource "github_repository_environment_deployment_policy" "main" {
 resource "github_actions_variable" "publishing_enabled" {
   repository    = github_repository.app.name
   variable_name = "PRODUCTION_PUBLISHING_ENABLED"
-  value         = "false"
+  value         = "true"
 }
