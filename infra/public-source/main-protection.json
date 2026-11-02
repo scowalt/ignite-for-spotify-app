@@ -1,0 +1,21 @@
+{
+  "url": "https://api.github.com/repos/scowalt/ignite-for-spotify-app/branches/main/protection",
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["backend", "backup", "frontend"],
+    "checks": [
+      {"context": "backend", "app_id": null},
+      {"context": "backup", "app_id": 15368},
+      {"context": "frontend", "app_id": null}
+    ]
+  },
+  "enforce_admins": false,
+  "required_signatures": false,
+  "required_linear_history": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "block_creations": false,
+  "required_conversation_resolution": true,
+  "lock_branch": false,
+  "allow_fork_syncing": false
+}

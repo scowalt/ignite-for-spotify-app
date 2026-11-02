@@ -1,4 +1,10 @@
-# GlitchTip Paseo Controller Operations
+# GlitchTip Paseo Controller Operations — historical
+
+**Retired from the current handover:** the owner no longer uses Paseo. Do not
+install, activate or migrate dispatch using this runbook. Source and tests remain
+for history; GlitchTip application error reporting is still maintained. Any state,
+service or legacy-history cleanup needs its own approval. The remainder documents
+the former design, not current operating instructions.
 
 ## Boundaries
 

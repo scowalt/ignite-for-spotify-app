@@ -45,10 +45,11 @@ availability where required. No broad license waiver is implied by green CI.
    older. This first release therefore includes the intervening authorization-error
    fix, dependency updates and cleanup, plus the approved security updates—not just
    a repository rename. Recheck current deployed revisions before acting.
-2. Confirm all writers/publishers and controller locations. Drain/fence the original
-   GitHub publisher and any other identified release path before enabling the new
-   one. Do not create another Watchtower/controller or assume an undiscovered
-   controller has been retired. Preserve in-flight work and private evidence.
+2. Confirm all active writers/publishers. Drain/fence the original GitHub publisher
+   and any other identified release path before enabling the new one. The owner
+   no longer uses Paseo; its dispatch is excluded rather than migrated or started.
+   Preserve GlitchTip error reporting, in-flight work and private evidence. Do not
+   create another Watchtower or interrupt unidentified shell/agent processes.
 3. Record current immutable image references and mount/health metadata privately.
    Verify rollback images remain available and the new backend's effective UID/GID
    is compatible with the existing data-volume ownership; do not fix a mismatch
@@ -57,7 +58,9 @@ availability where required. No broad license waiver is implied by green CI.
 4. Provision only explicitly approved environment variables/credentials. Do not copy
    the broad production Doppler token into the public repository. Protect the
    production environment and trusted-main path before setting the publish-enable
-   variable. Keep Renovate/controller activation a separate approval.
+   variable. Use the [IaC adoption plan](../../infra/README.md) and retain the
+   reviewed check app bindings. Keep Renovate activation a separate approval;
+   Paseo dispatch remains retired.
 5. Verify fresh package access without granting this public repo access to legacy
    package history. GitHub warns that public-repo package grants may also allow fork
    reads. Images must contain no production data/secrets regardless of private flags.
@@ -110,7 +113,7 @@ backup continuity. A successful build alone is not deployment evidence.
 Re-enable only the agreed single updater path after successful verification.
 
 Once stable, normal development and publishing must use this public repository only.
-Complete BB/checkouts/open-work, bot/controller and infrastructure-ownership migration;
+Complete BB/checkouts/open-work, retained bot/integration and infrastructure-ownership migration;
 publication and this first deployment alone do not complete those other handovers.
 
 ## Rollback

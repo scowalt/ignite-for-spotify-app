@@ -1,11 +1,11 @@
 ---
 id: TASK-30
 title: Prepare fresh production images without deploying
-status: In Progress
+status: Done
 assignee:
   - '@pi'
 created_date: '2026-11-01 13:33'
-updated_date: '2026-11-01 22:12'
+updated_date: '2026-11-02 00:13'
 labels: []
 dependencies: []
 ---
@@ -22,8 +22,8 @@ Prepare the public repository for a safe image-namespace cutover without grantin
 - [x] #2 All three release images have repeatable non-publishing build/security verification with no production secrets, registry pushes or weakened security checks.
 - [x] #3 Shipped dependency notices and source/license coverage are reviewed for the actual image components; unresolved obligations are clearly recorded rather than waived.
 - [x] #4 The first-release and rollback runbook preserves existing data, backup and proxy bindings, identifies component-version differences, and requires separate production approval.
-- [ ] #5 Relevant local and GitHub validation passes before merge; publisher/Renovate remain disabled, protections unchanged, and owner commits/merges use me@scowalt.com.
-- [x] #6 Approved supported runtime and Go-library security updates remove the candidate images’ fixable HIGH/CRITICAL findings without weakening checks or changing application features.
+- [x] #5 Approved supported runtime and Go-library security updates remove the candidate images’ fixable HIGH/CRITICAL findings without weakening checks or changing application features.
+- [x] #6 Relevant local and GitHub validation passes before merge; publisher/Renovate remain disabled, protections unchanged, and future owner commits/merges use scowalt@gmail.com while previously approved me@scowalt.com history is preserved.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -58,4 +58,31 @@ Owner approved the documented security-update extension. Continuing locally with
 - Local validation: 94 backend, 37 frontend, 102 controller, 13 comment-policy and 22 publication/notice/configuration tests passed, plus formatting, type checking, actionlint, shellcheck and workflow safety assertions.
 - New first-release/rollback documentation preserves project/volume/bind identities and requires separate production authorization. Copied upstream license text retains its original whitespace; only the generated notice text is exempted from whitespace lint.
 - All preparation remains local pending protected-PR validation; no registry writes, live changes or automation enablement.
+
+Owner changed preferred authorship to scowalt@gmail.com, matching the existing GitHub-generated test-merge address. No account change/history rewrite is needed; the earlier me@scowalt.com commits remain approved history. All PR validation passed. Repository remains private pending explicit republication approval.
+
+- PR #1 passed all GitHub validation and was merged as 811c5dbbe8cd52103d7c91bdb85e679a926ae5a4 using explicit authorEmail=scowalt@gmail.com, matching the owner’s updated preference.
+- Both post-merge workflows passed; all three image jobs and the required backup aggregate passed; publisher skipped. Branch-protection settings unchanged and no production secrets/variables/environments configured.
+- Repository remains private pending republication approval. This task completes preparation only, not registry publication, operational cutover, controller/BB migration or automation activation.
+- Completion metadata is recorded locally after the authorized merge and awaits a later approved documentation commit.
+
+Subsequent owner-approved republication and development checkout move are complete. Production still uses legacy images. The BB default source and this thread use the new public checkout; BB cached remote metadata remains a documented tool limitation. Paseo dispatch is excluded by owner decision; GlitchTip error reporting is retained.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Prepared fresh-image cutover without deploying or granting access to legacy packages.
+
+Changes:
+- New image coordinates and explicit existing Compose project; guarded digest-pinned cutover/rollback configuration.
+- Supported runtime/library security updates and compatible frontend transitive fixes, retaining existing application/runtime families.
+- Non-publishing image checks, bundled notices/source references, filtered verification artifacts, and first-release/rollback documentation.
+
+Verification:
+- All three candidate images and frontend production-lock checks pass the existing fixable HIGH/CRITICAL and secret policies.
+- Unit/fixture/configuration/notice tests, backup snapshot/restore and static checks passed locally and in GitHub Actions.
+- PR #1 merged; post-merge CI is green with publisher skipped and protections unchanged.
+
+No registry push, secret/package-permission change, production operation or automation activation occurred. Full migration remains pending the separately approved operational handover.
+<!-- SECTION:FINAL_SUMMARY:END -->
