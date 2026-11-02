@@ -2,6 +2,9 @@ name: Deploy
 
 on:
   workflow_call:
+    secrets:
+      GLITCHTIP_AUTH_TOKEN:
+        required: true
 
 env:
   REGISTRY: ghcr.io
@@ -37,10 +40,16 @@ jobs:
           CUTOVER_COMPLETE: ${{ vars.LOCAL_SQLITE_CUTOVER_COMPLETE }}
           VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
           VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+          SOURCEMAPS_ENABLED: ${{ vars.GLITCHTIP_SOURCEMAPS_ENABLED }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}
         run: |
           test "$CUTOVER_COMPLETE" = true
           test -n "$VITE_POSTHOG_KEY"
           test -n "$VITE_SENTRY_DSN"
+          if [ "$SOURCEMAPS_ENABLED" = true ] && [ -z "$SENTRY_AUTH_TOKEN" ]; then
+            echo '::error::Enabled source maps require the protected upload credential.'
+            exit 1
+          fi
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
