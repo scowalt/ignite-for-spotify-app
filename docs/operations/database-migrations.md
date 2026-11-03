@@ -44,7 +44,7 @@ Scripts use `NNNN_lower_case.sql` identifiers, with unique increasing nonzero nu
 Identifiers do not depend on assembly or namespace names. SQL is strict UTF-8, without
 a BOM, CR characters or embedded NULs; `.gitattributes` fixes SQL line endings to LF.
 There is no variable substitution, schema stripping or arbitrary preprocessor chain.
-Limits are 4,096 scripts and 1 MiB per script.
+Limits are 4,096 scripts, 1 MiB per script and 16 MiB across the catalogue.
 
 `__ignite_migrations` records contiguous positions, identifiers, exact SQL SHA-256 values
 and UTC timestamps. The journal definition and metadata are validated, including no-op
@@ -82,6 +82,60 @@ raw SQL/provider exceptions and their inner exceptions are not propagated. A fai
 terminated process alone does not establish whether commit happened: recovery must inspect
 durable history before selecting a prior image or a forward fix. No down-migration, live
 restore, repository initialization/pruning or automatic operator upgrade is provided.
+
+## Prepared migration-aware interface (not activated)
+
+The integration branch adds `AutomaticUpgrade` for rehearsals and `VerifiedUpgrade`
+for a release-bound target. Both require the exact prior schema/history and an explicit
+positive database budget no greater than 256 MiB. A verified upgrade also checks the
+published target schema before committing. Production startup's `requireReady` reads
+complete history/schema; it never applies pending SQL.
+
+The first automatic policy permits simple nullable appended columns, ordinary nonunique
+indexes and new ordinary tables. It rejects data rewrites, old-object removal/renaming,
+complex column constraints, expression/partial/unique indexes, and new trigger/view/virtual
+table work. Native authorization is supplemented by old object/root/column checks and
+per-operation HMAC comparison of existing row values. Random keys are erased after use;
+row values and those private data hashes are never emitted or added to deployment state.
+This is a conservative structural policy, not proof of arbitrary business compatibility.
+
+An SQLite page limit bounds the logical database during mutations. Native tests verify
+that over-budget index creation rolls back and that a new connection does not inherit the
+fixture's lower limit. This is not a WAL/temp/filesystem quota: container limits, storage
+headroom, writer cleanup and wall-clock deadlines remain deployment-controller duties.
+See [SQLite limits](https://www.sqlite.org/limits.html) and
+[`max_page_count`](https://www.sqlite.org/pragma.html#pragma_max_page_count).
+
+`Data/Migrations/manifest.json` classifies the exact ordered script set as `baseline`,
+`automatic-schema` or `manual`; only the first script may be the baseline. Build rehearsal
+uses synthetic databases and native automatic checks, not a declaration alone. Manual
+steps can be represented without authorizing their live execution. The catalogue hash is
+SHA-256 of UTF-8 `ignite-database-catalogue-v1\n` followed by one
+`id<TAB>sql-sha256<TAB>delivery<LF>` row per script. SQL checksums include original LF bytes.
+The generated descriptor contains protocol, catalogue/baseline/target schema hashes and
+script identities, not SQL or row data. Generate it once at build time, not by replaying
+historical SQL on application startup. Its binding into signed releases is still being
+integrated.
+
+The separate `Ignite.Migrations` executable has no HTTP host, Hangfire workers or service
+credentials. Prepared commands are `build-manifest`, `describe <manifest>`, `inspect`,
+`apply <manifest>`, `adopt <manifest>` and `settle`. Database operations take bounded strict
+JSON on stdin and emit only bounded metadata or fixed errors. `apply` requires exact
+image/source metadata and prior state, rejects pending manual steps and stale retries,
+and verifies the target inside the transaction. `adopt` only admits an explicitly reviewed
+baseline-only release and cannot be used as a fallback after `apply` fails.
+
+`settle` is deliberately **not read-only**: after the controller proves its owned migration
+writer has stopped and holds the deployment lock, it can open the existing database for
+SQLite's native interrupted-transaction recovery, check integrity and inspect history.
+It never creates a missing database, runs pending SQL or restores an older backup. A real
+process-kill fixture forces a hot rollback journal: `inspect` refuses it, and only explicit
+`settle` restores readable committed state. The controller must never hide this operation
+inside a read-only check or race it against an orphaned writer.
+
+These prepared interfaces are not an authorization to run against production. Docker
+packaging/startup gating, signed-release integration, durable updater decisions and the
+approved operator/database transition must be completed and verified before activation.
 
 ## Verification
 

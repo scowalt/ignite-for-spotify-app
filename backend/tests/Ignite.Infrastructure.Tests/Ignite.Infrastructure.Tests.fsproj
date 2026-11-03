@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ignite.Infrastructure\Ignite.Infrastructure.fsproj" />
     <ProjectReference Include="..\..\src\Ignite.Core\Ignite.Core.fsproj" />
+    <ProjectReference Include="../../src/Ignite.Migrations/Ignite.Migrations.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +21,9 @@
   <ItemGroup>
     <Compile Include="DatabaseTests.fs" />
     <Compile Include="DatabaseMigrationTests.fs" />
+    <Compile Include="MigrationDeliveryTests.fs" />
+    <Compile Include="MigrationCatalogueTests.fs" />
+    <Compile Include="MigrationCommandTests.fs" />
     <Compile Include="UserSessionRepositoryTests.fs" />
     <Compile Include="PlaylistSearchSnapshotRepositoryTests.fs" />
     <Compile Include="CdlcScraperTests.fs" />

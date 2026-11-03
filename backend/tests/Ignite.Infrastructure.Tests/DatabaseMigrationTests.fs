@@ -249,11 +249,17 @@ let ``history must remain an identical ordered prefix even without pending work`
 [<InlineData("crlf")>]
 [<InlineData("bom")>]
 [<InlineData("invalid-utf8")>]
+[<InlineData("oversized-total")>]
 let ``invalid catalogues are rejected before creating a database`` change =
     withDatabase (fun path ->
         let scripts =
             match change with
             | "empty" -> []
+            | "oversized-total" ->
+                [ for number in 1..17 do
+                      yield
+                          { Id = $"{number:D4}_large.sql"
+                            Sql = "SELECT 1;\n" + String(' ', 1024 * 1024 - 10) } ]
             | "duplicate" -> [ initial; initial ]
             | "duplicate-number" -> [ initial; { initial with Id = "0001_other.sql" } ]
             | "invalid-id" -> [ { initial with Id = "../initial.sql" } ]
@@ -609,6 +615,11 @@ let interruptionCatalogue () =
     [ initial
       { Id = "0002_change.sql"
         Sql = "INSERT INTO sample VALUES (1, 'private-marker'); CREATE TABLE added (id INTEGER);\n" } ]
+
+let interruptionCatalogueWithSpill () =
+    [ initial
+      { Id = "0002_change.sql"
+        Sql = "INSERT INTO sample VALUES (1, hex(zeroblob(3000000))); CREATE TABLE added (id INTEGER);\n" } ]
 
 [<Fact>]
 let ``concurrent migration attempts cannot enter the same pending batch`` () =

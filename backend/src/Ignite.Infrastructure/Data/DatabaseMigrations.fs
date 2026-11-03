@@ -15,30 +15,12 @@ open DbUp.Engine.Transactions
 open DbUp.Sqlite
 open Microsoft.Data.Sqlite
 
-type MigrationScript = { Id: string; Sql: string }
-
-type MigrationEntry =
-    { Id: string
-      Sha256: string
-      AppliedAt: DateTimeOffset }
-
-type MigrationMode =
-    | CreateNew
-    | UpgradeExisting
-    | AdoptLegacy of expectedSchemaSha256: string
-
-type MigrationReport =
-    { Applied: string list
-      History: MigrationEntry list }
-
-type MigrationInspection =
-    { SchemaSha256: string
-      History: MigrationEntry list option }
-
-type MigrationRejected(code: string) =
-    inherit InvalidOperationException(code)
-
 module private MigrationStorage =
+    type SqlPolicy =
+        | General
+        | Baseline
+        | Expansion
+
     let validatePath (path: string) =
         if
             not (Path.IsPathFullyQualified(path))
@@ -57,7 +39,15 @@ module private MigrationStorage =
         if List.isEmpty scripts || scripts.Length > 4096 then
             raise (MigrationRejected("invalid_migration_catalogue"))
 
+        let mutable totalBytes = 0L
+
         for script in scripts do
+            let size = UTF8Encoding(false, true).GetByteCount(script.Sql)
+            totalBytes <- totalBytes + int64 size
+
+            if totalBytes > 16L * 1024L * 1024L then
+                raise (MigrationRejected("migration_catalogue_too_large"))
+
             if
                 not (Regex.IsMatch(script.Id, "\\A[0-9]{4}_[a-z0-9_]+\\.sql\\z"))
                 || script.Id.StartsWith("0000_")
@@ -70,7 +60,7 @@ module private MigrationStorage =
                 || script.Sql.StartsWith("\uFEFF", StringComparison.Ordinal)
                 || script.Sql.Contains('\r')
                 || script.Sql.Contains('\u0000')
-                || UTF8Encoding(false, true).GetByteCount(script.Sql) > 1024 * 1024
+                || size > 1024 * 1024
             then
                 raise (MigrationRejected("invalid_migration_encoding"))
 
@@ -237,7 +227,7 @@ module private MigrationStorage =
             member _.EnsureTableExistsAndIsLatestVersion(_) = ()
             member _.StoreExecutedScript(script, factory) = store factory.Invoke clock script
 
-    type LiteralExecutor(configuration: DbUp.Builder.UpgradeConfiguration, schemaOnly: bool) =
+    type LiteralExecutor(configuration: DbUp.Builder.UpgradeConfiguration, policy: SqlPolicy) =
         inherit
             SqliteScriptExecutor(
                 Func<IConnectionManager>(fun () -> configuration.ConnectionManager),
@@ -249,7 +239,7 @@ module private MigrationStorage =
             )
 
         let internalTables =
-            HashSet<string>([ "sqlite_master"; "sqlite_schema"; "sqlite_sequence" ], StringComparer.OrdinalIgnoreCase)
+            HashSet<string>([ "sqlite_master"; "sqlite_schema" ], StringComparer.OrdinalIgnoreCase)
 
         override _.PreprocessScriptContents(script, _) = script.Contents
 
@@ -259,7 +249,11 @@ module private MigrationStorage =
 
             let authorizer =
                 SQLitePCL.strdelegate_authorizer (fun _ action first second _ _ ->
-                    if action = SQLitePCL.raw.SQLITE_CREATE_VTABLE && second = "fts5" then
+                    if
+                        policy <> Expansion
+                        && action = SQLitePCL.raw.SQLITE_CREATE_VTABLE
+                        && second = "fts5"
+                    then
                         for suffix in [ "_data"; "_idx"; "_docsize"; "_config" ] do
                             internalTables.Add(first + suffix) |> ignore
 
@@ -284,7 +278,25 @@ module private MigrationStorage =
                               SQLitePCL.raw.SQLITE_DETACH
                               SQLitePCL.raw.SQLITE_PRAGMA ]
                         || ((reserved first || reserved second) && action <> SQLitePCL.raw.SQLITE_READ)
-                        || (schemaOnly && dataMutation && not (internalTables.Contains(first)))
+                        || (policy <> General && dataMutation && not (internalTables.Contains(first)))
+                        || (policy <> General
+                            && List.contains
+                                action
+                                [ SQLitePCL.raw.SQLITE_CREATE_TEMP_TABLE
+                                  SQLitePCL.raw.SQLITE_CREATE_TEMP_INDEX
+                                  SQLitePCL.raw.SQLITE_CREATE_TEMP_TRIGGER
+                                  SQLitePCL.raw.SQLITE_CREATE_TEMP_VIEW ])
+                        || (policy = Expansion
+                            && List.contains
+                                action
+                                [ SQLitePCL.raw.SQLITE_CREATE_VTABLE
+                                  SQLitePCL.raw.SQLITE_CREATE_TRIGGER
+                                  SQLitePCL.raw.SQLITE_CREATE_VIEW
+                                  SQLitePCL.raw.SQLITE_DROP_TABLE
+                                  SQLitePCL.raw.SQLITE_DROP_INDEX
+                                  SQLitePCL.raw.SQLITE_DROP_TRIGGER
+                                  SQLitePCL.raw.SQLITE_DROP_VIEW
+                                  SQLitePCL.raw.SQLITE_DROP_VTABLE ])
                     then
                         SQLitePCL.raw.SQLITE_DENY
                     else
@@ -306,7 +318,7 @@ module private MigrationStorage =
                 )
                 |> ignore
 
-    let upgrade transaction (scripts: MigrationScript list) schemaOnly clock onUncommitted =
+    let upgrade transaction (scripts: MigrationScript list) policy clock onUncommitted =
         let engine =
             DeployChanges.To
                 .SqliteDatabase("")
@@ -317,7 +329,7 @@ module private MigrationStorage =
         engine.Configure(fun configuration ->
             configuration.ConnectionManager <- ConnectionManager(transaction)
             configuration.Journal <- Journal(transaction, clock)
-            configuration.ScriptExecutor <- LiteralExecutor(configuration, schemaOnly))
+            configuration.ScriptExecutor <- LiteralExecutor(configuration, policy))
 
         let upgrader = engine.Build()
         upgrader.ScriptExecuted.Add(fun event -> onUncommitted ((event :?> ScriptExecutedEventArgs).Script.Name))
@@ -335,27 +347,32 @@ module private MigrationStorage =
         connection.Open()
         use transaction = connection.BeginTransaction(deferred = false)
         createJournal (command transaction)
-        upgrade transaction [ baseline ] true TimeProvider.System ignore |> ignore
+        upgrade transaction [ baseline ] Baseline TimeProvider.System ignore |> ignore
         schemaHash (command transaction)
 
 [<RequireQualifiedAccess>]
 module DatabaseMigrations =
-    let inspect (path: string) : MigrationInspection =
+    let private inspectExisting (path: string) sqliteMode : MigrationInspection =
         try
             MigrationStorage.validatePath path
 
             let builder =
-                SqliteConnectionStringBuilder(
-                    DataSource = path,
-                    Mode = SqliteOpenMode.ReadOnly,
-                    Pooling = false,
-                    DefaultTimeout = 1
-                )
+                SqliteConnectionStringBuilder(DataSource = path, Mode = sqliteMode, Pooling = false, DefaultTimeout = 1)
 
             use connection = new SqliteConnection(builder.ConnectionString)
             connection.Open()
-            use transaction = connection.BeginTransaction(deferred = true)
+
+            use transaction =
+                connection.BeginTransaction(deferred = (sqliteMode = SqliteOpenMode.ReadOnly))
+
             let factory = MigrationStorage.command transaction
+
+            if sqliteMode = SqliteOpenMode.ReadWrite then
+                use integrity = factory ()
+                integrity.CommandText <- "PRAGMA quick_check"
+
+                if integrity.ExecuteScalar() <> box "ok" then
+                    raise (MigrationRejected("migration_database_integrity_failed"))
 
             { SchemaSha256 = MigrationStorage.schemaHash factory
               History =
@@ -371,6 +388,12 @@ module DatabaseMigrations =
         with
         | :? MigrationRejected -> reraise ()
         | _ -> raise (MigrationRejected("migration_inspection_failed"))
+
+    let inspect path =
+        inspectExisting path SqliteOpenMode.ReadOnly
+
+    let settleAndInspect path =
+        inspectExisting path SqliteOpenMode.ReadWrite
 
     let runObserved
         (path: string)
@@ -389,7 +412,9 @@ module DatabaseMigrations =
                     new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None)
 
                 ()
-            | UpgradeExisting -> ()
+            | UpgradeExisting
+            | AutomaticUpgrade _
+            | VerifiedUpgrade _ -> ()
             | AdoptLegacy expected ->
                 if
                     scripts.Length <> 1
@@ -410,11 +435,21 @@ module DatabaseMigrations =
             use connection = new SqliteConnection(builder.ConnectionString)
             connection.Open()
             use transaction = connection.BeginTransaction(deferred = false)
+
+            let maximumBytes =
+                match mode with
+                | AutomaticUpgrade(_, maximum)
+                | VerifiedUpgrade(_, _, maximum) -> maximum
+                | _ -> 256L * 1024L * 1024L
+
+            MigrationExpansion.limitDatabase transaction maximumBytes
             let factory = MigrationStorage.command transaction
             let journalExists = MigrationStorage.hasJournal factory
 
             match mode with
-            | UpgradeExisting when not journalExists -> raise (MigrationRejected("explicit_legacy_adoption_required"))
+            | UpgradeExisting
+            | AutomaticUpgrade _
+            | VerifiedUpgrade _ when not journalExists -> raise (MigrationRejected("explicit_legacy_adoption_required"))
             | AdoptLegacy expected ->
                 if
                     journalExists
@@ -432,18 +467,92 @@ module DatabaseMigrations =
 
             let previous = MigrationStorage.history factory
 
-            if mode = UpgradeExisting && previous.IsEmpty then
+            let automatic =
+                match mode with
+                | AutomaticUpgrade _
+                | VerifiedUpgrade _ -> true
+                | _ -> false
+
+            if (mode = UpgradeExisting || automatic) && previous.IsEmpty then
                 raise (MigrationRejected("migration_journal_invalid"))
 
             MigrationStorage.validateHistory scripts previous
-            let applied = MigrationStorage.upgrade transaction scripts false clock onUncommitted
-            let history = MigrationStorage.history factory
-            MigrationStorage.validateHistory scripts history
-            transaction.Commit()
-            { Applied = applied; History = history }
+
+            match mode with
+            | AutomaticUpgrade(expected, _)
+            | VerifiedUpgrade(expected, _, _) when
+                expected.History <> Some previous
+                || expected.SchemaSha256 <> MigrationStorage.schemaHash factory
+                ->
+                raise (MigrationRejected("migration_precondition_changed"))
+            | _ -> ()
+
+            let expansion =
+                match mode with
+                | AutomaticUpgrade _
+                | VerifiedUpgrade _ -> Some(MigrationExpansion.capture transaction)
+                | _ -> None
+
+            try
+                let policy =
+                    if automatic then
+                        MigrationStorage.Expansion
+                    else
+                        MigrationStorage.General
+
+                let applied =
+                    MigrationStorage.upgrade transaction scripts policy clock onUncommitted
+
+                match expansion with
+                | Some snapshot -> MigrationExpansion.verify transaction snapshot
+                | None -> ()
+
+                let history = MigrationStorage.history factory
+                MigrationStorage.validateHistory scripts history
+
+                match mode with
+                | VerifiedUpgrade(_, expectedSchema, _) when MigrationStorage.schemaHash factory <> expectedSchema ->
+                    raise (MigrationRejected("migration_target_schema_mismatch"))
+                | _ -> ()
+
+                transaction.Commit()
+                { Applied = applied; History = history }
+            finally
+                match expansion with
+                | Some snapshot -> (snapshot :> IDisposable).Dispose()
+                | None -> ()
         with
         | :? MigrationRejected -> reraise ()
         | _ -> raise (MigrationRejected("migration_operation_failed"))
 
     let run path mode scripts =
         runObserved path mode scripts TimeProvider.System ignore
+
+    let internal identifyCatalogue scripts =
+        try
+            MigrationStorage.validateCatalogue scripts
+            scripts |> List.map (fun script -> script.Id, MigrationStorage.hash script.Sql)
+        with
+        | :? MigrationRejected -> reraise ()
+        | _ -> raise (MigrationRejected("invalid_migration_catalogue"))
+
+    let internal baselineSchema script =
+        try
+            MigrationStorage.validateCatalogue [ script ]
+            MigrationStorage.baselineHash script
+        with
+        | :? MigrationRejected -> reraise ()
+        | _ -> raise (MigrationRejected("invalid_migration_baseline"))
+
+    let requireReady (path: string) (scripts: MigrationScript list) (expectedSchema: string) =
+        try
+            MigrationStorage.validateCatalogue scripts
+            let actual = inspect path
+
+            match actual.History with
+            | Some history when history.Length = scripts.Length && actual.SchemaSha256 = expectedSchema ->
+                MigrationStorage.validateHistory scripts history
+            | _ -> raise (MigrationRejected("migration_readiness_failed"))
+        with
+        | :? MigrationRejected -> reraise ()
+        | _ -> raise (MigrationRejected("migration_readiness_failed"))

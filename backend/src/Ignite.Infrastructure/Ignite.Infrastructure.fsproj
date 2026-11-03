@@ -28,12 +28,16 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Data/Migrations/*.sql" LogicalName="Ignite.Migrations.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Data/Migrations/manifest.json" LogicalName="Ignite.MigrationDelivery.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Config.fs" />
     <Compile Include="Data/DatabaseConfiguration.fs" />
+    <Compile Include="Data/MigrationContracts.fs" />
+    <Compile Include="Data/MigrationExpansion.fs" />
     <Compile Include="Data/DatabaseMigrations.fs" />
+    <Compile Include="Data/MigrationCatalogue.fs" />
     <Compile Include="Data/ApplicationMigrations.fs" />
     <Compile Include="Data/IgniteDbContext.fs" />
     <Compile Include="Data/SongRepository.fs" />
