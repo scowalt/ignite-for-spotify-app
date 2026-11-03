@@ -34,6 +34,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
     uses: ./.github/workflows/deploy.yml
     secrets:
       GLITCHTIP_AUTH_TOKEN: ${{ secrets.GLITCHTIP_AUTH_TOKEN }}
@@ -150,6 +151,15 @@ jobs:
 
       - name: Build backup image
         run: docker build -f docker/Dockerfile.backup -t ignite-backup:test .
+
+      - name: Exercise guarded deployment backup and restart cleanup
+        run: sudo env IGNITE_BACKUP_FIXTURE_IMAGE=ignite-backup:test python3 -B -m unittest discover -s scripts -p test_deployment_backup.py -v
+
+      - name: Exercise immutable record archive transport
+        run: sudo env IGNITE_BACKUP_FIXTURE_IMAGE=ignite-backup:test python3 -B -m unittest discover -s scripts -p test_release_transport.py -v
+
+      - name: Exercise production Docker metadata compatibility
+        run: sudo env IGNITE_BACKUP_FIXTURE_IMAGE=ignite-backup:test python3 -B -m unittest discover -s scripts -p test_deployment_runtime.py -v
 
       - name: Exercise snapshot and isolated restore
         run: docker build --target test -f docker/Dockerfile.backup .

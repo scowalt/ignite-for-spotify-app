@@ -1,0 +1,13 @@
+[Unit]
+Description=Ignite guarded release deployment
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/doppler run --project ignite-for-spotify --config prd -- /usr/bin/python3 %h/.local/lib/ignite-deployer/current/scripts/ignite-deploy.py once
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+UMask=0077
+TimeoutStartSec=40min
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+MemoryMax=1G
