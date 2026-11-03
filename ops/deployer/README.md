@@ -1,9 +1,9 @@
 # Guarded deployment implementation
 
-This is an incomplete, inactive implementation. The draft publisher and transaction
-core are tested; the production runtime adapter, authenticated record transport,
-installer/timer and controlled live proof are still required. Do not activate it
-by importing these modules into an ad hoc script.
+This is an inactive implementation pending controlled live proof. The publisher,
+transaction core, record transport, production runtime adapter and disabled installer/
+timer are present. Do not activate the timer before protected-main signing compatibility,
+read-only production preflight and a guarded deployment have passed.
 
 ## Transaction interface
 
@@ -84,8 +84,40 @@ credentials or network. Local rootless runs set `DOCKER_HOST` and
 immutable record reference and exact issuer/workflow/repository/ref/source policy.
 It suppresses raw subprocess output and does not inherit runtime secrets or Cosign
 trust overrides. Its invocation tests use an external executable fixture; these do
-not prove live keyless signing/registry compatibility. The record loader must still
-bind the extracted bytes to that exact verified artifact before calling validation.
+not prove live keyless signing/registry compatibility. The record loader authorizes the publisher before pulling, bounds the manifest, reads
+only an immutable digest, then validates source-bound signature and successful workflow
+evidence. It reads a bounded Docker image export in memory without creating/starting an
+artifact container or extracting archive files onto the host.
+
+## Driver and installation
+
+`ignite-deploy.py` provides `bootstrap`, `status`, `check` and `once`. It requires a
+private policy and an immutable reviewed operator bundle directory whose name matches
+the policy source SHA. Bootstrap verifies the explicitly supplied existing baseline
+without deploying; it never overwrites state. Check refuses interrupted transactions
+rather than mutating under a read-only command. Once recovers old work before fetching
+new release authority. Fixed outcome codes suppress raw provider/credentialed errors.
+
+`install-deployer.py` installs only an absent or exactly matching policy, bundle link
+and user units. It verifies the pinned signer and systemd unit syntax but does not
+start/enable either unit. The service uses existing project-scoped Doppler hydration;
+no production secret enters GitHub or a new plaintext service configuration. The timer
+runs one oneshot updater after boot and five minutes after the prior invocation finishes.
+
+`deployment_runtime.py` preserves the existing source checkout, old bind anchor,
+project/physical volumes, private configuration and data inode/ownership. A private,
+domain-specific configuration HMAC uses the existing Restic password to compare
+credential-bearing configuration across process restarts without storing its values or
+a new key. The runtime uses only the prior known-good backup image for recovery proof.
+All live auxiliary binds are checked; rollback first rejects unknown image/configuration
+drift, then restores only changed/missing app containers or resumes the known original
+backup. Existing physical volumes must already exist; no initialization/volume creation
+is intended. Running backup repository access is rechecked with a bounded read.
+
+Image preflight requires 5 GiB free before pulls, at most 1 GiB summed compressed layer
+sizes and four times that size plus 3 GiB free as conservative unpack headroom. After
+pulls and backup, 3 GiB must remain free. These estimates/budget checks are not filesystem
+quotas or hard billing caps. Do not increase them or prune images/history automatically.
 
 ## Verification
 

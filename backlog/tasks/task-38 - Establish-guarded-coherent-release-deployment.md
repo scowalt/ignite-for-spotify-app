@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 22:00'
-updated_date: '2026-11-03 00:56'
+updated_date: '2026-11-03 01:40'
 labels: []
 dependencies: []
 ---
@@ -59,4 +59,8 @@ Self-review tightened replay fencing: the highest attempted release order is sep
 - Ported the proven SQLite/Restic backup helper into maintained source and hardened restart cleanup: operation-specific ownership discovery, exact scratch-mount validation, idempotence and child-environment minimization. Four real, network-disabled rootless-Docker fixtures passed, including WAL snapshot/exact encrypted restore, missing-repository refusal and cleanup from a new operator instance. Added the same fixture gate after the backup-image build in hosted CI; no production storage was used.
 - Added a pinned Cosign invocation adapter with exact immutable reference/issuer/workflow/repository/ref/source checks, binary checksum verification, redacted subprocess failures and filtered environment. Three external-executable protocol tests pass; actual protected keyless/registry compatibility remains pending. The ported R2 signer also matched the independent pinned Botocore signer with synthetic credentials and a mocked transport.
 - Full local suite with real backup and pinned source-map fixtures: 77 tests passed, no skips. Actionlint, comment-policy (278 files), whitespace and secret checks passed. This remains draft source: authenticated artifact transport, full production runtime adapter and installer/timer are not yet complete or activated.
+
+- Implemented the immutable record loader: authorize publisher before bounded pulls, resolve one digest, read a bounded Docker export in memory without running/extracting artifact code, verify exact source-bound signature and successful trusted workflow. Actual Docker archive export compatibility passes locally; hosted CI includes the fixture.
+- Added the production Docker runtime adapter around the proven cutover: fixed project/bind anchors, credential-bearing configuration equality via private HMAC without stored values, physical-volume/data/account guards, explicit pull budgets, existing backup idleness/access/identity, known-good backup image, health-gated app-only switch and one image-only rollback. External Docker/Compose fixtures cover preserved settings, drift refusal and expected missing-container recovery.
+- Added version-bound CLI bootstrap/status/check/once and a fail-closed disabled user-unit installer. Read-only check cannot trigger recovery. User units are not installed/enabled yet; confirmed production Doppler and system Python locations. Remaining before activation: exact-head CI/source review, real production no-service-change preflight, protected keyless signing trial and guarded deployment. TASK-39 and TASK-40 now track dependency/open-work and final cross-system checks.
 <!-- SECTION:NOTES:END -->

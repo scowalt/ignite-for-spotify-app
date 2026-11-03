@@ -54,6 +54,15 @@ class ReleaseSignatureTests(unittest.TestCase):
             with self.assertRaises(ReleaseRejected):
                 verifier.verify('sha256:' + 'a' * 64, 'b' * 40)
 
+    def test_publisher_authorization_without_source_binding_does_not_issue_deployment_proof(self):
+        with tempfile.TemporaryDirectory() as directory:
+            executable = Path(directory) / 'cosign-fixture'
+            content = '#!/usr/bin/env python3\nimport sys\nassert "--certificate-identity" in sys.argv\nassert "--certificate-github-workflow-sha" not in sys.argv\n'
+            executable.write_text(content)
+            executable.chmod(0o700)
+            verifier = SignatureVerifier(executable, hashlib.sha256(content.encode()).hexdigest())
+            self.assertIsNone(verifier.authorize('sha256:' + 'a' * 64))
+
 
 if __name__ == '__main__':
     unittest.main()
