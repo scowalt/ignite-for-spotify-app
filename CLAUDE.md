@@ -5,11 +5,12 @@
 Ongoing development uses `scowalt/ignite-for-spotify-app`. The owner's permanent
 checkout is `~/Code/ignite-for-spotify-app`; the old private repository/checkouts
 retain history and uncommitted work. Production now runs verified, digest-pinned
-`ignite-for-spotify-app` images. Watchtower and both publishers remain paused.
-Before service changes or publisher/updater activation, read
-`docs/operations/runtime-cutover-plan.md` and preserve its active digest override.
-Source publishing policy still desires true while the live flag is intentionally
-false; an IaC apply must not silently undo that fence.
+`ignite-for-spotify-app` images. The protected publisher and sole guarded user-systemd
+updater are the maintained delivery path; legacy publishing and Watchtower stay inactive.
+Before deployment, recovery, operator upgrades or publisher changes, read
+`docs/operations/guarded-continuous-delivery.md`. Use the deployment ledger's active
+artifact/override, not historical cutover paths. Respect any emergency publishing fence;
+an IaC apply must not silently undo it.
 
 When acting for Scott Walters, use repository-local author email
 `scowalt@gmail.com`. Preserve previously approved `me@scowalt.com` history. Merge
@@ -18,7 +19,8 @@ exact-head validation. Other contributors retain their own identities.
 
 Before infrastructure adoption, environment provisioning or state changes, read
 `infra/README.md`. Before publishing images or changing services, read
-`docs/operations/fresh-image-cutover.md`. Those operations require separate approval.
+`docs/operations/guarded-continuous-delivery.md`. Operations outside its reviewed
+image-only contract require separate approval; old cutover helpers are historical.
 
 ## Secrets Management (Doppler)
 

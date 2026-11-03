@@ -1,11 +1,10 @@
 # Fresh-image first release and rollback
 
-**Publication and the separately approved runtime cutover are complete.** Production
-runs the verified digest-pinned `4ef6b03` release. See the
-[runtime execution record](runtime-cutover-plan.md) for active operator paths and
-preserved identities. Watchtower and both publishers remain intentionally paused;
-continuing CD/activation requires a separate decision. The procedure below remains
-reference material, not authorization to repeat the completed operations.
+**Historical first publication and runtime cutover are complete.** Their execution
+record is in [runtime cutover](runtime-cutover-plan.md). Current releases, operator
+paths and activation/recovery policy are in the [guarded delivery runbook](guarded-continuous-delivery.md).
+Legacy publishing and Watchtower remain inactive. The procedure below is historical
+reference material, not current image selection or authorization to repeat completed operations.
 
 ## Invariants
 

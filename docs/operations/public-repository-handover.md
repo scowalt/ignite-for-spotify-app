@@ -1,11 +1,12 @@
 # Public repository handover
 
-**Status: public source, development and digest-pinned runtime moved; continuing CD pending.**
+**Status: public source, runtime and guarded CD moved; final external integration checks are tracked separately.**
 The development repository is `scowalt/ignite-for-spotify-app`; the owner's checkout
-is `~/Code/ignite-for-spotify-app`. Production runs the verified new images after
-the [guarded cutover](runtime-cutover-plan.md). Watchtower and both publishers remain
-paused; wider integration/updater handover is not complete. Old private history and
-uncommitted work are preserved. BB's default source/path is new, but its stored remote URL remains
+is `~/Code/ignite-for-spotify-app`. Production uses the protected publisher and sole
+[guarded updater](guarded-continuous-delivery.md), verified through controlled and
+timer-driven deployments. Legacy publishing and Watchtower remain inactive. Old
+private history and uncommitted work are preserved. Hosted Renovate coverage remains
+subject to the live integration evidence in TASK-39. BB's default source/path is new, but its stored remote URL remains
 stale because the installed API cannot update it: use the actual Git origin and
 explicit new URL for any additional-host clone.
 
