@@ -1,11 +1,11 @@
 ---
 id: TASK-40
 title: Verify and document the complete migration handover
-status: In Progress
+status: Done
 assignee:
   - '@pi'
 created_date: '2026-11-03 01:08'
-updated_date: '2026-11-03 05:03'
+updated_date: '2026-11-03 13:12'
 labels: []
 dependencies: []
 ---
@@ -20,7 +20,7 @@ Close the remaining cross-system migration checks with explicit evidence rather 
 <!-- AC:BEGIN -->
 - [x] #1 The new release publisher and sole guarded updater are verified operational, with healthy exact production images and preserved backup/data/observability/protections.
 - [x] #2 A bounded synthetic event proves frontend source-map symbolication in the isolated target, without exposing real user events.
-- [ ] #3 Supported BB project/source metadata reflects the new repository, or an evidenced external blocker is reported without unsupported internal mutation.
+- [x] #3 Supported BB project/source metadata reflects the new repository, or an evidenced external blocker is reported without unsupported internal mutation.
 - [x] #4 Maintained references, operating documentation and migration tasks reflect the verified final state; old repositories/checkouts/rollback material remain preserved.
 <!-- AC:END -->
 
@@ -44,4 +44,19 @@ Synthetic cleanup verification initially stopped because GlitchTip truncates the
 Guarded CD is now verified end to end, including a real timer-driven deployment, exact healthy images, fresh verified recovery, preserved data/auxiliaries and final sole-publisher/updater activation. TASK-38 is Done. Remaining handover work is publishing the current runbooks/catalog and resolving or explicitly reporting supported BB metadata limitations; hosted bot coverage is tracked separately in TASK-39.
 
 Application runbook/task handover PR #15 merged as ae7b00dd18cf32608a1958c09ad42f1cf14b1b71 with exact-head/Gmail/tree validation. Mission Control catalog PR #61 merged as 7db68781960ed72d9833ed40e011766e03d48a9e through green Woodpecker checks, with GitHub Actions still disabled. Applied only that catalog paragraph to the permanent Mission Control working file; unrelated dirty work and HEAD were preserved. Updating remaining design/implementation status pointers to distinguish completed live verification from historical preparation. BB cached remote remains the only unchecked criterion for this task; current API offers no supported setter.
+
+On November 3, 2026 the owner explicitly selected "Accept documented workaround (Recommended)": close the migration with the stale BB cached remote documented, preserve the existing project/history, and supply the new URL explicitly for additional-host clones. Rechecked supported project/source controls and metadata: name/source/path/environment/actual origin are correct; project.gitRemoteUrl still names the old repository and no supported setter exists. This satisfies AC3 through its documented external-limitation path, not a claim that the cache was repaired. No internal patch, duplicate project or history removal occurred. Updated public-repository-handover.md with the accepted disposition; hosted Renovate evidence is complete in TASK-39. Final source records await their protected exact-head/Gmail merge.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Completed the public-repository migration handover, with one explicitly accepted BB metadata limitation.
+
+- Guarded delivery is operational and independently verified through controlled and timer-driven signed deployments, bounded exact recovery, healthy digest-pinned services, preserved data/observability and a sole updater.
+- Synthetic-only frontend symbolication passed, with both owned synthetic issues resolved and no real user events accessed.
+- Maintained application and Mission Control operating references were published; hosted Renovate is verified separately in TASK-39.
+- The owner accepted the documented BB cached-remote workaround. Active development uses the new source/origin; future clones must use the explicit new URL. The cache itself remains unchanged.
+
+Validation: exact-head PR/main CI, independent production identity/health/recovery evidence, synthetic symbolication, live bot evidence, and supported BB metadata inspection. Old private repositories, dirty checkouts, rollback material and history remain preserved. No unsupported BB mutation or new service/controller was introduced.
+<!-- SECTION:FINAL_SUMMARY:END -->

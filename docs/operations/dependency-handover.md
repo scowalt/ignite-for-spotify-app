@@ -8,9 +8,10 @@ only its invalid `bunInstall` option. No history was rewritten or old publisher 
 
 ## Maintained policy
 
-- Enable the existing Mend Renovate integration through the new repository config.
-  Actual installation/run evidence is still required; valid JSON alone does not
-  demonstrate that the App can access the repository.
+- Use the existing Mend Renovate integration through the new repository config.
+  Hosted access and an enabled scan were verified on November 3, 2026; see the
+  run and bot-authored dashboard evidence below. No new installation or broader
+  repository permissions were needed.
 - Keep minor/patch grouping and automerge through protected pull requests, with major
   updates held for dependency-dashboard approval.
 - Use `platformAutomerge: false`: Renovate performs its own checked PR merge instead
@@ -44,10 +45,22 @@ Renovate disabled. The private retirement PR passed all required checks; its exi
 retired controller job remains non-required and was not activated or opportunistically
 repaired. No private ancestry, old data-bearing file or unrelated work was copied.
 
-The new configuration is enabled and validated, but hosted App coverage still needs
-actual provider/run evidence. A previously disabled hosted repository can remain on
-an infrequent scheduler; the existing Mend Developer Portal can confirm installation
-and trigger a job. Do not substitute configuration validity for that verification.
+Hosted coverage is verified by [Mend job d877cbee-0047-424e-a676-d99925459dd9](https://developer.mend.io/github/scowalt/ignite-for-spotify-app/-/job/d877cbee-0047-424e-a676-d99925459dd9),
+completed November 3, 2026 at 13:00:46 UTC using Renovate `44.204.0`. The run reported
+`result: done`, `status: onboarded`, `enabled: true`, and `onboarded: true`, detected
+161 dependency entries, and emitted no warning/error-level log messages. Renovate
+created [Dependency Dashboard #17](https://github.com/scowalt/ignite-for-spotify-app/issues/17).
+The dashboard confirms major updates awaiting approval, scheduled grouped non-major
+updates, and detection of both source-built Restic/Caddy version-and-commit pairs.
+No approval or schedule bypass was requested. The xUnit deprecation advisory is a
+normal dependency follow-up, not an integration failure.
+
+The two October 31 jobs marked `DONE` were not sufficient evidence: the latest of
+those reported `disabled-by-config` and skipped the repository. A fresh scan was
+requested through the existing portal's **Actions → Run Renovate scan** after the
+enabled configuration reached main. Legacy configuration and disabled publishing
+were independently rechecked and remain inactive. No credentials, App permissions,
+publisher settings, production services or private history changed during this check.
 
 ## Validation evidence and sources
 
@@ -66,4 +79,4 @@ reactivity/build warnings were not hidden or opportunistically changed.
 - [Reviewed Trivy action](https://github.com/aquasecurity/trivy-action/blob/d2a0b60797ff03db6132bd4e2b293f9b37081297/action.yaml):
   explicit version input and changed default.
 
-TASK-39 remains the completion record for live bot evidence and legacy work disposition.
+TASK-39 records completion of live bot verification and legacy work disposition.
