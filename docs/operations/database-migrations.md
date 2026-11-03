@@ -57,10 +57,17 @@ A read-only inspection returns a hash of ordered SQLite schema definitions, incl
 FTS and trigger definitions but excluding the migration journal and SQLite-owned objects.
 It does not emit those definitions or user records. A corrupt or empty journal is refused,
 not interpreted as permission to adopt again. The fingerprint is deliberately exact:
-formatting or legacy schema variants can differ. The source-derived EF/FTS baseline has
-been tested; the historical Turso-imported production shape has **not** been inspected
-or approved by this development work. Unknown shapes stop for a reviewed baseline plan.
-Never obtain a new hash and blindly treat it as owner approval.
+formatting or legacy schema variants can differ. A separately owner-approved read-only
+metadata inventory identified the existing production shape as
+`91520ea3d23a8c812dea171d9bf5194e5f896069b3b540ffbab723e7b2ffa6a5`. The initial
+unmerged/unactivated draft was corrected to reproduce that exact shape, including the
+appended `official_dlc` default and legacy playlist/FTS definitions. No deployed migration
+was edited, no live schema changed, and raw metadata remains private. A frozen test-only
+legacy fixture replays the old public DDL sequence instead of regenerating from future
+EF models. Tests seed synthetic data and prove exact adoption and repository preservation.
+Unknown shapes still stop; no fingerprint matching was weakened. The metadata inventory
+is not approval to adopt production. Recheck the exact baseline in the later approved
+procedure, and never treat a freshly observed hash as automatic authorization.
 
 ## Transaction and failure behavior
 
