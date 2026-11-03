@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 22:00'
-updated_date: '2026-11-02 23:21'
+updated_date: '2026-11-03 00:36'
 labels: []
 dependencies: []
 ---
@@ -51,4 +51,8 @@ Owner explicitly approved completion of remaining migration work. Proposed direc
 Signed-release preparation is in draft PR #10. Added tested decision rules for no-op active releases, stale/failed release fencing and interrupted-operation recovery priority; a rollback already started cannot be retried automatically. A trusted CI run still finishing is explicitly deferred rather than treated as a failed deployment attempt. Durable state, real verifier/transport adapters and the actual VPS transaction/updater remain unfinished; nothing new is activated.
 
 Self-review tightened replay fencing: the highest attempted release order is separate from the active image order and must survive rollback. Added a red/green test showing an older signed release cannot become eligible merely because a newer deployment rolled back. This is still a pure decision module, not durable state or production transaction execution.
+
+- Added the durable deployment-transaction interface with private bounded/schema-checked state, no-follow reads, flock, atomic writes plus file/directory fsync, retained attempt receipts, and a replay high-water mark preserved through rollback. Recovery is processed before any new candidate.
+- Twenty transaction tests exercise real filesystem/locking and an actual killed child process, plus external runtime failure fixtures: partial/failed/interrupted rollback, cleanup retry without redeployment, preflight drift without overwriting unknown runtime, snapshot freshness/budgets, failed-release fencing, audit retention and malformed/symlink state refusal. Backend changes cannot begin while owned plaintext remains.
+- Self-review added rejection of expired receipts after slow cleanup, distinct filesystem-vs-lock errors and a stop before exhausting failure-fence capacity. These tests prove transaction behavior, not live Docker/Restic/R2/Cosign compatibility. Runtime adapter, record transport and installer/timer are still pending; production and publisher fences unchanged.
 <!-- SECTION:NOTES:END -->
