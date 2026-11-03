@@ -18,7 +18,7 @@ from release_record import deployment_contract, REPOSITORY
 SERVICES = ('backend', 'backup', 'frontend')
 ALL = (*SERVICES, 'caddy', 'alloy', 'watchtower')
 FORMAT = '''{"id":{{json .Id}},"image_id":{{json .Image}},"image":{{json .Config.Image}},"running":{{json .State.Running}},"started":{{json .State.StartedAt}},"health":{{with index .State "Health"}}{{json .Status}}{{else}}null{{end}},"project":{{json (index .Config.Labels "com.docker.compose.project")}},"network":{{json .HostConfig.NetworkMode}},"dns":{{json .HostConfig.Dns}},"restart":{{json .HostConfig.RestartPolicy.Name}},"ports":{{json .HostConfig.PortBindings}},"logging":{{json (index .Config.Labels "logging")}},"mounts":{{json .Mounts}}}'''
-IMAGE_FORMAT = '''{"id":{{json .Id}},"digests":{{json .RepoDigests}},"user":{{json (index .Config "User")}},"os":{{json .Os}},"arch":{{json .Architecture}},"volumes":{{json .Config.Volumes}},"revision":{{json (index .Config.Labels "org.opencontainers.image.revision")}},"source":{{json (index .Config.Labels "org.opencontainers.image.source")}}}'''
+IMAGE_FORMAT = '''{"id":{{json .Id}},"digests":{{json .RepoDigests}},"user":{{json (index .Config "User")}},"os":{{json .Os}},"arch":{{json .Architecture}},"volumes":{{json (index .Config "Volumes")}},"revision":{{with index .Config "Labels"}}{{json (index . "org.opencontainers.image.revision")}}{{else}}null{{end}},"source":{{with index .Config "Labels"}}{{json (index . "org.opencontainers.image.source")}}{{else}}null{{end}}}'''
 
 
 def invariant(value):

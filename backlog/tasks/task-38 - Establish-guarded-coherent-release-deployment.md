@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 22:00'
-updated_date: '2026-11-03 01:40'
+updated_date: '2026-11-03 01:47'
 labels: []
 dependencies: []
 ---
@@ -63,4 +63,6 @@ Self-review tightened replay fencing: the highest attempted release order is sep
 - Implemented the immutable record loader: authorize publisher before bounded pulls, resolve one digest, read a bounded Docker export in memory without running/extracting artifact code, verify exact source-bound signature and successful trusted workflow. Actual Docker archive export compatibility passes locally; hosted CI includes the fixture.
 - Added the production Docker runtime adapter around the proven cutover: fixed project/bind anchors, credential-bearing configuration equality via private HMAC without stored values, physical-volume/data/account guards, explicit pull budgets, existing backup idleness/access/identity, known-good backup image, health-gated app-only switch and one image-only rollback. External Docker/Compose fixtures cover preserved settings, drift refusal and expected missing-container recovery.
 - Added version-bound CLI bootstrap/status/check/once and a fail-closed disabled user-unit installer. Read-only check cannot trigger recovery. User units are not installed/enabled yet; confirmed production Doppler and system Python locations. Remaining before activation: exact-head CI/source review, real production no-service-change preflight, protected keyless signing trial and guarded deployment. TASK-39 and TASK-40 now track dependency/open-work and final cross-system checks.
+
+Actual production no-service-change preflight exposed an optional Docker Config.Volumes template issue before mutation. Container identities/start times stayed unchanged. Added null-safe Volumes and Labels lookups, preserving required provenance checks, and actual Docker metadata compatibility coverage. Retained the failed attempt evidence; no image/service/credential or safety invariant was relaxed.
 <!-- SECTION:NOTES:END -->

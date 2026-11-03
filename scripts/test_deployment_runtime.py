@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from deployment_runtime import DockerRuntime
+from deployment_runtime import DockerRuntime, IMAGE_FORMAT
 from deployment_process import OperationFailed
 from release_record import ReleaseRecord, deployment_contract
 from test_production_config import render
@@ -130,6 +130,16 @@ class RuntimeGuardTests(unittest.TestCase):
             self.assertEqual(final['updated'], ['backend'])
             self.assertEqual(final['containers']['backup']['id'], 'backup')
             runtime.cleanup(workspace)
+
+    @unittest.skipUnless(os.environ.get('IGNITE_BACKUP_FIXTURE_IMAGE'), 'Requires the isolated Docker fixture image.')
+    def test_actual_image_metadata_accepts_absent_optional_docker_fields(self):
+        result = subprocess.run(['docker', 'image', 'inspect', '--format', IMAGE_FORMAT, os.environ['IGNITE_BACKUP_FIXTURE_IMAGE']],
+                                capture_output=True, text=True, check=False, timeout=30)
+        self.assertEqual(result.returncode, 0)
+        value = json.loads(result.stdout)
+        self.assertIn(value['volumes'], [None, {}])
+        self.assertEqual(value['os'], 'linux')
+        self.assertEqual(value['arch'], 'amd64')
 
 
 if __name__ == '__main__':
