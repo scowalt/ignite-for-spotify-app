@@ -89,7 +89,8 @@ class ReleaseTransportTests(unittest.TestCase):
             image = 'ignite-release-fixture:' + uuid.uuid4().hex
             dockerfile = Path(__file__).resolve().parents[1] / 'ops/deployer/Dockerfile.release'
             try:
-                run(['docker', 'build', '-f', str(dockerfile), '-t', image, str(root)], timeout=90)
+                run(['docker', 'buildx', 'build', '--load', '--platform', 'linux/amd64', '--provenance=false', '--sbom=false',
+                     '-f', str(dockerfile), '-t', image, str(root)], timeout=90)
                 raw = run(['docker', 'image', 'save', image], limit=8 * 1024**2)
                 self.assertEqual(record_from_image_archive(raw), b'{"fixture":"export"}')
             finally:

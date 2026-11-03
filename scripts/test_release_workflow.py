@@ -28,6 +28,12 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertIn('commits/main --jq .sha', promotion)
         self.assertIn('RELEASE_RECORD_DIGEST', promotion)
 
+    def test_record_packaging_uses_one_platform_without_buildkit_attestations(self):
+        workflow = (ROOT / '.github/workflows/deploy.yml').read_text()
+        record = workflow.split('      - name: Create coherent release record\n', 1)[1].split('\n      - name:', 1)[0]
+        for option in ['docker buildx build', '--load', '--platform linux/amd64', '--provenance=false', '--sbom=false']:
+            self.assertIn(option, record)
+
 
 if __name__ == '__main__':
     unittest.main()
