@@ -99,7 +99,11 @@ rather than mutating under a read-only command. Once recovers old work before fe
 new release authority. Once compares the immutable registry pointer to the last
 committed artifact before making workflow API calls: an unchanged verified release is
 a no-op, not a repeated anonymous API request. New artifacts and explicit checks still
-require full signature/source/successful-workflow verification. Fixed outcome codes
+require full signature/source/successful-workflow verification. Workflow metadata uses
+the existing owner-private GHCR credential, verified to have only `read:packages`,
+against the fixed public-repository GitHub API endpoint. This avoids shared anonymous
+rate exhaustion without a new credential, repository/write permission, CI secret or
+stored token copy. Missing/unexpected credential storage or scope fails closed. Fixed outcome codes
 suppress raw provider/credentialed errors.
 
 `install-deployer.py` installs only an absent or exactly matching policy, bundle link
