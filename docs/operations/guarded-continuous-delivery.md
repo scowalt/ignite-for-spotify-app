@@ -1,8 +1,10 @@
 # Guarded continuous delivery
 
 The public repository is the sole maintained source and publisher. Its protected
-main workflow requires the existing owner environment review and all actual image,
-source-map, secret and notice gates. A versioned user-systemd updater on the existing
+main workflow publishes automatically after successful validation and all actual image,
+source-map, secret and notice gates, without a separate production approval click.
+Merging a green protected PR is the release decision, including Renovate auto-merges.
+A versioned user-systemd updater on the existing
 VPS deploys only a coherent, authenticated, successfully completed release.
 
 Legacy Deploy workflow `218752864` stays disabled and Watchtower stays stopped. The
@@ -40,9 +42,11 @@ executable operator code or upgrade that bundle.
 1. Merge through the existing protected source workflow. Owner-authored merges use
    explicit expected-head and `scowalt@gmail.com` controls; other contributors retain
    their identities.
-2. Review the protected `production` job at the exact validated main commit. Only its
-   named scoped upload secret and short-lived signing identity are used. No production
-   Doppler/runtime/database credential belongs in public/fork CI.
+2. Successful main validation enters the `production` publishing job automatically.
+   The environment retains its main-only deployment policy and scoped inputs, but
+   has no required reviewer. Only its named scoped upload secret and short-lived
+   signing identity are used. No production Doppler/runtime/database credential
+   belongs in public/fork CI.
 3. The publisher scans/pushes all three images, builds a small single-platform metadata
    record, signs/verifies its immutable digest and promotes one pointer. The consumer
    also checks the matching workflow completed successfully. Partial/failed publication
@@ -57,6 +61,13 @@ executable operator code or upgrade that bundle.
 6. Backend updates and passes bounded readiness/identity checks before backup/frontend.
    Only the three app services change, using explicit digests and no builds, tag pulls
    or dependency recreation. Commit the active set only after complete verification.
+
+The owner approved removal of the extra environment-review step after the migration.
+TASK-41 records the narrow IaC change and its live verification. No workflow, signing
+identity, scoped secret or branch protection is removed. Passing CI is not proof of
+business correctness; without the extra pause, a green merged regression can reach
+production. Database/compatibility-contract changes, infrastructure operations and
+operator upgrades still require their separate reviewed procedures.
 
 Inspect status without loading runtime secrets:
 

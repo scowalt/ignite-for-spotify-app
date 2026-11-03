@@ -9,8 +9,10 @@ the design rather than granting permission to replay completed setup operations.
 ## Release authority
 
 The protected GitHub publisher remains the only producer. Fork/PR validation stays
-read-only. Existing owner approval, main-only environment restriction, source-map
-upload and image/security/notice gates remain mandatory.
+read-only. The original handover retained owner environment approval; the subsequent
+owner-approved TASK-41 policy removes that extra click for successful trusted-main CI.
+Main-only environment restriction, source-map upload and image/security/notice gates
+remain mandatory. See the current runbook for operating authority.
 
 After all three application images pass their gates and are pushed, publish a small
 OCI release-record artifact in the fresh namespace. Its JSON binds exactly:

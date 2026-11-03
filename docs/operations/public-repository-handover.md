@@ -49,9 +49,11 @@ is not a secret scanner or a substitute for content review.
   caller and publisher require the exact destination repository, main, a push or
   manual event, and repository variable `PRODUCTION_PUBLISHING_ENABLED=true`.
   Leave that variable absent/false during setup and validation.
-- Before setting it true, configure the `production` environment with reviewed
-  protection/approval rules and main-only deployment restrictions. Merely naming
-  an environment in YAML does not establish those protections.
+- The `production` environment retains main-only deployment restrictions and scoped
+  inputs. The owner-approved post-migration policy in TASK-41 removes its extra
+  required-reviewer rule: successful trusted-main CI publishes automatically, so
+  merging a green protected PR is the release decision. Merely naming an environment
+  in YAML does not establish its branch restrictions or secret boundaries.
 - Publishing is serialized within the new repository. This does **not** serialize
   it with publishers in the old repository: disable and drain those first.
 - All three images must pass their security gates before the first push. Pushing

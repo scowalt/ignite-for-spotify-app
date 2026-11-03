@@ -20,7 +20,7 @@ mock_provider "github" {
   }
 }
 
-run "preserve_repository_and_gate_production" {
+run "preserve_repository_and_automate_main_production" {
   command = plan
 
   assert {
@@ -43,13 +43,13 @@ run "preserve_repository_and_gate_production" {
       github_repository_environment.production.environment == "production" &&
       !github_repository_environment.production.can_admins_bypass &&
       !github_repository_environment.production.prevent_self_review &&
-      toset(github_repository_environment.production.reviewers[0].users) == toset([1100550]) &&
+      length(github_repository_environment.production.reviewers) == 0 &&
       github_repository_environment.production.deployment_branch_policy[0].custom_branch_policies &&
       !github_repository_environment.production.deployment_branch_policy[0].protected_branches &&
       github_repository_environment_deployment_policy.main.branch_pattern == "main" &&
       github_repository_environment_deployment_policy.main.tag_pattern == null
     )
-    error_message = "Production requires owner approval with no bypass and only the main branch."
+    error_message = "Production must allow automatic publishing without reviewers while retaining no bypass and only the main branch."
   }
 
   assert {
@@ -57,7 +57,7 @@ run "preserve_repository_and_gate_production" {
       github_actions_variable.publishing_enabled.variable_name == "PRODUCTION_PUBLISHING_ENABLED" &&
       github_actions_variable.publishing_enabled.value == "true"
     )
-    error_message = "Publication follows the separately approved retry policy; environment approval remains required."
+    error_message = "Automatic publication retains the independently controllable publishing switch."
   }
 
   assert {
