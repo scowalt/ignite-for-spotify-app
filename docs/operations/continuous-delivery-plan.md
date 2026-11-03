@@ -1,8 +1,10 @@
 # Guarded continuous delivery handover
 
-The owner approved completion of the remaining migration. Implementation/activation
-is in progress; the current digest-pinned runtime remains healthy, and the existing
-Watchtower and both publishers stay paused until this design is verified end to end.
+This historical design was implemented and verified through protected publication,
+controlled deployment and a timer-driven follow-up. Current operation, authoritative
+ledger paths, recovery policy and verification evidence are in the
+[guarded delivery runbook](guarded-continuous-delivery.md). The remaining text explains
+the design rather than granting permission to replay completed setup operations.
 
 ## Release authority
 
@@ -109,6 +111,7 @@ working user-systemd manager; Cosign is not installed/activated there yet.
 - [Fulcio GitHub identity implementation](https://github.com/sigstore/fulcio/blob/main/pkg/identity/github/principal.go)
 - [Existing guarded runtime and recovery record](runtime-cutover-plan.md)
 
-Keyless signing/registry compatibility is not yet claimed until the controlled live
-workflow test passes. No new deployment automation is active merely because this plan
-or its validation module exists.
+The controlled live workflow subsequently verified keyless signing/registry compatibility,
+and the sole updater completed an independently verified automatic deployment. See the
+current runbook and TASK-38 evidence; a plan or isolated validation module alone would
+not establish that result.
