@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 22:00'
-updated_date: '2026-11-03 00:36'
+updated_date: '2026-11-03 00:56'
 labels: []
 dependencies: []
 ---
@@ -55,4 +55,8 @@ Self-review tightened replay fencing: the highest attempted release order is sep
 - Added the durable deployment-transaction interface with private bounded/schema-checked state, no-follow reads, flock, atomic writes plus file/directory fsync, retained attempt receipts, and a replay high-water mark preserved through rollback. Recovery is processed before any new candidate.
 - Twenty transaction tests exercise real filesystem/locking and an actual killed child process, plus external runtime failure fixtures: partial/failed/interrupted rollback, cleanup retry without redeployment, preflight drift without overwriting unknown runtime, snapshot freshness/budgets, failed-release fencing, audit retention and malformed/symlink state refusal. Backend changes cannot begin while owned plaintext remains.
 - Self-review added rejection of expired receipts after slow cleanup, distinct filesystem-vs-lock errors and a stop before exhausting failure-fence capacity. These tests prove transaction behavior, not live Docker/Restic/R2/Cosign compatibility. Runtime adapter, record transport and installer/timer are still pending; production and publisher fences unchanged.
+
+- Ported the proven SQLite/Restic backup helper into maintained source and hardened restart cleanup: operation-specific ownership discovery, exact scratch-mount validation, idempotence and child-environment minimization. Four real, network-disabled rootless-Docker fixtures passed, including WAL snapshot/exact encrypted restore, missing-repository refusal and cleanup from a new operator instance. Added the same fixture gate after the backup-image build in hosted CI; no production storage was used.
+- Added a pinned Cosign invocation adapter with exact immutable reference/issuer/workflow/repository/ref/source checks, binary checksum verification, redacted subprocess failures and filtered environment. Three external-executable protocol tests pass; actual protected keyless/registry compatibility remains pending. The ported R2 signer also matched the independent pinned Botocore signer with synthetic credentials and a mocked transport.
+- Full local suite with real backup and pinned source-map fixtures: 77 tests passed, no skips. Actionlint, comment-policy (278 files), whitespace and secret checks passed. This remains draft source: authenticated artifact transport, full production runtime adapter and installer/timer are not yet complete or activated.
 <!-- SECTION:NOTES:END -->

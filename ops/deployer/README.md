@@ -62,6 +62,31 @@ Preflight refusal or interruption only abandons/cleans that attempt. It cannot
 recovery is recorded durably before the single recovery attempt. If rollback or cleanup
 cannot be proven safe, stop and report the fixed outcome; do not weaken the guards.
 
+## Recovery and signature adapters
+
+`deployment_backup.py` ports the proven no-init/no-prune SQLite/Restic procedure.
+Its temporary containers have a dedicated `ignite.deployer-tool` ownership label;
+cleanup discovers that identity after process loss and checks the exact writable
+scratch bind before deletion. Unknown/ambiguous ownership is refused. Only required
+Docker and backup environment names reach child processes. The runtime adapter should
+use the prior, known-good backup image for pre-deployment recovery, not assume a new
+candidate backup implementation is already operationally compatible.
+
+Credential-free Docker fixtures exercise a live WAL-mode synthetic database, new local
+encrypted repository, exact-ID verified restore, missing-repository refusal and
+restart cleanup. Fixture initialization is limited to temporary local repositories;
+the production helper contains no initialization/pruning path. CI runs these fixtures
+on its isolated hosted runner after building the backup image, with no production
+credentials or network. Local rootless runs set `DOCKER_HOST` and
+`IGNITE_BACKUP_FIXTURE_IMAGE` explicitly.
+
+`release_signature.py` invokes a checksum-pinned Cosign executable with the fixed
+immutable record reference and exact issuer/workflow/repository/ref/source policy.
+It suppresses raw subprocess output and does not inherit runtime secrets or Cosign
+trust overrides. Its invocation tests use an external executable fixture; these do
+not prove live keyless signing/registry compatibility. The record loader must still
+bind the extracted bytes to that exact verified artifact before calling validation.
+
 ## Verification
 
 The transaction tests use the real filesystem, locks and process-kill behavior with
