@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,10 +19,12 @@
 
   <ItemGroup>
     <Compile Include="DatabaseTests.fs" />
+    <Compile Include="DatabaseMigrationTests.fs" />
     <Compile Include="UserSessionRepositoryTests.fs" />
     <Compile Include="PlaylistSearchSnapshotRepositoryTests.fs" />
     <Compile Include="CdlcScraperTests.fs" />
     <Compile Include="SpotifyPlaylistPaginationTests.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
 
 </Project>
