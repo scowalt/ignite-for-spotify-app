@@ -23,7 +23,7 @@ WORKDIR /src
 COPY backend/ .
 RUN dotnet test Ignite.slnx --verbosity minimal
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.13 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.14 AS runtime
 WORKDIR /app
 
 RUN apt-get update && apt-get upgrade -y \
