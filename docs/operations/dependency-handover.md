@@ -1,9 +1,10 @@
 # Dependency automation handover
 
 The maintained source is `scowalt/ignite-for-spotify-app`. Legacy private history,
-checkouts and pending dependency PRs are preserved until their public replacements
-are validated. The old repository's main `renovate.json` already has `enabled: false`;
-retirement does not require rewriting its history or reactivating its publisher.
+checkouts and dependency branches are preserved. The reviewed updates merged through
+public PR #12, after which legacy PRs #276/#236 were closed as superseded. The old
+repository's main `renovate.json` stays disabled; private retirement PR #280 removed
+only its invalid `bunInstall` option. No history was rewritten or old publisher reactivated.
 
 ## Maintained policy
 
@@ -36,9 +37,17 @@ the public transfer explicitly keeps scanner `v0.72.0`, matching the independent
 verified image workflow. This is an action-implementation update, not an unreviewed
 scanner-policy/version migration. All actual image/security/notice gates stay mandatory.
 
-The observed legacy open inventory contains those two Renovate PRs and one Renovate
-dashboard. Close/supersede them only after the new path's replacement/run evidence is
-recorded. Do not copy private ancestry, old data-bearing files or unrelated work.
+The observed legacy inventory contained those two dependency PRs and configuration
+warning issue #279 (not an ordinary dependency dashboard). They were dispositioned
+with handover comments; the warning's invalid option was corrected while keeping
+Renovate disabled. The private retirement PR passed all required checks; its existing
+retired controller job remains non-required and was not activated or opportunistically
+repaired. No private ancestry, old data-bearing file or unrelated work was copied.
+
+The new configuration is enabled and validated, but hosted App coverage still needs
+actual provider/run evidence. A previously disabled hosted repository can remain on
+an infrequent scheduler; the existing Mend Developer Portal can confirm installation
+and trigger a job. Do not substitute configuration validity for that verification.
 
 ## Validation evidence and sources
 

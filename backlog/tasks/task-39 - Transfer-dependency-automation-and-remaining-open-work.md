@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-03 01:08'
-updated_date: '2026-11-03 02:50'
+updated_date: '2026-11-03 04:27'
 labels: []
 dependencies: []
 ---
@@ -18,10 +18,10 @@ Finish the repository migration by moving maintained dependency automation and t
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Legacy dependency PRs 276 and 236 are reviewed and transferred or explicitly superseded in the public repository with passing validation.
+- [x] #1 Legacy dependency PRs 276 and 236 are reviewed and transferred or explicitly superseded in the public repository with passing validation.
 - [ ] #2 Renovate is validated and active only on the maintained repository path, with intended grouping/approval policy and no revived legacy publisher.
-- [ ] #3 Remaining legacy open work and integration references are inventoried and dispositioned without deleting private history or uncommitted work.
-- [ ] #4 Comment-free source-tool version/commit tracking is functional, manual infrastructure-provider updates are preserved, and automerge honors the existing protected PR workflow.
+- [x] #3 Remaining legacy open work and integration references are inventoried and dispositioned without deleting private history or uncommitted work.
+- [x] #4 Comment-free source-tool version/commit tracking is functional, manual infrastructure-provider updates are preserved, and automerge honors the existing protected PR workflow.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -40,4 +40,12 @@ Finish the repository migration by moving maintained dependency automation and t
 - Repaired the comment-free Restic/Caddy source-pin extraction, derived the Caddy runtime version from its ARG, retained major approvals/manual infrastructure updates, and selected Renovate-managed protected PR automerge without changing native repository settings. Native Renovate 44.206.2 strict validation and credential-free extraction passed; actual regex extraction found both source pins.
 - Legacy main already disables Renovate. Open inventory is exactly PRs 276/236 and dashboard issue 279; do not close them until replacement/bot evidence is verified. New-repository App access remains to be proven after the reviewed configuration reaches main.
 - Frontend frozen install, 37 tests, lint (one existing warning), type check and build passed. Script tests/actionlint/comment checks passed; exact-head image gates remain required in CI.
+
+Protected PR #12 merged as f28bb0eed16ff733c136b13825cef73f4aefb49c with exact-head Gmail controls, tree equality and successful required CI. Both legacy dependency updates are now in maintained main; bot configuration/extraction/provider policy is validated. Actual hosted Renovate coverage remains unproven because no new-repository bot issue/PR has yet appeared.
+
+Legacy dependency PRs #276 and #236 were closed as superseded only after their public replacement merged and passed validation; branches/history were retained. Legacy dashboard #279 was closed as obsolete, with a handover comment. The verified legacy open-work inventory contained no other issues or PRs. New hosted Renovate run evidence remains the sole unfinished criterion for this task.
+
+Correction to the legacy inventory classification: issue #279 was a Renovate configuration warning, not an ordinary dependency dashboard. Legacy config still had unsupported postUpdateOptions: bunInstall despite enabled=false. Opened a narrowly scoped private retirement PR removing only that invalid option while preserving enabled=false and the publisher fence; no private history was copied into public source. AC3 remains open until that cleanup is validated.
+
+Legacy retirement PR #280 merged through exact-head/Gmail controls after all three required checks and comment policy passed. Its existing retired controller check fails at dependency installation and remains non-required; it was not activated or opportunistically repaired. Only the invalid bunInstall option was removed, enabled=false stayed intact, legacy publishing remained disabled, and private history/branches/checkouts were preserved.
 <!-- SECTION:NOTES:END -->

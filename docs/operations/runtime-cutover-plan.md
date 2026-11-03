@@ -1,6 +1,9 @@
 # Runtime cutover plan: verified public images
 
-**Executed successfully on 2026-11-02; automatic updates remain paused.** All three
+**Historical cutover executed successfully on 2026-11-02.** Current deployments and
+active overrides are governed by the [guarded delivery runbook](guarded-continuous-delivery.md),
+not this completed one-shot procedure. The paused automation and override paths below
+record the original cutover milestone, not the current operating state. All three
 app services run the verified `4ef6b03` digests below. Public frontend, internal
 readiness, backup health/access, source identity and preserved data/mount checks passed.
 No image rollback was needed; Caddy and Alloy retained their identities and binds.

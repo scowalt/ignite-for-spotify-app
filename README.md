@@ -4,7 +4,8 @@ Bridge between Spotify and Rocksmith CDLC (Custom Downloadable Content).
 
 The development source of truth is `scowalt/ignite-for-spotify-app`. Source and
 validation CI are public, and production runs the verified digest-pinned release
-from this repository. Automatic publishing/updating remains paused. The owner's
+from this repository through a protected signed-release publisher and one guarded
+VPS updater. The owner's
 permanent development checkout is `~/Code/ignite-for-spotify-app`. Follow the
 [full handover plan](docs/operations/public-repository-handover.md) before changing
 production, integrations or publishing. The old repository retains
@@ -42,7 +43,7 @@ CDLC (Custom Downloadable Content) are community-created songs for Rocksmith, a 
 ```bash
 cd backend
 dotnet restore
-dotnet run --project src/Ignite.Api
+portless run --tailscale sh -c 'dotnet run --no-launch-profile --project src/Ignite.Api --urls "http://127.0.0.1:$PORT"'
 ```
 
 ### Frontend
@@ -50,18 +51,20 @@ dotnet run --project src/Ignite.Api
 ```bash
 cd frontend
 bun install
-bun run dev
+PORTLESS_TAILSCALE=1 portless
 ```
 
 ## Deployment
 
-The [runtime cutover record](docs/operations/runtime-cutover-plan.md) identifies the
-active digest override, public Compose file and retained base directory. Use those
-explicit identities for any separately approved operation, not a generic whole-stack
-`compose up`. Existing volumes, Caddy/Alloy binds and credentials must be preserved.
+Follow the [guarded delivery runbook](docs/operations/guarded-continuous-delivery.md).
+The deployment ledger identifies the current verified release and digest override;
+the old cutover record is historical. Existing volumes, Caddy/Alloy binds and credentials
+remain preserved. Do not substitute a generic whole-stack `compose up`.
 
-Docker Compose and Caddy remain in use, with secrets supplied by Doppler. Watchtower
-and both publishers are intentionally paused pending the continuing-CD decision.
+Docker Compose and Caddy remain in use, with runtime secrets supplied by Doppler.
+The protected publisher emits a signed coherent image set after all gates; one updater
+verifies it, proves fresh recovery and applies a health-gated image-only deployment.
+Legacy publishing is disabled and Watchtower remains stopped.
 
 Production requires an existing `/app/data/ignite.db` in the `ignite-data`
 volume and will not silently create an empty replacement. Follow the
@@ -99,11 +102,11 @@ existing GHCR credentials. Watchtower is stopped, with its configuration retaine
 separately approved minimum-access credential plan; do not grant the public
 repository access to legacy private package history.
 
-Watchtower can update consumed image tags but cannot apply Compose changes. The
-[first-release procedure](docs/operations/fresh-image-cutover.md) coordinates the
-single updater/publisher, pins images and preserves the existing project, volumes,
-backup identity and proxy binds. Do not substitute a whole-stack recreation or a
-`git pull` in an old checkout for that procedure.
+The [guarded updater](docs/operations/guarded-continuous-delivery.md) consumes an
+immutable signed release record, not per-image mutable tags. Configuration/schema
+contract changes require review. Preserve the existing project, volumes, backup identity
+and proxy binds; a `git pull` in an old checkout is not a deployment procedure.
+See [dependency handover](docs/operations/dependency-handover.md) for maintained bot policy.
 
 ### IPv6-Only VPS Architecture
 
