@@ -155,6 +155,19 @@ no rollback was used. Recovery snapshot
 within the same budgets. The final sole-publisher enablement was a reviewed flag-only
 OpenTofu apply with unrelated state/settings preserved and a no-op follow-up plan.
 
+The subsequent owner-approved automatic-publishing policy removed only the production
+reviewer rule through a fresh full-root OpenTofu plan; all other settings and unrelated
+state were preserved, and the follow-up plan was empty. GitHub canceled the publisher
+already waiting on the deleted rule before any runner/steps started. A fresh full CI
+[run 41648567265](https://github.com/scowalt/ignite-for-spotify-app/actions/runs/41648567265)
+at source `6be9e16d475726d7975a7644a74e3565b956bd57` then published successfully with
+no approval events. The existing timer deployed that signed release without a manual
+deploy command. Exact healthy images, preserved data/mount/auxiliary identities,
+unchanged operator/policy/units and removal of owned plaintext/tooling were verified.
+Recovery snapshot `6bdf1020692a476c75e49d1bb221300f9dba5a37ff40986e10d151c6381e48ca`
+restored exactly within budget; no rollback was used. TASK-41 records this evidence.
+These identifiers are historical proof, not a replacement for the live ledger.
+
 Isolated frontend debug-ID symbolication was verified with a uniquely labelled synthetic
 event from a served source-mapped function span. It resolved to `Home.tsx`; only synthetic
 events were inspected, and their groups were resolved. The legacy frontend/history and
