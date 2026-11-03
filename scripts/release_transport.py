@@ -1,8 +1,10 @@
+import base64
 import io
 import json
 import os
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 import re
+import stat
 import tarfile
 import zlib
 import urllib.request
@@ -17,11 +19,36 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
+def _registry_read_credential():
+    path = Path(os.environ.get('DOCKER_CONFIG', str(Path.home() / '.docker'))) / 'config.json'
+    try:
+        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(descriptor, 'rb') as stream:
+            metadata = os.fstat(stream.fileno())
+            if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid() or metadata.st_mode & 0o077 or metadata.st_size > 65536:
+                raise ReleaseRejected('Registry credential storage is not private and owned.')
+            config = json.loads(stream.read(65537))
+        raw = base64.b64decode(config['auths']['ghcr.io']['auth'], validate=True).decode()
+        _, token = raw.split(':', 1)
+        if not token or len(token) > 512 or any(character.isspace() for character in token):
+            raise ReleaseRejected('Invalid existing registry credential.')
+        return token
+    except (OSError, ValueError, KeyError, TypeError):
+        raise ReleaseRejected('Existing registry read credential unavailable; no substitute used.') from None
+
+
 def public_workflow(identifier):
+    if type(identifier) is not int or not 0 < identifier < 2**63:
+        raise ReleaseRejected('Invalid workflow identifier.')
+    token = _registry_read_credential()
     request = urllib.request.Request('https://api.github.com/repos/' + REPOSITORY + '/actions/runs/' + str(identifier),
-                                     headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'ignite-release-reader'})
+                                     headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'ignite-release-reader',
+                                              'Authorization': 'Bearer ' + token})
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
     with opener.open(request, timeout=30) as response:
+        scopes = {scope.strip() for scope in response.headers.get('X-OAuth-Scopes', '').split(',') if scope.strip()}
+        if scopes != {'read:packages'}:
+            raise ReleaseRejected('Existing registry credential scope differs from the reviewed read-only policy.')
         raw = response.read(2 * 1024**2 + 1)
     if len(raw) > 2 * 1024**2:
         raise ReleaseRejected('Workflow response exceeds its bound.')
