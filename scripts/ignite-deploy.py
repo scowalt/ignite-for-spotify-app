@@ -89,7 +89,11 @@ def main():
                     print(json.dumps({'outcome': outcome}))
                     return 0 if outcome in ['deployed', 'unchanged'] else 1
                 verifier = SignatureVerifier(Path.home() / '.local/lib/ignite-deployer/tools/cosign-v3.1.4')
-                release = load_release(policy['contract_sha256'], docker=runtime.docker, verifier=verifier)
+                known_artifact = deployment.status()['active']['artifact_digest'] if args.action == 'once' else None
+                release = load_release(policy['contract_sha256'], docker=runtime.docker, verifier=verifier, known_artifact=known_artifact)
+                if release is None:
+                    print(json.dumps({'outcome': 'unchanged'}))
+                    return 0
                 if args.action == 'check':
                     checks = root / 'checks'
                     checks.mkdir(mode=0o700, exist_ok=True)

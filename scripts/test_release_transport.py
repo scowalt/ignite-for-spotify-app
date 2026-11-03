@@ -96,6 +96,16 @@ class ReleaseTransportTests(unittest.TestCase):
             finally:
                 run(['docker', 'image', 'rm', image])
 
+    def test_unchanged_active_digest_does_not_consume_workflow_api_quota(self):
+        with tempfile.TemporaryDirectory() as directory:
+            docker = Path(directory) / 'docker.py'
+            docker.write_text('import json,sys\nassert sys.argv[1:4]==["buildx","imagetools","inspect"]\nprint(json.dumps({"digest":"sha256:"+"a"*64}))\n')
+            def workflow_unavailable(identifier):
+                raise AssertionError('An unchanged active release must not query workflow evidence again.')
+            result = load_release('d' * 64, docker=[sys.executable, str(docker)], verifier=None,
+                                  workflow_reader=workflow_unavailable, known_artifact='sha256:' + 'a' * 64)
+            self.assertIsNone(result)
+
 
 if __name__ == '__main__':
     unittest.main()

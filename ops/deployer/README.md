@@ -96,7 +96,11 @@ private policy and an immutable reviewed operator bundle directory whose name ma
 the policy source SHA. Bootstrap verifies the explicitly supplied existing baseline
 without deploying; it never overwrites state. Check refuses interrupted transactions
 rather than mutating under a read-only command. Once recovers old work before fetching
-new release authority. Fixed outcome codes suppress raw provider/credentialed errors.
+new release authority. Once compares the immutable registry pointer to the last
+committed artifact before making workflow API calls: an unchanged verified release is
+a no-op, not a repeated anonymous API request. New artifacts and explicit checks still
+require full signature/source/successful-workflow verification. Fixed outcome codes
+suppress raw provider/credentialed errors.
 
 `install-deployer.py` installs only an absent or exactly matching policy, bundle link
 and user units. It verifies the pinned signer and systemd unit syntax but does not

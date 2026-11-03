@@ -47,13 +47,15 @@ def _bounded_manifest(docker, reference, env, depth=0):
         raise ReleaseRejected('Artifact download exceeds its bound.')
 
 
-def load_release(expected_contract, *, docker, verifier, workflow_reader=public_workflow):
+def load_release(expected_contract, *, docker, verifier, workflow_reader=public_workflow, known_artifact=None):
     env = {key: os.environ[key] for key in ['PATH', 'HOME', 'DOCKER_HOST', 'DOCKER_CONFIG', 'XDG_RUNTIME_DIR'] if key in os.environ}
     descriptor = json.loads(run([*docker, 'buildx', 'imagetools', 'inspect', RELEASE_IMAGE + ':latest',
                                  '--format', '{{json .Manifest}}'], env=env, limit=32768))
     digest = descriptor.get('digest', '')
     if not isinstance(digest, str) or not re.fullmatch(r'sha256:[a-f0-9]{64}', digest):
         raise ReleaseRejected('Artifact digest unavailable.')
+    if known_artifact is not None and digest == known_artifact:
+        return None
     reference = RELEASE_IMAGE + '@' + digest
     verifier.authorize(digest)
     _bounded_manifest(docker, reference, env)
