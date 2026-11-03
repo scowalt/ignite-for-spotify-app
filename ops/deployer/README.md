@@ -1,9 +1,11 @@
 # Guarded deployment implementation
 
-This is an inactive implementation pending controlled live proof. The publisher,
-transaction core, record transport, production runtime adapter and disabled installer/
-timer are present. Do not activate the timer before protected-main signing compatibility,
-read-only production preflight and a guarded deployment have passed.
+This implementation is verified and in use. The protected publisher, record transport,
+transaction core and sole updater passed controlled and automatic deployment checks.
+Current operations and ledger paths are in the
+[guarded delivery runbook](../../docs/operations/guarded-continuous-delivery.md).
+The installer deliberately installs disabled units; any new installation still requires
+its own preflight and controlled verification before activation.
 
 ## Transaction interface
 
@@ -133,5 +135,7 @@ The transaction tests use the real filesystem, locks and process-kill behavior w
 an external runtime fixture. They cover durable success, concurrency, interrupted and
 failed updates, cleanup retries, preflight drift, backup proof budgets/freshness,
 failed-release fencing and evidence retention. They do not prove Docker, Restic, R2,
-GitHub, Cosign, systemd or production compatibility. Those adapter/live fixtures are
-required before enabling the watchdog.
+GitHub, Cosign, systemd or production compatibility by themselves. Separate native
+fixtures and controlled live evidence now establish those paths for the installed
+operator; the current runbook records them. Repeat relevant verification for a changed
+operator/contract rather than treating historical evidence as blanket approval.

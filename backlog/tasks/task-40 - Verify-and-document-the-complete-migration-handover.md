@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-03 01:08'
-updated_date: '2026-11-03 04:43'
+updated_date: '2026-11-03 05:03'
 labels: []
 dependencies: []
 ---
@@ -21,7 +21,7 @@ Close the remaining cross-system migration checks with explicit evidence rather 
 - [x] #1 The new release publisher and sole guarded updater are verified operational, with healthy exact production images and preserved backup/data/observability/protections.
 - [x] #2 A bounded synthetic event proves frontend source-map symbolication in the isolated target, without exposing real user events.
 - [ ] #3 Supported BB project/source metadata reflects the new repository, or an evidenced external blocker is reported without unsupported internal mutation.
-- [ ] #4 Maintained references, operating documentation and migration tasks reflect the verified final state; old repositories/checkouts/rollback material remain preserved.
+- [x] #4 Maintained references, operating documentation and migration tasks reflect the verified final state; old repositories/checkouts/rollback material remain preserved.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -42,4 +42,6 @@ Close the remaining cross-system migration checks with explicit evidence rather 
 Synthetic cleanup verification initially stopped because GlitchTip truncates the issue title before the event UUID. Rechecked exact event-ID-to-group binding, project 8, unique synthetic label and single-event count; both synthetic groups are now confirmed resolved. No real issue was modified.
 
 Guarded CD is now verified end to end, including a real timer-driven deployment, exact healthy images, fresh verified recovery, preserved data/auxiliaries and final sole-publisher/updater activation. TASK-38 is Done. Remaining handover work is publishing the current runbooks/catalog and resolving or explicitly reporting supported BB metadata limitations; hosted bot coverage is tracked separately in TASK-39.
+
+Application runbook/task handover PR #15 merged as ae7b00dd18cf32608a1958c09ad42f1cf14b1b71 with exact-head/Gmail/tree validation. Mission Control catalog PR #61 merged as 7db68781960ed72d9833ed40e011766e03d48a9e through green Woodpecker checks, with GitHub Actions still disabled. Applied only that catalog paragraph to the permanent Mission Control working file; unrelated dirty work and HEAD were preserved. Updating remaining design/implementation status pointers to distinguish completed live verification from historical preparation. BB cached remote remains the only unchecked criterion for this task; current API offers no supported setter.
 <!-- SECTION:NOTES:END -->
