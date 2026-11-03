@@ -39,11 +39,22 @@ let private initial =
       Sql = "CREATE TABLE sample (id INTEGER PRIMARY KEY, value TEXT NOT NULL);\n" }
 
 [<Fact>]
+let ``the initial draft reproduces the reviewed production schema fingerprint`` () =
+    withDatabase (fun path ->
+        DatabaseMigrations.run path CreateNew [ (ApplicationMigrations.catalogue ()).Head ]
+        |> ignore
+
+        Assert.Equal(
+            "91520ea3d23a8c812dea171d9bf5194e5f896069b3b540ffbab723e7b2ffa6a5",
+            (DatabaseMigrations.inspect path).SchemaSha256
+        ))
+
+[<Fact>]
 let ``the embedded application catalogue supports unchanged repositories and FTS`` () =
     withDatabase (fun path ->
         let catalogue = ApplicationMigrations.catalogue ()
         let report = DatabaseMigrations.run path CreateNew catalogue
-        Assert.Equal("0001_initial.sql", Assert.Single(report.Applied))
+        Assert.Equal<string list>(catalogue |> List.map _.Id, report.Applied)
         use provider = createProvider path
         use scope = provider.CreateScope()
         let songs = scope.ServiceProvider.GetRequiredService<ISongRepository>()
@@ -76,43 +87,28 @@ let ``the embedded application catalogue supports unchanged repositories and FTS
 [<Fact>]
 let ``explicit adoption validates the legacy schema and preserves repository data and FTS`` () =
     withDatabase (fun path ->
-        let services = ServiceCollection()
-
-        services.AddInfrastructure(ConfigurationBuilder().Build(), $"Data Source={path}", false)
-        |> ignore
-
-        use provider = services.BuildServiceProvider()
-        provider.InitializeDatabaseAsync().GetAwaiter().GetResult()
-        use scope = provider.CreateScope()
-        let songs = scope.ServiceProvider.GetRequiredService<ISongRepository>()
-
-        let song =
-            Song(
-                Artist = "Legacy Artist",
-                Title = "Signal Fire",
-                Album = "Test Album",
-                DownloadLink = "https://example.test/song"
-            )
-
-        let created =
-            songs.CreateAsync(song, CancellationToken.None).GetAwaiter().GetResult()
-
+        LegacySchema.create path
+        LegacySchema.seed path
         let before = DatabaseMigrations.inspect path
-        Assert.Matches("^[a-f0-9]{64}$", before.SchemaSha256)
+        Assert.Equal("91520ea3d23a8c812dea171d9bf5194e5f896069b3b540ffbab723e7b2ffa6a5", before.SchemaSha256)
         Assert.True(before.History.IsNone)
         let catalogue = ApplicationMigrations.catalogue ()
 
         let adopted =
-            DatabaseMigrations.run path (AdoptLegacy before.SchemaSha256) catalogue
+            DatabaseMigrations.run path (AdoptLegacy before.SchemaSha256) [ catalogue.Head ]
 
         Assert.Empty(adopted.Applied)
         Assert.Equal("0001_initial.sql", Assert.Single(adopted.History).Id)
         let after = DatabaseMigrations.inspect path
         Assert.Equal(before.SchemaSha256, after.SchemaSha256)
         Assert.Equal<MigrationEntry list>(adopted.History, after.History.Value)
+        DatabaseMigrations.run path UpgradeExisting catalogue |> ignore
+        use provider = createProvider path
+        use scope = provider.CreateScope()
+        let songs = scope.ServiceProvider.GetRequiredService<ISongRepository>()
 
         Assert.Equal(
-            created.Id,
+            1,
             Assert.Single(songs.FullTextSearchAsync("Signal", 10, CancellationToken.None).GetAwaiter().GetResult()).Id
         )
 
@@ -123,17 +119,16 @@ let ``explicit adoption validates the legacy schema and preserves repository dat
 [<InlineData("missing-fts-trigger")>]
 [<InlineData("extra-table")>]
 [<InlineData("pending-script")>]
+[<InlineData("changed-default")>]
 let ``legacy adoption refuses unreviewed schemas and cannot mark pending migrations as applied`` change =
     withDatabase (fun path ->
-        let services = ServiceCollection()
+        LegacySchema.create path
 
-        services.AddInfrastructure(ConfigurationBuilder().Build(), $"Data Source={path}", false)
-        |> ignore
-
-        use provider = services.BuildServiceProvider()
-        provider.InitializeDatabaseAsync().GetAwaiter().GetResult()
-
-        if change = "missing-fts-trigger" || change = "extra-table" then
+        if
+            change = "missing-fts-trigger"
+            || change = "extra-table"
+            || change = "changed-default"
+        then
             use connection = new SqliteConnection($"Data Source={path};Pooling=False")
             connection.Open()
             use command = connection.CreateCommand()
@@ -141,6 +136,8 @@ let ``legacy adoption refuses unreviewed schemas and cannot mark pending migrati
             command.CommandText <-
                 if change = "extra-table" then
                     "CREATE TABLE unknown (id INTEGER)"
+                elif change = "changed-default" then
+                    "ALTER TABLE songs DROP COLUMN official_dlc; ALTER TABLE songs ADD COLUMN official_dlc INTEGER NOT NULL DEFAULT 1"
                 else
                     "DROP TRIGGER songs_au"
 
@@ -154,7 +151,7 @@ let ``legacy adoption refuses unreviewed schemas and cannot mark pending migrati
             else
                 before.SchemaSha256
 
-        let catalogue = ApplicationMigrations.catalogue ()
+        let catalogue = [ (ApplicationMigrations.catalogue ()).Head ]
 
         let scripts =
             if change = "pending-script" then
@@ -452,72 +449,76 @@ let ``fresh and adopted databases preserve sessions snapshots and job records`` 
         let catalogue = ApplicationMigrations.catalogue ()
 
         if adopt then
-            let services = ServiceCollection()
+            LegacySchema.create path
+            LegacySchema.seed path
 
-            services.AddInfrastructure(ConfigurationBuilder().Build(), $"Data Source={path}", false)
+            DatabaseMigrations.run path (AdoptLegacy (DatabaseMigrations.inspect path).SchemaSha256) [ catalogue.Head ]
             |> ignore
 
-            use legacy = services.BuildServiceProvider()
-            legacy.InitializeDatabaseAsync().GetAwaiter().GetResult()
+            DatabaseMigrations.run path UpgradeExisting catalogue |> ignore
         else
             DatabaseMigrations.run path CreateNew catalogue |> ignore
 
         use provider = createProvider path
-        let sessionId = UserSessionId.create ()
+
+        let sessionId =
+            if adopt then
+                "session_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            else
+                UserSessionId.create ()
 
         let jobId =
-            use scope = provider.CreateScope()
-            let sessions = scope.ServiceProvider.GetRequiredService<IUserSessionRepository>()
+            if adopt then
+                1
+            else
+                use scope = provider.CreateScope()
+                let sessions = scope.ServiceProvider.GetRequiredService<IUserSessionRepository>()
 
-            let snapshots =
-                scope.ServiceProvider.GetRequiredService<IPlaylistSearchSnapshotRepository>()
+                let snapshots =
+                    scope.ServiceProvider.GetRequiredService<IPlaylistSearchSnapshotRepository>()
 
-            let jobs = scope.ServiceProvider.GetRequiredService<IScrapingJobRepository>()
+                let jobs = scope.ServiceProvider.GetRequiredService<IScrapingJobRepository>()
 
-            sessions
-                .CreateAsync(
-                    UserSession(
-                        Id = sessionId,
-                        SpotifyUserId = "fixture-user",
-                        SpotifyAccessToken = "fixture-access",
-                        SpotifyRefreshToken = "fixture-refresh"
-                    ),
-                    CancellationToken.None
-                )
-                .GetAwaiter()
-                .GetResult()
-            |> ignore
+                sessions
+                    .CreateAsync(
+                        UserSession(
+                            Id = sessionId,
+                            SpotifyUserId = "fixture-user",
+                            SpotifyAccessToken = "fixture-access",
+                            SpotifyRefreshToken = "fixture-refresh"
+                        ),
+                        CancellationToken.None
+                    )
+                    .GetAwaiter()
+                    .GetResult()
+                |> ignore
 
-            snapshots
-                .UpsertAsync(
-                    PlaylistSearchSnapshot(
-                        SpotifyUserId = "fixture-user",
-                        PlaylistId = "fixture-playlist",
-                        ResultsJson = "[]",
-                        TotalTracks = 12
-                    ),
-                    CancellationToken.None
-                )
-                .GetAwaiter()
-                .GetResult()
-            |> ignore
+                snapshots
+                    .UpsertAsync(
+                        PlaylistSearchSnapshot(
+                            SpotifyUserId = "fixture-user",
+                            PlaylistId = "fixture-playlist",
+                            ResultsJson = "[]",
+                            TotalTracks = 12
+                        ),
+                        CancellationToken.None
+                    )
+                    .GetAwaiter()
+                    .GetResult()
+                |> ignore
 
-            jobs
-                .CreateAsync(
-                    ScrapingJob(
-                        JobType = ScrapingJobType.CdlcIncremental,
-                        Status = ScrapingJobStatus.Completed,
-                        HangfireJobId = "fixture-job"
-                    ),
-                    CancellationToken.None
-                )
-                .GetAwaiter()
-                .GetResult()
-                .Id
-
-        if adopt then
-            DatabaseMigrations.run path (AdoptLegacy (DatabaseMigrations.inspect path).SchemaSha256) catalogue
-            |> ignore
+                jobs
+                    .CreateAsync(
+                        ScrapingJob(
+                            JobType = ScrapingJobType.CdlcIncremental,
+                            Status = ScrapingJobStatus.Completed,
+                            HangfireJobId = "fixture-job"
+                        ),
+                        CancellationToken.None
+                    )
+                    .GetAwaiter()
+                    .GetResult()
+                    .Id
 
         use readScope = provider.CreateScope()
 

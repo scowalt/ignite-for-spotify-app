@@ -18,6 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Fixtures/legacy-schema-v1.sql" LogicalName="Ignite.Tests.LegacySchema.sql" />
+    <EmbeddedResource Include="Fixtures/legacy-rows-v1.sql" LogicalName="Ignite.Tests.LegacyRows.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="LegacySchema.fs" />
     <Compile Include="DatabaseTests.fs" />
     <Compile Include="DatabaseMigrationTests.fs" />
     <Compile Include="UserSessionRepositoryTests.fs" />

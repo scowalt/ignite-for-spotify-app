@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@pi'
 created_date: '2026-11-03 15:51'
-updated_date: '2026-11-03 17:09'
+updated_date: '2026-11-03 21:57'
 labels:
   - backend
   - database
@@ -59,6 +59,9 @@ Foundation implemented and self-reviewed with 43 real SQLite migration cases; al
 Fantomas 7.0.6 checks pass; comment policy checked 307 files with zero violations; NuGet reports no vulnerable packages for the backend graph; mechanical notice collection covers 52 components with zero gaps. Production contract remains exactly 417fe8060e7156e73c308c2148e0d282f9cadbbaaf952e7b0097744a31666d5f. Startup/ORM/updater/workflow/production unchanged. Source-derived EF/FTS adoption is proven with synthetic data only; historical production schema may differ and remains uninspected/unapproved. Protected review/CI remains to be completed before marking the task Done.
 
 Draft PR #21 at exact code head 96c185237e2d2e6b54111800e18e3cc3668d368a passed hosted CI 41679797925 and comment-policy runs 41679797946/41679788805, including actual image/security/notice/backup/infrastructure gates and native fixtures. PR remains unmerged; no production release or state change occurred. The one timed-out adversarial-NUL test left only an owned empty synthetic database and rollback journal; those exact files were removed after confirming provenance, with no test processes or unrelated sessions touched.
+
+After the separately approved metadata-only inventory, the initial unmerged/unactivated draft was corrected to reproduce the observed legacy fingerprint 91520ea3d23a8c812dea171d9bf5194e5f896069b3b540ffbab723e7b2ffa6a5 exactly. Red/green regression first observed the prior source-derived mismatch. Changes preserve the known appended official_dlc DEFAULT 0, public legacy playlist DDL and FTS definition layout. The standalone index terminator reproduces stored whitespace without source trailing whitespace; matching was not normalized or weakened. No live/persistent deployed migration was edited or executed.
+Added a frozen test-only legacy DDL replay and synthetic old-schema row fixture, independent of future EF model generation. Adoption tests preserve that data through baseline adoption and subsequent catalogue upgrades; fresh creation reproduces the same exact fingerprint. Additional default-change refusal guards against broadening adoption. All 139 backend tests pass (45 migration cases), no skips, with formatting and diff checks clean. Raw inventory stays private; no unknown identifiers or non-public SQL literal values were used in source.
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
@@ -66,12 +69,12 @@ Draft PR #21 at exact code head 96c185237e2d2e6b54111800e18e3cc3668d368a passed 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
 Added an unwired DbUp-based SQLite migration foundation while preserving EF Core repositories and existing startup/delivery behavior.
 
-- Embedded immutable numbered SQL with stable resource IDs, strict UTF-8/LF/input bounds and SHA-256/UTC journal history. Changed/missing/reordered scripts and corrupt/empty history are rejected, including no-op starts.
-- One externally owned immediate SQLite transaction covers the complete batch and journal. Native authorization blocks transaction escape, attached databases, PRAGMAs and journal modification; diagnostics are fixed/redacted.
-- Explicit schema-only legacy adoption compares an independently reviewed fingerprint and a recreated baseline without rewriting data or claiming pending scripts ran. Only synthetic source-derived EF/FTS schemas have been proven; production remains uninspected.
-- Added read-only inspection and real process/concurrency/failure fixtures, including journal timestamp-source, script-event and commit failures.
+- Embedded immutable numbered SQL, stable resource IDs, strict encoding/input/history checks, and one externally owned SQLite transaction for each pending batch and journal.
+- Native authorization blocks transaction escape, attached databases, PRAGMAs and journal modification; diagnostic failures are fixed/redacted.
+- Explicit schema-only legacy adoption now targets the exact metadata-reviewed production shape. The initial draft was corrected before any live adoption; no deployed migration or Git history was rewritten.
+- Frozen legacy DDL and synthetic row fixtures do not depend on future EF models. Real concurrency/process-kill, journal/event/commit failure and repository/FTS preservation tests remain.
 
-Verification: all 137 backend tests pass (43 migration cases), no skips; Fantomas clean; 307-file zero-violation comment scan; secret scan clean; NuGet reports no vulnerable backend packages; 52-component notice inventory has zero gaps. Exact code head 96c1852 passed hosted CI 41679797925 and comment-policy CI. Runtime fingerprint remains unchanged.
+Verification: all 139 backend tests pass, including 45 migration cases; no skips. Prior exact foundation heads passed hosted image/security/notice/native gates; current baseline revision requires refreshed exact-head CI before merge. Runtime compatibility fingerprint remains unchanged.
 
-The runner is not wired into production, the PR is unmerged, and this is not activation of database CD. Signed-release/updater integration and a separately approved exact production procedure remain required.
+The runner remains unwired and the PR unmerged. Metadata-only inspection was separately approved and performed without user rows, credentials or database/service changes. Actual adoption/operator activation remains unapproved.
 <!-- SECTION:FINAL_SUMMARY:END -->
