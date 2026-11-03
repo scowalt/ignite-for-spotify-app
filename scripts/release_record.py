@@ -32,6 +32,7 @@ MIGRATION_CONTRACT_PATHS = (
     'backend/src/Ignite.Infrastructure/Data/MigrationCatalogue.fs',
     'backend/src/Ignite.Infrastructure/Data/DatabaseMigrations.fs',
     'backend/src/Ignite.Infrastructure/Data/ApplicationMigrations.fs',
+    'backend/src/Ignite.Infrastructure/Data/DatabaseStartup.fs',
     'backend/src/Ignite.Migrations/Program.fs',
 )
 

@@ -133,21 +133,6 @@ module private Wire =
         { SchemaSha256 = schemaHash
           History = entries }
 
-    let manifest plan path =
-        let info = FileInfo(path)
-
-        if not (isNull info.LinkTarget) then
-            reject ()
-
-        use input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read)
-
-        if input.Length > 1024L * 1024L then
-            reject ()
-
-        use content = new MemoryStream()
-        input.CopyTo(content)
-        MigrationCatalogue.decode plan (content.ToArray())
-
     let result (outcome: string) inspection =
         json (fun writer ->
             writer.WriteStartObject()
@@ -179,7 +164,7 @@ module Program =
                 match arguments with
                 | [| "build-manifest" |] -> plan |> MigrationCatalogue.build |> MigrationCatalogue.encode
                 | [| "describe"; manifest |] ->
-                    let descriptor = Wire.manifest plan manifest
+                    let descriptor = MigrationCatalogue.readFile plan manifest
                     MigrationCatalogue.encode descriptor
                 | [| "inspect" |] ->
                     use request = Wire.input [ "database_path" ]
@@ -191,7 +176,7 @@ module Program =
                     let path = request.RootElement.GetProperty("database_path").GetString() |> nonNull
                     Wire.result "settled" (DatabaseMigrations.settleAndInspect path)
                 | [| "adopt"; manifest |] ->
-                    let descriptor = Wire.manifest plan manifest
+                    let descriptor = MigrationCatalogue.readFile plan manifest
 
                     use request =
                         Wire.input [ "database_path"; "catalogue_sha256"; "schema_sha256"; "before" ]
@@ -226,7 +211,7 @@ module Program =
 
                     Wire.result "adopted" (DatabaseMigrations.inspect path)
                 | [| "apply"; manifest |] ->
-                    let descriptor = Wire.manifest plan manifest
+                    let descriptor = MigrationCatalogue.readFile plan manifest
 
                     use request =
                         Wire.input

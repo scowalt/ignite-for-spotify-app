@@ -2,7 +2,7 @@
 
 Approved development scope: TASK-42 then TASK-43, followed by a separately approved exact production procedure in TASK-44. No live database inspection/adoption, operator upgrade or deployment-contract activation is authorized by the development approval.
 
-## Current behavior
+## Deployed behavior before activation
 
 EF Core owns application data access. Startup currently uses `EnsureCreated` outside production, checks a few required objects in production, and executes ad hoc DDL for official DLC and saved playlist results. There is no migration journal. `ignite.db` is application-owned; `hangfire.db` has a separate provider-owned schema.
 
@@ -18,7 +18,7 @@ The updater currently takes an online verified snapshot and attempts one image-o
 
 The approved seams are the migration initialization/inspection interface over real SQLite files, and existing repositories/FTS behavior against the resulting schema. No tests mock migration internals or SQLite transactions. Process fixtures exercise that same interface to prove interruption handling.
 
-The module owns path validation, exclusive migration execution, catalogue validation, history validation, one pending-batch transaction and fixed redacted errors. Callers explicitly select new-file initialization, existing-history upgrade or reviewed legacy adoption. Normal production startup must select existing-history upgrade; an absent file never authorizes creation. SQL and history remain Infrastructure concerns, not Domain dependencies.
+The module owns path validation, exclusive migration execution, catalogue validation, history validation, one pending-batch transaction and fixed redacted errors. Callers explicitly select new-file initialization, existing-history upgrade or reviewed legacy adoption. Only the deployment controller selects a production upgrade after verified recovery preparation. Production application startup validates complete history/schema read-only and never executes pending SQL; an absent file never authorizes creation. SQL and history remain Infrastructure concerns, not Domain dependencies.
 
 Scripts use stable numbered logical identifiers independent of assembly names. SQL is strict UTF-8 without a BOM, uses LF line endings, and is hashed without substitution. Applied identifiers/checksums/timestamps are validated even when nothing is pending. Applied history must be an ordered prefix of the supplied catalogue. Modified, missing, reordered or duplicate migrations are errors.
 
@@ -37,6 +37,6 @@ The first automatic policy targets reviewed, bounded, backward-compatible migrat
 
 ## Verification and preservation
 
-Real SQLite tests cover fresh initialization, known-legacy adoption, unknown-schema refusal, repeat startup, upgrades, changed/missing/duplicate/order history, concurrent migration attempts, SQL/journal/event failures and process interruption. Existing repository and FTS tests exercise business-data access. Later container fixtures prove no requests or jobs start before migration success, committed-schema failure cannot launch an incompatible prior image, and all durable recovery/cleanup paths are bounded.
+Real SQLite tests cover fresh initialization, known-legacy adoption, unknown-schema refusal, repeat startup, upgrades, changed/missing/duplicate/order history, concurrent migration attempts, SQL/journal/event failures and process interruption. Existing repository and FTS tests exercise business-data access. Real container fixtures now cover startup refusal before Hangfire initialization and healthy startup after explicit synthetic adoption. Interrupted writer/transaction recovery, commit-before-health failure and bounded durable cleanup still require the remaining updater integration.
 
 Preserve current CI/image/signature/source-map gates, secret boundaries, sole updater, replay/failed-release fences, database paths/volumes/UIDs, backup repository/password/retention/budgets, auxiliary services and private history. Do not broaden the project into a database/ORM/framework rewrite. No live automatic migration capability is claimed until the approved activation is independently verified.

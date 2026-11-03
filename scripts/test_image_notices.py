@@ -76,6 +76,23 @@ class ImageNoticeTests(unittest.TestCase):
         ):
             self.assertIsNone(MODULE.safe_github_source(bad))
 
+    def test_dotnet_inventory_unions_independent_publish_graphs_without_losing_versions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            graphs = []
+            for version in ['1.0.0', '2.0.0']:
+                package = root / 'packages/sample' / version
+                package.mkdir(parents=True)
+                (package / 'sample.nuspec').write_text('<package><metadata><license type="expression">MIT</license></metadata></package>')
+                with zipfile.ZipFile(package / 'sample.nupkg', 'w') as archive:
+                    archive.writestr('LICENSE', 'upstream permission')
+                graph = root / (version + '.deps.json')
+                graph.write_text(json.dumps({'libraries': {'Sample/' + version: {'type': 'package'}, 'Sample/1.0.0': {'type': 'package'}}}))
+                graphs.append(str(graph))
+            result = MODULE.collect_dotnet(SimpleNamespace(deps=graphs, packages=str(root / 'packages'), output=str(root / 'output')))
+            self.assertEqual([(item['name'], item['version']) for item in result['components']], [('Sample', '1.0.0'), ('Sample', '2.0.0')])
+            self.assertEqual(result['review_required'], [])
+
     def test_dotnet_inventory_covers_published_packages_and_records_gaps(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -50,8 +50,9 @@ All app images carry the original-code license and this document under
 Go/.NET component manifests, copied package/upstream license texts, and source
 references. Go manifests are derived from the compiled binary, not every downloaded
 build dependency; the effective module files and Go toolchain license are retained.
-.NET manifests follow the published `deps.json` and supplement missing package
-texts from pinned upstream source commits. SQLitePCLRaw 2.1.12 uses its verified
+.NET manifests cover the independently published API and migration-CLI `deps.json`
+graphs, retaining distinct shipped versions, and supplement missing package texts
+from pinned upstream source commits. SQLitePCLRaw 2.1.12 uses its verified
 upstream v2.1.12 commit, including its Apache/SQLite notices.
 
 The frontend also serves `third-party-licenses/manifest.json` and its notice files,

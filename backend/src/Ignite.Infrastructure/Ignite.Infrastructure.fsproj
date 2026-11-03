@@ -39,6 +39,7 @@
     <Compile Include="Data/DatabaseMigrations.fs" />
     <Compile Include="Data/MigrationCatalogue.fs" />
     <Compile Include="Data/ApplicationMigrations.fs" />
+    <Compile Include="Data/DatabaseStartup.fs" />
     <Compile Include="Data/IgniteDbContext.fs" />
     <Compile Include="Data/SongRepository.fs" />
     <Compile Include="Data/UserSessionRepository.fs" />

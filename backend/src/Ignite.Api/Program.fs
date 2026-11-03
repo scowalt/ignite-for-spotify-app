@@ -229,6 +229,24 @@ module Program =
                             "Database:RequireExisting"
                             "Database:RequireExisting must be true or false."
 
+            if builder.Environment.IsProduction() && not requireExistingDatabase then
+                invalidArg "Database:RequireExisting" "Production cannot initialize a missing database."
+
+            let migrationPlan = ApplicationMigrations.deliveryPlan ()
+
+            let migrationDescriptor =
+                if requireExistingDatabase then
+                    Some(
+                        MigrationCatalogue.readFile
+                            migrationPlan
+                            (IO.Path.Combine(AppContext.BaseDirectory, "migration-catalogue.json"))
+                    )
+                else
+                    None
+
+            connectionString <-
+                DatabaseStartup.initialize connectionString requireExistingDatabase migrationPlan migrationDescriptor
+
             builder.Services.AddInfrastructure(
                 builder.Configuration,
                 connectionString,
@@ -274,8 +292,6 @@ module Program =
             |> ignore
 
             let app = builder.Build()
-
-            app.Services.InitializeDatabaseAsync().GetAwaiter().GetResult()
 
             app.UseSerilogRequestLogging() |> ignore
             app.Use(RequestCancellationMiddleware.invoke) |> ignore

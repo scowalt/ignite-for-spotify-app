@@ -55,6 +55,10 @@ jobs:
           COMPONENT: ${{ matrix.component }}
         run: docker build --pull -f "docker/Dockerfile.$COMPONENT" -t "$IMAGE_REF" .
 
+      - name: Exercise real migration and startup fixtures
+        if: matrix.component == 'backend'
+        run: IGNITE_MIGRATION_FIXTURE_IMAGE="$IMAGE_REF" python3 -m unittest discover -s scripts -p test_migration_startup.py -v
+
       - name: Verify security and notice coverage
         env:
           COMPONENT: ${{ matrix.component }}

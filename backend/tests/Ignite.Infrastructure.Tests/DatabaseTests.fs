@@ -17,7 +17,9 @@ open Microsoft.Extensions.DependencyInjection
 open Xunit
 
 let private createTempDirectory () =
-    let path = Path.Combine(Path.GetTempPath(), $"ignite-database-tests-{Guid.NewGuid():N}")
+    let path =
+        Path.Combine(Path.GetTempPath(), $"ignite-database-tests-{Guid.NewGuid():N}")
+
     Directory.CreateDirectory(path) |> ignore
     path
 
@@ -29,14 +31,22 @@ let private createProvider databasePath requireExisting =
     let configuration = ConfigurationBuilder().Build()
     let services = ServiceCollection()
 
-    services.AddInfrastructure(
-        configuration,
-        $"Data Source={databasePath};Default Timeout=60",
-        requireExisting
-    )
+    services.AddInfrastructure(configuration, $"Data Source={databasePath};Default Timeout=60", requireExisting)
     |> ignore
 
     services.BuildServiceProvider()
+
+let private initialize databasePath requireExisting =
+    let plan = ApplicationMigrations.deliveryPlan ()
+
+    let descriptor =
+        if requireExisting then
+            Some(MigrationCatalogue.build plan)
+        else
+            None
+
+    DatabaseStartup.initialize $"Data Source={databasePath};Pooling=False" requireExisting plan descriptor
+    |> ignore
 
 type FailOnceConnectionInterceptor() =
     inherit DbConnectionInterceptor()
@@ -50,18 +60,6 @@ type FailOnceConnectionInterceptor() =
 
         ValueTask<InterceptionResult>(result)
 
-let private createBareSchemaAsync databasePath =
-    task {
-        let options =
-            DbContextOptionsBuilder<IgniteDbContext>()
-                .UseSqlite($"Data Source={databasePath}")
-                .Options
-
-        use context = new IgniteDbContext(options)
-        let! _ = context.Database.EnsureCreatedAsync()
-        return ()
-    }
-
 [<Fact>]
 let ``file database initializes WAL CRUD FTS and concurrent contexts`` () =
     task {
@@ -70,7 +68,7 @@ let ``file database initializes WAL CRUD FTS and concurrent contexts`` () =
         try
             let databasePath = Path.Combine(directory, "ignite.db")
             use provider = createProvider databasePath false
-            do! provider.InitializeDatabaseAsync()
+            initialize databasePath false
 
             use connection = new SqliteConnection($"Data Source={databasePath}")
             do! connection.OpenAsync()
@@ -83,6 +81,7 @@ let ``file database initializes WAL CRUD FTS and concurrent contexts`` () =
             use readScope = provider.CreateScope()
             let writer = writeScope.ServiceProvider.GetRequiredService<ISongRepository>()
             let reader = readScope.ServiceProvider.GetRequiredService<ISongRepository>()
+
             let song =
                 Song(
                     Artist = "Test Artist",
@@ -114,8 +113,7 @@ let ``file database initializes WAL CRUD FTS and concurrent contexts`` () =
 
             do! Task.WhenAll([| updateTask :> Task; readTask :> Task |])
 
-            use requiredProvider = createProvider databasePath true
-            do! requiredProvider.InitializeDatabaseAsync()
+            initialize databasePath true
         finally
             deleteTempDirectory directory
     }
@@ -128,7 +126,7 @@ let ``search retries a transient SQLite connection failure`` () =
         try
             let databasePath = Path.Combine(directory, "ignite.db")
             use provider = createProvider databasePath false
-            do! provider.InitializeDatabaseAsync()
+            initialize databasePath false
 
             let options =
                 DbContextOptionsBuilder<IgniteDbContext>()
@@ -146,15 +144,14 @@ let ``search retries a transient SQLite connection failure`` () =
     }
 
 [<Fact>]
-let ``production startup adds the saved playlist snapshot table to an existing database`` () =
+let ``production startup refuses missing schema instead of silently repairing it`` () =
     task {
         let directory = createTempDirectory ()
 
         try
             let databasePath = Path.Combine(directory, "ignite.db")
 
-            use initialProvider = createProvider databasePath false
-            do! initialProvider.InitializeDatabaseAsync()
+            initialize databasePath false
 
             use connection = new SqliteConnection($"Data Source={databasePath}")
             do! connection.OpenAsync()
@@ -163,8 +160,8 @@ let ``production startup adds the saved playlist snapshot table to an existing d
             do! dropCommand.ExecuteNonQueryAsync() :> Task
             do! connection.CloseAsync()
 
-            use requiredProvider = createProvider databasePath true
-            do! requiredProvider.InitializeDatabaseAsync()
+            Assert.Throws<MigrationRejected>(fun () -> initialize databasePath true)
+            |> ignore
 
             use verificationConnection = new SqliteConnection($"Data Source={databasePath}")
             do! verificationConnection.OpenAsync()
@@ -174,7 +171,7 @@ let ``production startup adds the saved playlist snapshot table to an existing d
                 "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='playlist_search_snapshots'"
 
             let! tableCount = verificationCommand.ExecuteScalarAsync()
-            Assert.Equal(1L, Convert.ToInt64(tableCount))
+            Assert.Equal(0L, Convert.ToInt64(tableCount))
         finally
             deleteTempDirectory directory
     }
@@ -182,17 +179,21 @@ let ``production startup adds the saved playlist snapshot table to an existing d
 [<Fact>]
 let ``production rejects remote missing and relative databases`` () =
     Assert.Throws<ArgumentException>(fun () ->
-        DatabaseConfiguration.validateConnectionString true "libsql://example.turso.io" |> ignore)
+        DatabaseConfiguration.validateConnectionString true "libsql://example.turso.io"
+        |> ignore)
     |> ignore
 
     Assert.Throws<ArgumentException>(fun () ->
-        DatabaseConfiguration.validateConnectionString true "Data Source=ignite.db" |> ignore)
+        DatabaseConfiguration.validateConnectionString true "Data Source=ignite.db"
+        |> ignore)
     |> ignore
 
-    let missingPath = Path.Combine(Path.GetTempPath(), $"missing-ignite-{Guid.NewGuid():N}.db")
+    let missingPath =
+        Path.Combine(Path.GetTempPath(), $"missing-ignite-{Guid.NewGuid():N}.db")
 
     Assert.Throws<FileNotFoundException>(fun () ->
-        DatabaseConfiguration.validateConnectionString true $"Data Source={missingPath}" |> ignore)
+        DatabaseConfiguration.validateConnectionString true $"Data Source={missingPath}"
+        |> ignore)
     |> ignore
 
 [<Fact>]
@@ -203,12 +204,9 @@ let ``production rejects corrupt database`` () =
         try
             let databasePath = Path.Combine(directory, "ignite.db")
             File.WriteAllText(databasePath, "not a sqlite database")
-            use provider = createProvider databasePath true
 
-            let! _ =
-                Assert.ThrowsAsync<AggregateException>(fun () -> provider.InitializeDatabaseAsync())
-
-            return ()
+            Assert.Throws<MigrationRejected>(fun () -> initialize databasePath true)
+            |> ignore
         finally
             deleteTempDirectory directory
     }
@@ -220,13 +218,16 @@ let ``production rejects database missing FTS objects`` () =
 
         try
             let databasePath = Path.Combine(directory, "ignite.db")
-            do! createBareSchemaAsync databasePath
-            use provider = createProvider databasePath true
+            initialize databasePath false
+            use connection = new SqliteConnection($"Data Source={databasePath};Pooling=False")
+            connection.Open()
+            use command = connection.CreateCommand()
+            command.CommandText <- "DROP TRIGGER songs_au"
+            command.ExecuteNonQuery() |> ignore
+            connection.Close()
 
-            let! error =
-                Assert.ThrowsAsync<AggregateException>(fun () -> provider.InitializeDatabaseAsync())
-
-            Assert.Contains("songs_fts", error.InnerException.Message)
+            Assert.Throws<MigrationRejected>(fun () -> initialize databasePath true)
+            |> ignore
         finally
             deleteTempDirectory directory
     }

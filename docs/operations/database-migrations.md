@@ -1,9 +1,9 @@
 # SQLite migration foundation
 
-This module is implemented for offline preparation, not enabled in production startup.
-The current `InitializeDatabaseAsync` path and image-only updater remain unchanged.
-See [the approved staged plan](../plans/database-migration-delivery.md) for the remaining
-signed-release/updater integration and separately approved production adoption.
+The unmerged integration branch prepares journaled startup, a packaged migration CLI and
+container execution; none is activated in production. Deployed main still uses the reviewed
+image-only updater. See [the approved staged plan](../plans/database-migration-delivery.md)
+for the remaining signed-release/updater integration and separately approved adoption.
 
 ## Ownership and interface
 
@@ -140,9 +140,45 @@ process-kill fixture forces a hot rollback journal: `inspect` refuses it, and on
 `settle` restores readable committed state. The controller must never hide this operation
 inside a read-only check or race it against an orphaned writer.
 
-These prepared interfaces are not an authorization to run against production. Docker
-packaging/startup gating, signed-release integration, durable updater decisions and the
-approved operator/database transition must be completed and verified before activation.
+These prepared interfaces are not an authorization to run against production. Signed-release
+activation, durable updater decisions and the approved operator/database transition must
+still be completed and verified.
+
+## Packaged startup and contained execution
+
+The image contains `/app/migration-catalogue.json` and the CLI at
+`/app/migrations/Ignite.Migrations.dll`. API and CLI publish into separate directories:
+sharing one output directory can overwrite different resolved dependency versions and break
+the application. The notice inventory covers both published dependency graphs, preserving
+distinct versions and rejecting conflicting identities for the same package/version.
+
+`DatabaseStartup.initialize` replaces ad hoc `EnsureCreated`/startup DDL. Development can
+create a new journaled file or upgrade valid existing history; it cannot silently adopt an
+old unjournaled database. In production, `Database:RequireExisting` cannot be disabled.
+The packaged descriptor must match the embedded source plan, and read-only readiness must
+verify complete history and the exact target before infrastructure registration, Hangfire
+storage initialization or HTTP startup. Startup does not apply pending SQL, reconstruct the
+schema by replaying history, repair drift, adopt a legacy database or implicitly settle a
+hot rollback journal. Explicit settlement remains a controller recovery operation after
+writer shutdown. Once readiness succeeds, startup maintains WAL and enables foreign keys
+on application connections. Relative development file paths are normalized; memory/URI
+startup databases are not supported.
+
+`MigrationTool` is a container adapter, not release authorization. Its caller must first
+verify the signed release, immutable backend identity, source metadata, approved physical
+volume and durable deployment intent. It accepts only an immutable local image ID and
+fixed `inspect`, `apply`, `adopt` or `settle` commands against `/data/ignite.db`. It passes no
+runtime service credentials, uses no network, runs as UID/GID 999, and confines writes to
+the existing data mount and bounded temporary storage. Inspection mounts data read-only.
+
+The adapter bounds stdin/output and execution time, CPU, memory, process count, temporary
+storage and individual file size. These are not an aggregate filesystem quota or a waiver
+of backup budgets/freshness. Ownership labels, exact image/command/user/mount identity and
+stopped-state checks govern cleanup. A client timeout explicitly stops the owned container
+before removing it; a new controller instance can perform the same cleanup after a crash.
+Unknown ownership or extra mounts stop cleanup rather than touching another container.
+Neither a clean process exit nor a successful cleanup is proof of migration outcome: the
+controller must still inspect durable history before admitting images.
 
 ## Verification
 
@@ -161,7 +197,13 @@ dotnet test backend/tests/Ignite.Infrastructure.Tests --filter FullyQualifiedNam
 dotnet test backend/Ignite.slnx
 ```
 
-These tests establish the migration module, not live R2 recovery, readiness gating,
-image rollback compatibility or activation. Those require the remaining migration-aware
-release/controller work and an approved production procedure. Keep existing signing,
+The image-verification workflow also runs real, network-isolated container fixtures:
+an unadopted synthetic database must refuse startup without creating Hangfire storage;
+explicit adoption must let the actual packaged API become healthy. Run them locally with
+`IGNITE_MIGRATION_FIXTURE_IMAGE=<fresh-backend-image> python3 -m unittest discover -s scripts -p test_migration_startup.py -v`.
+They create and remove only uniquely labelled synthetic fixtures, exposing no host port.
+
+These tests do not establish live R2 recovery, complete interrupted-container transaction
+recovery, image rollback compatibility or activation. Those require the remaining
+migration-aware release/controller work and an approved production procedure. Keep existing signing,
 image/security/notice gates, backup credentials/retention/budgets and deployment fences.

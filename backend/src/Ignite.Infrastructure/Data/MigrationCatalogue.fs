@@ -214,6 +214,32 @@ module MigrationCatalogue =
         | :? MigrationRejected -> reraise ()
         | _ -> reject ()
 
+    let readFile steps (path: string) =
+        try
+            if not (isNull (FileInfo(path).LinkTarget)) then
+                reject ()
+
+            use input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read)
+
+            if input.Length > 1024L * 1024L then
+                reject ()
+
+            use content = new MemoryStream()
+            let buffer = Array.zeroCreate<byte> 8192
+            let mutable count = input.Read(buffer, 0, buffer.Length)
+
+            while count > 0 do
+                if content.Length + int64 count > 1024L * 1024L then
+                    reject ()
+
+                content.Write(buffer, 0, count)
+                count <- input.Read(buffer, 0, buffer.Length)
+
+            decode steps (content.ToArray())
+        with
+        | :? MigrationRejected -> reraise ()
+        | _ -> reject ()
+
     let build (steps: Step list) : Descriptor =
         try
             validatePlan steps
