@@ -265,6 +265,8 @@ class Deployment:
             release = None
         if release is not None and (not isinstance(release, ReleaseRecord) or release.contract_sha256 != state['contract_sha256']):
             raise StateRejected('Unreviewed deployment contract.')
+        if release is not None and release.migrations is not None:
+            raise StateRejected('Migration-aware transaction policy is not active.')
         target = None if release is None else {'source_sha': release.source_sha, 'images': dict(release.images),
                                                'order': list(release.order), 'artifact_digest': release.artifact_digest}
         if target is not None and (not _release_set(target) or not _hex(target['artifact_digest'], 64, 'sha256:')):

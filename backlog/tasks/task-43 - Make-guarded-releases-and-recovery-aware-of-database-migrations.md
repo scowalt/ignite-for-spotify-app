@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-03 15:51'
-updated_date: '2026-11-03 19:35'
+updated_date: '2026-11-03 20:23'
 labels:
   - deployment
   - database
@@ -61,4 +61,9 @@ Current Infrastructure suite: 83 passed, including 21 new delivery-policy cases 
 Added strict delivery metadata and deterministic source/schema descriptors, with independent canonical-hash fixture and malformed/tampered-input tests. Source manifest distinguishes baseline, automatic-schema and manual entries; declaration alone cannot bypass native expansion enforcement. Runtime metadata contains no SQL or row values. Added 16 MiB total catalogue bound in addition to per-script/count caps.
 Added a separate credential-free migration executable and real process tests for build/describe/inspect, verified apply with target checked before commit, stale retry refusal, pending-manual refusal, baseline-only adoption and explicit native SQLite settlement. A 6 MB spill/kill fixture leaves a hot rollback journal: read-only inspection refuses it; only the named settle operation recovers readable prior history without executing pending SQL. No production startup, Docker packaging, publisher or Python updater wiring yet.
 All 181 backend tests pass with zero skips (Infrastructure 106); new code adds no compiler warnings. Fantomas passes and full comment policy checks 316 files with zero violations. The current backup helper was confirmed to back up only ignite.db, not Hangfire; keep that scope explicit. Remaining work is packaging/startup, signed-record/controller integration, real container/recovery fixtures and a separately approved activation transition.
+
+Prepared-command commit 4ffce8768d197e6fac965d776b2f9aa199aaace6 is published in draft PR #22, unmerged. Its initial foundation-branch base only triggered comment checks because CI filters PR bases to main. Retargeted this owned draft to main (still includes foundation #21) so the next source push gets the real CI gates; no workflow/protection/publishing policy was changed.
+Python protocol work now has observed red/green tests for bounded nonblocking stdin, strict descriptor/history/source binding, resolved Hangfire package-content identity, v2 signed-record validation/creation, split host-configuration versus application-protocol fingerprints, and unstarted immutable-image metadata extraction. V2 validation requires explicit policy opt-in, and the legacy transaction driver explicitly rejects migration-bearing releases rather than silently using image-only rollback. Publisher CLI supports an explicit migration flag, not yet wired into the workflow. All 116 script tests pass (seven existing native-fixture skips locally). Container writer lifecycle and migration-aware durable state are still unfinished; no activation or production access.
+
+Current Python protocol/plumbing verification: 116 tests run, OK, with seven existing native fixtures skipped locally (109 executed successfully); 321 files pass comment policy. Native .NET migration commands and policy suite remain at 181 passing backend tests. The protocol can now create/validate source-bound v2 records and copy image metadata without starting containers, but the workflow/default transport and transaction driver do not activate migrations. Exact production legacy schema is still unknown; source-derived EF schema is not a substitute for an approved metadata-only inventory.
 <!-- SECTION:NOTES:END -->

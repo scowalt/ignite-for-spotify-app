@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import replace
 from datetime import datetime, timezone
 import json
 import multiprocessing
@@ -11,6 +12,7 @@ from unittest.mock import patch
 
 from deployment_transaction import Deployment, StateRejected
 from release_record import ReleaseRecord
+from migration_record import MigrationSummary
 
 
 def image_set(character):
@@ -113,6 +115,15 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.deployment = Deployment(self.root)
         self.active = {'source_sha': 'a' * 40, 'images': image_set('a'), 'order': [42, 1], 'artifact_digest': None}
         self.deployment.bootstrap(self.active, 'b' * 64)
+
+    def test_legacy_transactions_cannot_ignore_migration_metadata(self):
+        before = self.deployment.status()
+        release = replace(candidate(), migrations=MigrationSummary(1, '1' * 64, '2' * 64, '3' * 64, 2), hangfire_sha256='4' * 64)
+        with self.assertRaises(StateRejected):
+            self.deployment.run(release, self.runtime)
+        self.assertEqual(self.deployment.status(), before)
+        self.assertEqual(self.runtime.images, image_set('a'))
+        self.assertTrue(self.runtime.backup_running)
 
     def test_success_is_durable_and_polling_does_not_repeat_the_deployment(self):
         release = candidate()

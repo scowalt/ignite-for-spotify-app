@@ -1,8 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import hashlib
 import json
 from pathlib import Path
 import re
+
+from migration_record import MigrationMetadataRejected, MigrationSummary, descriptor_summary, hangfire_identity, parse_summary, verify_source_descriptor
 
 REPOSITORY = 'scowalt/ignite-for-spotify-app'
 REPOSITORY_ID = 1441388195
@@ -21,6 +23,16 @@ CONTRACT_PATHS = (
     'backend/src/Ignite.Infrastructure/DependencyInjection.fs',
     'backend/src/Ignite.Infrastructure/Data/DatabaseConfiguration.fs',
     'scripts/verify-production-config.py',
+)
+
+
+MIGRATION_CONTRACT_PATHS = (
+    'backend/src/Ignite.Infrastructure/Data/MigrationContracts.fs',
+    'backend/src/Ignite.Infrastructure/Data/MigrationExpansion.fs',
+    'backend/src/Ignite.Infrastructure/Data/MigrationCatalogue.fs',
+    'backend/src/Ignite.Infrastructure/Data/DatabaseMigrations.fs',
+    'backend/src/Ignite.Infrastructure/Data/ApplicationMigrations.fs',
+    'backend/src/Ignite.Migrations/Program.fs',
 )
 
 
@@ -49,16 +61,26 @@ class ReleaseRecord:
     contract_sha256: str
     images: tuple[tuple[str, str], ...]
     artifact_digest: str
+    migrations: MigrationSummary | None = None
+    hangfire_sha256: str | None = None
 
     @property
     def order(self) -> tuple[int, int]:
         return self.run_number, self.run_attempt
 
 
-def deployment_contract(root: Path) -> str:
+def runtime_contract(root: Path) -> str:
+    return _contract(root, tuple(path for path in CONTRACT_PATHS if not path.startswith('backend/')))
+
+
+def deployment_contract(root: Path, *, migration_protocol=False) -> str:
+    return _contract(root, CONTRACT_PATHS + (MIGRATION_CONTRACT_PATHS if migration_protocol else ()))
+
+
+def _contract(root: Path, paths) -> str:
     root = root.resolve()
     rows = []
-    for name in CONTRACT_PATHS:
+    for name in paths:
         path = root / name
         if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(root):
             raise ReleaseRejected('Reviewed runtime contract input is unavailable.')
@@ -87,9 +109,11 @@ def _decode_record(payload: bytes, expected_contract: str) -> dict:
     except (ValueError, UnicodeError, RecursionError):
         raise ReleaseRejected('Malformed release record.') from None
     fields = {'schema', 'repository', 'source_sha', 'run_id', 'run_attempt', 'run_number', 'contract_sha256', 'images'}
+    if isinstance(record, dict) and type(record.get('schema')) is int and record['schema'] == 2:
+        fields |= {'migrations', 'hangfire_sha256'}
     if not isinstance(record, dict) or set(record) != fields:
         raise ReleaseRejected('Unexpected release schema.')
-    if type(record['schema']) is not int or record['schema'] != 1 or record['repository'] != REPOSITORY:
+    if type(record['schema']) is not int or record['schema'] not in [1, 2] or record['repository'] != REPOSITORY:
         raise ReleaseRejected('Unsupported release identity or schema.')
     if not isinstance(record['source_sha'], str) or not re.fullmatch(r'[a-f0-9]{40}', record['source_sha']):
         raise ReleaseRejected('Invalid source revision.')
@@ -98,6 +122,13 @@ def _decode_record(payload: bytes, expected_contract: str) -> dict:
     if (not isinstance(expected_contract, str) or not re.fullmatch(r'[a-f0-9]{64}', expected_contract) or
             record['contract_sha256'] != expected_contract):
         raise ReleaseRejected('Deployment or schema contract requires manual review.')
+    if record['schema'] == 2:
+        try:
+            parse_summary(record['migrations'])
+        except MigrationMetadataRejected:
+            raise ReleaseRejected('Migration release metadata is invalid.') from None
+        if not isinstance(record['hangfire_sha256'], str) or not re.fullmatch(r'[a-f0-9]{64}', record['hangfire_sha256']):
+            raise ReleaseRejected('Job storage identity is invalid.')
     images = record.get('images')
     if not isinstance(images, dict) or set(images) != {'backend', 'backup', 'frontend'}:
         raise ReleaseRejected('A complete three-image release is required.')
@@ -108,18 +139,28 @@ def _decode_record(payload: bytes, expected_contract: str) -> dict:
     return record
 
 
-def create_release_record(root: Path, environment: dict[str, str], images: dict[str, str]) -> bytes:
+def create_release_record(root: Path, environment: dict[str, str], images: dict[str, str], *, migration_descriptor=None, backend_deps=None) -> bytes:
     if (environment.get('GITHUB_REPOSITORY') != REPOSITORY or
             environment.get('GITHUB_REF') != 'refs/heads/main' or
             environment.get('GITHUB_EVENT_NAME') not in ['push', 'workflow_dispatch']):
         raise ReleaseRejected('Only the trusted main publisher can create a release record.')
-    contract = deployment_contract(root)
+    migration_protocol = migration_descriptor is not None or backend_deps is not None
+    if migration_protocol and (migration_descriptor is None or backend_deps is None):
+        raise ReleaseRejected('Complete migration image metadata is required.')
+    contract = deployment_contract(root, migration_protocol=migration_protocol)
     try:
         record = {'schema': 1, 'repository': REPOSITORY, 'source_sha': environment['GITHUB_SHA'],
                   'run_id': int(environment['GITHUB_RUN_ID']), 'run_attempt': int(environment['GITHUB_RUN_ATTEMPT']),
                   'run_number': int(environment['GITHUB_RUN_NUMBER']), 'contract_sha256': contract, 'images': images}
     except (KeyError, ValueError, TypeError):
         raise ReleaseRejected('Required publisher identity is unavailable.') from None
+    if migration_protocol:
+        try:
+            descriptor = verify_source_descriptor(migration_descriptor, root)
+            record.update({'schema': 2, 'migrations': asdict(descriptor_summary(descriptor)),
+                           'hangfire_sha256': hangfire_identity(backend_deps)})
+        except MigrationMetadataRejected:
+            raise ReleaseRejected('Migration image metadata does not match reviewed source.') from None
     encoded = json.dumps(record, sort_keys=True, separators=(',', ':')).encode()
     _decode_record(encoded, contract)
     return encoded
@@ -130,10 +171,14 @@ def validate_release(
     proof: SignatureProof | None,
     run: object,
     expected_contract: str,
+    *,
+    allow_migrations: bool = False,
 ) -> ReleaseRecord:
     if proof is None:
         raise ReleaseRejected('Signature verification is required.')
     record = _decode_record(payload, expected_contract)
+    if record['schema'] == 2 and allow_migrations is not True:
+        raise ReleaseRejected('Migration-aware release requires explicit operator policy.')
     if (not isinstance(proof, SignatureProof) or proof.identity != PUBLISHER_IDENTITY or
             proof.issuer != OIDC_ISSUER or proof.source_sha != record['source_sha'] or
             not isinstance(proof.artifact_digest, str) or
@@ -159,4 +204,6 @@ def validate_release(
         raise ReleaseRejected('Only a successfully completed workflow is deployable.')
     return ReleaseRecord(record['source_sha'], record['run_id'], record['run_attempt'],
                          record['run_number'], record['contract_sha256'],
-                         tuple(sorted(record['images'].items())), proof.artifact_digest)
+                         tuple(sorted(record['images'].items())), proof.artifact_digest,
+                         parse_summary(record['migrations']) if record['schema'] == 2 else None,
+                         record.get('hangfire_sha256'))
