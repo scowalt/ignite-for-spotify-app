@@ -180,6 +180,44 @@ Unknown ownership or extra mounts stop cleanup rather than touching another cont
 Neither a clean process exit nor a successful cleanup is proof of migration outcome: the
 controller must still inspect durable history before admitting images.
 
+## Durable database-transition journal (not activated)
+
+`migration_plan.py` validates complete prior history/schema and the immutable candidate
+catalogue before forming a transition. Applied identifiers, checksums and delivery classes
+must remain an identical prefix; pending manual steps and a different target for an
+unchanged catalogue are refused. Legacy adoption needs the separately approved exact hash
+and a baseline-only candidate. Target history must preserve all prior timestamps.
+
+`MigrationTransition` records bounded private `migration.json` evidence in the existing
+artifact-specific attempt directory. Preparation binds it to the authenticated release's
+artifact, source, backend image, contract, Hangfire identity and catalogue summary. The
+caller still owns signature/policy verification, the global deployment lock, physical
+volume/configuration checks and actual encrypted backup/restore verification. A per-attempt
+lock supplements, but does not replace, global deployment serialization.
+
+Before SQL, the journal requires fresh verified recovery evidence within the existing
+budgets, reserves 180 seconds of the five-minute freshness window, rechecks quiescence and
+exact before metadata, then fsyncs migration intent. Success requires the writer stopped
+and an independent inspection; a process return value alone is not a commit receipt.
+Expired recovery after migration cannot produce an image-admission success. The outer
+controller must recheck freshness and runtime compatibility before each admission.
+
+| Durable state | Meaning |
+| --- | --- |
+| `prepared` | Bound plan; no migration execution authorized yet |
+| `migration_started` | Intent persisted before possible SQL; never replay on restart |
+| `verified` | Exact expected database observed; not application health or deployment commit |
+| `recovery_started` | Stop all known writers before explicit native settlement and inspection |
+| `unchanged` | Exact before schema/history retained; outer controller must still prove prior-image compatibility |
+| `committed` | Target history/schema committed; never treat as prior-image rollback permission |
+| `uncertain` / `blocked` | Unexpected state or incomplete recovery; stop for manual handling |
+
+Committed, uncertain and blocked recovery outcomes latch rather than repeatedly mutating
+on polls. An unchanged observation is rechecked if recovery is requested again. The journal
+neither switches images nor restores a database. The existing image-only driver refuses
+any attempt containing this journal instead of accidentally applying its old rollback path.
+Versioned outer-ledger/runtime/policy integration remains required before activation.
+
 ## Verification
 
 Real file-backed SQLite tests cover initialization/no-op startup, catalogue/history drift,
@@ -199,11 +237,25 @@ dotnet test backend/Ignite.slnx
 
 The image-verification workflow also runs real, network-isolated container fixtures:
 an unadopted synthetic database must refuse startup without creating Hangfire storage;
-explicit adoption must let the actual packaged API become healthy. Run them locally with
-`IGNITE_MIGRATION_FIXTURE_IMAGE=<fresh-backend-image> python3 -m unittest discover -s scripts -p test_migration_startup.py -v`.
-They create and remove only uniquely labelled synthetic fixtures, exposing no host port.
+explicit adoption must let the actual packaged API become healthy. A separate test-only
+writer image holds an actual native SQLite transaction or pauses after commit. Killing the
+controller proves its daemon container is still running; a new adapter must stop/reap that
+container before settlement. Timeout, uncommitted rollback and commit-before-controller-death
+are verified separately. The fixture executable is never copied into a published app image.
 
-These tests do not establish live R2 recovery, complete interrupted-container transaction
+Run with `IGNITE_MIGRATION_FIXTURE_IMAGE=<fresh-backend-image>` and
+`IGNITE_MIGRATION_WRITER_FIXTURE_IMAGE=<test-only-writer-image>` when invoking
+`python3 -m unittest discover -s scripts -p test_migration_startup.py -v`.
+Build the latter using `scripts/fixtures/Dockerfile.migration-writer` and an explicit
+`BACKEND_IMAGE` build argument. Fixtures create/remove only uniquely labelled synthetic
+volumes and containers, expose no host port and pass no runtime credentials.
+
+Additional real file-backed SQLite/process tests exercise the durable transition journal:
+killed uncommitted and committed writers, no replay after restart, concurrent exclusion,
+unknown history, failed writer shutdown, backup bounds/expiry and failed durable writes.
+Their synthetic backup receipts test admission policy, not actual encrypted backup I/O.
+
+These tests do not establish live R2 recovery, complete outer deployment transaction
 recovery, image rollback compatibility or activation. Those require the remaining
 migration-aware release/controller work and an approved production procedure. Keep existing signing,
 image/security/notice gates, backup credentials/retention/budgets and deployment fences.

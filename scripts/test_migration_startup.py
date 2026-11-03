@@ -1,4 +1,6 @@
+from contextlib import closing
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import sqlite3
@@ -7,7 +9,7 @@ import time
 import unittest
 import uuid
 
-from deployment_process import run
+from deployment_process import OperationFailed, run
 from migration_image import metadata_file
 from migration_record import verify_source_descriptor
 from migration_tool import MigrationTool
@@ -15,6 +17,12 @@ from migration_tool import MigrationTool
 
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE = os.environ.get('IGNITE_MIGRATION_FIXTURE_IMAGE')
+WRITER_IMAGE = os.environ.get('IGNITE_MIGRATION_WRITER_FIXTURE_IMAGE')
+
+
+def hold_container_writer(image, operation, source, environment, phase):
+    MigrationTool(['docker'], image, operation, source, environment=environment, timeout=120).invoke(
+        'apply', {'database_path': '/data/ignite.db', 'fixture_phase': phase})
 
 
 @unittest.skipUnless(IMAGE, 'Set IGNITE_MIGRATION_FIXTURE_IMAGE to the freshly built backend image.')
@@ -38,7 +46,7 @@ class MigrationStartupNativeTests(unittest.TestCase):
         self.assertEqual(value['Labels']['ignite.test-migration'], self.operation)
         self.source = value['Mountpoint']
         database = Path(self.temporary.name) / 'fixture.db'
-        with sqlite3.connect(database) as connection:
+        with closing(sqlite3.connect(database)) as connection, connection:
             connection.executescript((ROOT / 'backend/tests/Ignite.Infrastructure.Tests/Fixtures/legacy-schema-v1.sql').read_text())
             connection.executescript((ROOT / 'backend/tests/Ignite.Infrastructure.Tests/Fixtures/legacy-rows-v1.sql').read_text())
         self.docker(['run', '--rm', '--interactive', '--pull', 'never', '--network', 'none', '--read-only', '--user', '0:0',
@@ -126,6 +134,81 @@ class MigrationStartupNativeTests(unittest.TestCase):
         self.assertTrue(value['running'])
         self.assertEqual(value['health'], 'healthy')
         self.assertEqual(self.docker(['exec', identifier, 'curl', '--silent', '--max-time', '10', '--output', '/dev/null', '--write-out', '%{http_code}', 'http://127.0.0.1:5050/health/ready']), b'200')
+
+    def writer_fixture(self, timeout=120):
+        image = self.docker(['image', 'inspect', WRITER_IMAGE, '--format', '{{.Id}}']).decode().strip()
+        tool = MigrationTool(['docker'], image, self.operation + '-writer', self.source, environment=self.env, timeout=timeout)
+        self.addCleanup(tool.close)
+        before = self.tool.invoke('inspect', {'database_path': '/data/ignite.db'})
+        adopted = self.tool.invoke('adopt', {'database_path': '/data/ignite.db', 'before': before,
+                                          'catalogue_sha256': self.descriptor['catalogue_sha256'], 'schema_sha256': self.descriptor['schema_sha256']})
+        return tool, image, adopted['inspection']
+
+    def writer_ids(self):
+        return self.docker(['ps', '-a', '--no-trunc', '--filter', 'label=ignite.deployer-migration=' + self.operation + '-writer', '--format', '{{.ID}}']).decode().splitlines()
+
+    @unittest.skipUnless(WRITER_IMAGE, 'Set IGNITE_MIGRATION_WRITER_FIXTURE_IMAGE to the test-only writer image.')
+    def test_native_timeout_stops_the_daemon_writer_before_settlement(self):
+        writer, _, before = self.writer_fixture(timeout=10)
+        with self.assertRaises(OperationFailed):
+            writer.invoke('apply', {'database_path': '/data/ignite.db', 'fixture_phase': 'before'})
+        self.assertEqual(self.writer_ids(), [])
+        self.docker(['run', '--rm', '--pull', 'never', '--network', 'none', '--read-only',
+                     '--label', 'ignite.test-migration=' + self.operation,
+                     '--mount', 'type=bind,src=' + self.source + ',dst=/data,readonly', '--entrypoint', '/bin/sh', self.image,
+                     '-ec', 'test -s /data/fixture-ready'])
+        with self.assertRaises(OperationFailed):
+            self.tool.invoke('inspect', {'database_path': '/data/ignite.db'})
+        settled = self.tool.invoke('settle', {'database_path': '/data/ignite.db'})
+        self.assertEqual(settled['inspection'], before)
+
+    def kill_controller(self, phase):
+        _, image, before = self.writer_fixture()
+        process = multiprocessing.get_context('fork').Process(target=hold_container_writer,
+            args=(image, self.operation + '-writer', self.source, self.env, phase))
+        process.start()
+        try:
+            deadline = time.monotonic() + 20
+            ready = False
+            identifier = None
+            while process.is_alive() and time.monotonic() < deadline:
+                identifiers = self.writer_ids()
+                if len(identifiers) == 1:
+                    identifier = identifiers[0]
+                    try:
+                        self.docker(['exec', identifier, '/bin/sh', '-ec', 'test -s /data/fixture-ready'])
+                        ready = True
+                        break
+                    except OperationFailed:
+                        pass
+                time.sleep(0.1)
+            self.assertTrue(ready)
+            process.kill()
+            process.join(5)
+            self.assertFalse(process.is_alive())
+            self.assertEqual(self.docker(['inspect', '--format', '{{.State.Running}}', identifier]).strip(), b'true')
+            recovered = MigrationTool(['docker'], image, self.operation + '-writer', self.source, environment=self.env)
+            recovered.close()
+            self.assertEqual(self.writer_ids(), [])
+            settled = self.tool.invoke('settle', {'database_path': '/data/ignite.db'})
+            return before, settled['inspection']
+        finally:
+            if process.is_alive():
+                process.kill()
+            process.join(5)
+            process.close()
+
+    @unittest.skipUnless(WRITER_IMAGE, 'Set IGNITE_MIGRATION_WRITER_FIXTURE_IMAGE to the test-only writer image.')
+    def test_native_restart_reaps_an_orphaned_uncommitted_container_writer(self):
+        before, after = self.kill_controller('before')
+        self.assertEqual(before, after)
+
+    @unittest.skipUnless(WRITER_IMAGE, 'Set IGNITE_MIGRATION_WRITER_FIXTURE_IMAGE to the test-only writer image.')
+    def test_native_restart_preserves_a_commit_that_preceded_controller_death(self):
+        before, after = self.kill_controller('after')
+        self.assertNotEqual(before['schema_sha256'], after['schema_sha256'])
+        self.assertEqual(after['history'][:-1], before['history'])
+        self.assertEqual(after['history'][-1]['id'], '9999_fixture.sql')
 
 
 if __name__ == '__main__':

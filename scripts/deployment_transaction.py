@@ -121,6 +121,11 @@ def _private_descriptor(descriptor):
         raise StateRejected('Deployment file is not private and owned.')
 
 
+def _has_migration_journal(workspace):
+    path = workspace / 'migration.json'
+    return path.exists() or path.is_symlink()
+
+
 class Deployment:
     def __init__(self, root: Path):
         self.root = root
@@ -209,10 +214,14 @@ class Deployment:
             raise StateRejected('Attempt evidence is unavailable or invalid.') from None
 
     def _finish(self, state, runtime, workspace, outcome):
+        if _has_migration_journal(workspace):
+            return 'manual_recovery'
         try:
             runtime.cleanup(workspace)
         except Exception:
             return 'cleanup_required'
+        if _has_migration_journal(workspace):
+            return 'manual_recovery'
         report = {'outcome': outcome, 'state': state}
         result_path = workspace / 'result.json'
         if result_path.exists() or result_path.is_symlink():
@@ -225,6 +234,8 @@ class Deployment:
         return outcome
 
     def _abandon(self, state, runtime, workspace):
+        if _has_migration_journal(workspace):
+            return 'manual_recovery'
         transaction = state['transaction']
         if transaction['candidate_digest'] not in state['failed_digests']:
             state['failed_digests'].append(transaction['candidate_digest'])
@@ -235,6 +246,8 @@ class Deployment:
         return self._finish(state, runtime, workspace, 'preflight_failed')
 
     def _recover(self, state, runtime, workspace):
+        if _has_migration_journal(workspace):
+            return 'manual_recovery'
         transaction = state['transaction']
         if transaction['candidate_digest'] not in state['failed_digests']:
             state['failed_digests'].append(transaction['candidate_digest'])
@@ -244,6 +257,8 @@ class Deployment:
         self._save(state)
         try:
             runtime.cleanup(workspace)
+            if _has_migration_journal(workspace):
+                return 'manual_recovery'
             runtime.rollback(transaction['prior'], workspace)
             runtime.verify(transaction['prior']['images'], workspace)
         except Exception:
@@ -262,6 +277,10 @@ class Deployment:
     def _run_locked(self, release, runtime):
         state = self.status()
         if state['transaction'] is not None:
+            workspace = self.root / state['transaction']['candidate_digest'].removeprefix('sha256:')
+            _private_directory(workspace)
+            if _has_migration_journal(workspace):
+                return 'manual_recovery'
             release = None
         if release is not None and (not isinstance(release, ReleaseRecord) or release.contract_sha256 != state['contract_sha256']):
             raise StateRejected('Unreviewed deployment contract.')
@@ -294,6 +313,8 @@ class Deployment:
         self._save(state)
         try:
             runtime.preflight(release, transaction['prior'], workspace)
+            if _has_migration_journal(workspace):
+                return 'manual_recovery'
         except Exception:
             return self._abandon(state, runtime, workspace)
         try:
@@ -306,7 +327,11 @@ class Deployment:
             transaction['recovery'] = recovery
             transaction['phase'] = 'backup_verified'
             self._save(state)
+            if _has_migration_journal(workspace):
+                return 'manual_recovery'
             runtime.cleanup(workspace)
+            if _has_migration_journal(workspace):
+                return 'manual_recovery'
             if time.time() - datetime.fromisoformat(recovery['snapshot_time']).timestamp() > 300:
                 raise StateRejected('Recovery evidence expired before image mutation.')
             transaction['phase'] = 'switch_started'
