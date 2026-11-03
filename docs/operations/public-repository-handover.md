@@ -1,16 +1,25 @@
 # Public repository handover
 
-**Status: public source, runtime and guarded CD moved; final external integration checks are tracked separately.**
+**Status: migration complete, with the owner-accepted BB cached-remote limitation below.**
 The development repository is `scowalt/ignite-for-spotify-app`; the owner's checkout
 is `~/Code/ignite-for-spotify-app`. Production uses the protected publisher and sole
 [guarded updater](guarded-continuous-delivery.md), verified through controlled and
 timer-driven deployments. Legacy publishing and Watchtower remain inactive. Old
-private history and uncommitted work are preserved. Hosted Renovate coverage remains
-subject to the live integration evidence in TASK-39. BB's default source/path is new, but its stored remote URL remains
-stale because the installed API cannot update it: use the actual Git origin and
-explicit new URL for any additional-host clone.
+private history and uncommitted work are preserved. Hosted Renovate is verified by
+an enabled, onboarded scan and bot-authored [Dependency Dashboard #17](https://github.com/scowalt/ignite-for-spotify-app/issues/17);
+see [the dependency handover](dependency-handover.md) and TASK-39.
 
-The destination must become the only home for ongoing development, issues and pull
+BB's project name, default source/path, active environment and actual Git origin
+point to the maintained repository. Its stored `gitRemoteUrl` still names the old
+private repository because the installed supported API has no setter. On November 3,
+2026, the owner explicitly accepted this documented limitation to close TASK-40.
+The cache was not corrected: no internal state patch, duplicate project or history
+removal was performed. For additional-host clones, explicitly supply
+`https://github.com/scowalt/ignite-for-spotify-app.git`, including the supported
+`bb project source add --clone --remote-url` override rather than relying on the cache.
+A future supported BB correction is separate maintenance, not an unfinished migration.
+
+The destination is the only home for ongoing development, issues and pull
 requests, dependency updates, GitHub Actions CI and production publishing.
 Paseo-based remediation is excluded: the owner no longer uses Paseo. This is not a
 permanent public mirror. The old private repository retains historical evidence only
@@ -128,5 +137,7 @@ is not a secret scanner or a substitute for content review.
    and requires separate approval. Remove temporary staging resources only when
    their evidence is preserved; do not delete shared caches or other projects' work.
 
-The handover is complete only after the final item is evidenced. A passing local
-candidate, a public repo, or a first successful build alone is not completion.
+The checklist is complete with the verification records in TASK-38 through TASK-40,
+the linked operating runbooks, and the explicit owner-accepted BB limitation above.
+A passing local candidate, a public repo, or a first successful build alone would
+not have established completion.
