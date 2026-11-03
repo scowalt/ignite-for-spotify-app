@@ -117,8 +117,9 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Scan backend image with Trivy
-        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297
         with:
+          version: v0.72.0
           image-ref: ${{ env.BACKEND_IMAGE }}:${{ steps.meta-backend.outputs.version }}
           format: 'sarif'
           output: 'trivy-backend.sarif'
@@ -166,8 +167,9 @@ jobs:
           cache-to: type=gha,mode=max,scope=backup
 
       - name: Scan backup image with Trivy
-        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297
         with:
+          version: v0.72.0
           image-ref: ${{ env.BACKUP_IMAGE }}:${{ steps.meta-backup.outputs.version }}
           format: 'sarif'
           output: 'trivy-backup.sarif'
@@ -225,8 +227,9 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Scan frontend image with Trivy
-        uses: aquasecurity/trivy-action@c07df6fec6fa692e6fd1200d50aaa1fdd66f03c8
+        uses: aquasecurity/trivy-action@d2a0b60797ff03db6132bd4e2b293f9b37081297
         with:
+          version: v0.72.0
           image-ref: ${{ env.FRONTEND_IMAGE }}:${{ steps.meta-frontend.outputs.version }}
           format: 'sarif'
           output: 'trivy-frontend.sarif'
