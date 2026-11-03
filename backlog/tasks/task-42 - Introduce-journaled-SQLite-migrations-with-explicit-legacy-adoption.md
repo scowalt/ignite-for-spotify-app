@@ -1,11 +1,11 @@
 ---
 id: TASK-42
 title: Introduce journaled SQLite migrations with explicit legacy adoption
-status: In Progress
+status: Done
 assignee:
   - '@pi'
 created_date: '2026-11-03 15:51'
-updated_date: '2026-11-03 16:58'
+updated_date: '2026-11-03 17:09'
 labels:
   - backend
   - database
@@ -57,4 +57,21 @@ Pinned DbUp Core 6.1.1 and SQLite provider 6.0.4; inspected exact upstream commi
 
 Foundation implemented and self-reviewed with 43 real SQLite migration cases; all 137 backend tests pass, no skips. Coverage includes native transaction/journal protection, unchanged no-op history, exact source-derived schema-only adoption and refusal, repository/session/snapshot/job/FTS behavior, an injected journal timestamp-source error after an earlier successful script, callback failure outside DbUp command management, deferred-constraint commit failure, concurrency, and process-kill rollback. Added strict identifier anchors, embedded NUL refusal and final-component symlink rejection after failing regressions. The malformed-NUL experiment hit the bounded test-harness deadline before validation was tightened; no owned test process remained.
 Fantomas 7.0.6 checks pass; comment policy checked 307 files with zero violations; NuGet reports no vulnerable packages for the backend graph; mechanical notice collection covers 52 components with zero gaps. Production contract remains exactly 417fe8060e7156e73c308c2148e0d282f9cadbbaaf952e7b0097744a31666d5f. Startup/ORM/updater/workflow/production unchanged. Source-derived EF/FTS adoption is proven with synthetic data only; historical production schema may differ and remains uninspected/unapproved. Protected review/CI remains to be completed before marking the task Done.
+
+Draft PR #21 at exact code head 96c185237e2d2e6b54111800e18e3cc3668d368a passed hosted CI 41679797925 and comment-policy runs 41679797946/41679788805, including actual image/security/notice/backup/infrastructure gates and native fixtures. PR remains unmerged; no production release or state change occurred. The one timed-out adversarial-NUL test left only an owned empty synthetic database and rollback journal; those exact files were removed after confirming provenance, with no test processes or unrelated sessions touched.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Added an unwired DbUp-based SQLite migration foundation while preserving EF Core repositories and existing startup/delivery behavior.
+
+- Embedded immutable numbered SQL with stable resource IDs, strict UTF-8/LF/input bounds and SHA-256/UTC journal history. Changed/missing/reordered scripts and corrupt/empty history are rejected, including no-op starts.
+- One externally owned immediate SQLite transaction covers the complete batch and journal. Native authorization blocks transaction escape, attached databases, PRAGMAs and journal modification; diagnostics are fixed/redacted.
+- Explicit schema-only legacy adoption compares an independently reviewed fingerprint and a recreated baseline without rewriting data or claiming pending scripts ran. Only synthetic source-derived EF/FTS schemas have been proven; production remains uninspected.
+- Added read-only inspection and real process/concurrency/failure fixtures, including journal timestamp-source, script-event and commit failures.
+
+Verification: all 137 backend tests pass (43 migration cases), no skips; Fantomas clean; 307-file zero-violation comment scan; secret scan clean; NuGet reports no vulnerable backend packages; 52-component notice inventory has zero gaps. Exact code head 96c1852 passed hosted CI 41679797925 and comment-policy CI. Runtime fingerprint remains unchanged.
+
+The runner is not wired into production, the PR is unmerged, and this is not activation of database CD. Signed-release/updater integration and a separately approved exact production procedure remain required.
+<!-- SECTION:FINAL_SUMMARY:END -->
