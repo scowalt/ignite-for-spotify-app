@@ -1,23 +1,35 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabled": false,
+  "enabled": true,
   "extends": ["config:recommended"],
   "labels": ["dependencies"],
   "dependencyDashboard": true,
   "dependencyDashboardAutoclose": true,
   "schedule": ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
   "rebaseWhen": "conflicted",
-  "platformAutomerge": true,
+  "platformAutomerge": false,
   "automergeType": "pr",
   "automergeStrategy": "squash",
   "rangeStrategy": "bump",
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update source-built tools with their release commit",
-      "managerFilePatterns": ["/^docker\\/Dockerfile\\.(?:backup|frontend)$/"],
+      "description": "Update the Restic release and verified source commit together",
+      "managerFilePatterns": ["/^docker\\/Dockerfile\\.backup$/"],
+      "datasourceTemplate": "github-tags",
+      "packageNameTemplate": "restic/restic",
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+) packageName=(?<packageName>[^\\s]+)\\nARG [A-Z_]+_VERSION=(?<currentValue>v[^\\s]+)\\nARG [A-Z_]+_COMMIT=(?<currentDigest>[a-f0-9]{40})"
+        "ARG RESTIC_VERSION=(?<currentValue>v[^\\s]+)\\nARG RESTIC_COMMIT=(?<currentDigest>[a-f0-9]{40})"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Update the Caddy release and verified source commit together",
+      "managerFilePatterns": ["/^docker\\/Dockerfile\\.frontend$/"],
+      "datasourceTemplate": "github-tags",
+      "packageNameTemplate": "caddyserver/caddy",
+      "matchStrings": [
+        "ARG CADDY_VERSION=(?<currentValue>v[^\\s]+)\\nARG CADDY_COMMIT=(?<currentDigest>[a-f0-9]{40})"
       ]
     }
   ],
@@ -26,6 +38,11 @@
     "automerge": true
   },
   "packageRules": [
+    {
+      "description": "Keep infrastructure provider and module updates manually reviewed",
+      "matchManagers": ["terraform"],
+      "enabled": false
+    },
     {
       "description": "Group all non-major updates into one PR with auto-merge",
       "matchUpdateTypes": ["minor", "patch"],
@@ -52,7 +69,7 @@
       "pinDigests": true
     },
     {
-      "description": "Ignore docker-compose infra images managed by Watchtower",
+      "description": "Keep retained Watchtower and shared Alloy changes manual",
       "matchManagers": ["docker-compose"],
       "matchPackageNames": ["containrrr/watchtower", "grafana/alloy"],
       "enabled": false
