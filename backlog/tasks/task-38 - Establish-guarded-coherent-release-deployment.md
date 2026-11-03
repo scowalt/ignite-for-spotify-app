@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-02 22:00'
-updated_date: '2026-11-03 01:47'
+updated_date: '2026-11-03 02:45'
 labels: []
 dependencies: []
 ---
@@ -65,4 +65,13 @@ Self-review tightened replay fencing: the highest attempted release order is sep
 - Added version-bound CLI bootstrap/status/check/once and a fail-closed disabled user-unit installer. Read-only check cannot trigger recovery. User units are not installed/enabled yet; confirmed production Doppler and system Python locations. Remaining before activation: exact-head CI/source review, real production no-service-change preflight, protected keyless signing trial and guarded deployment. TASK-39 and TASK-40 now track dependency/open-work and final cross-system checks.
 
 Actual production no-service-change preflight exposed an optional Docker Config.Volumes template issue before mutation. Container identities/start times stayed unchanged. Added null-safe Volumes and Labels lookups, preserving required provenance checks, and actual Docker metadata compatibility coverage. Retained the failed attempt evidence; no image/service/credential or safety invariant was relaxed.
+
+- PR #10 merged through exact-head/Gmail controls as 2ee6cc66ffb936d6c63fdb22d9f3d56a8fb59bea. Main operator bundle passed actual production preflight with all container identities/start/running states unchanged; signer and user units were installed disabled, and the existing runtime baseline was verified and bootstrapped. No timer or publisher was enabled.
+- Activation is blocked before any OpenTofu plan/apply: the existing mission-control/dev AWS state pair returns 401 on all three existing state objects. Independent Botocore HEAD also returns 401; server clock difference is under one second; the Cloudflare control API confirms the existing opentofu-state bucket still exists. No AWS_SESSION_TOKEN name is configured. A replacement S3 pair limited to this state bucket is needed; this is not the already-repaired application backup pair. Preserve all state/history and both publisher fences. Evidence is in guarded-cd-activation-evidence/state-*.json.
+
+The secure state-backend credential request was cancelled by the user. No replacement pair was received or applied. Keep publisher activation paused; the installed updater remains disabled. Continue only independent source/dependency/integration work until existing state access is restored through a secure approved path.
+
+- Shared state credentials were restored through the secure form: independent HEAD/GET succeeded on all three unchanged state objects, only mission-control/dev AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY changed, non-target values/sync boundaries were preserved, and the handoff file was verified then deleted. A fresh reviewed flag-only OpenTofu apply enabled one controlled publication.
+- Controlled run 41565946062 passed all validation and actual app-image gates/pushes, but GHCR denied the metadata record push. It emitted an extra BuildKit attestation, outside the intended single-platform record contract. Publishing was fenced again automatically; timer and production remain unchanged. A narrow packaging fix is under protected review, without broader permissions or weaker Cosign checks.
+- Author-policy review found that earlier branch commits inherited the isolated verification runner’s synthetic identity. Existing owner merges already used explicit Gmail controls. Future owner commits now explicitly use Scott Walters <scowalt@gmail.com>; published history is preserved rather than rewritten.
 <!-- SECTION:NOTES:END -->

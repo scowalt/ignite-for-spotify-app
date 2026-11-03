@@ -25,7 +25,7 @@ RUN cp go.mod /tmp/caddy.mod \
       google.golang.org/grpc@v1.83.2 \
     && go mod tidy -modfile=/tmp/caddy.mod \
     && CGO_ENABLED=0 go build -modfile=/tmp/caddy.mod -p=2 -trimpath \
-      -ldflags '-s -w -X github.com/caddyserver/caddy/v2.CustomVersion=v2.11.4' \
+      -ldflags "-s -w -X github.com/caddyserver/caddy/v2.CustomVersion=$CADDY_VERSION" \
       -o /usr/bin/caddy ./cmd/caddy
 
 COPY scripts/collect-image-notices.py /tmp/collect-image-notices.py
