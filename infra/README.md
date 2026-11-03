@@ -77,12 +77,16 @@ Actions) for a workflow-token-permission resource.
 
 ## Protected production environment
 
-The separately approved setup was applied and verified with:
+The production environment is retained for main-only publishing and scoped inputs.
+The owner separately approved automatic publication in TASK-41 after the migration:
 
 - Exact branch policy `main`, not all protected branches and not a matching tag.
-- Reviewer Scott Walters (GitHub user ID 1100550), with admin bypass disabled.
-- Self-review permitted so a sole owner can approve their manually initiated release;
-  approval is still required. Revisit this policy explicitly if another reviewer joins.
+- No required reviewers: successful trusted-main CI can publish without an extra
+  approval click. Merging a green protected PR is the release decision, including
+  Renovate auto-merges. The original handover's owner-review rule is removed through
+  this root, not by deleting the environment or relocating its secret.
+- Admin bypass remains disabled. The existing false self-review setting is retained
+  but imposes no approval step when there are no reviewers.
 - The reviewed continuing-CD handover enables only the new publisher. Legacy Deploy
   stays disabled and Watchtower stays stopped; the project-owned guarded updater is
   the sole runtime update path. An emergency live false publishing flag must not be

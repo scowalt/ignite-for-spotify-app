@@ -55,10 +55,6 @@ resource "github_repository_environment" "production" {
   can_admins_bypass   = false
   prevent_self_review = false
 
-  reviewers {
-    users = [1100550]
-  }
-
   deployment_branch_policy {
     protected_branches     = false
     custom_branch_policies = true
