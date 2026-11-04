@@ -4,7 +4,7 @@ title: Activate and verify migration-aware database delivery
 status: To Do
 assignee: []
 created_date: '2026-11-03 15:53'
-updated_date: '2026-11-03 21:41'
+updated_date: '2026-11-04 15:43'
 labels:
   - deployment
   - database
@@ -42,4 +42,7 @@ After offline migration/protocol verification, prepare and obtain approval for a
 Owner approved a narrow metadata-only production inventory during development. It is complete and privately retained; no user rows, credentials, database writes, backups, downtime or updater changes occurred. This does NOT satisfy approval of the exact live adoption/upgrade procedure. The observed legacy schema differs from the initial source-derived fixture, so prepare an explicit production-compatible draft baseline/frozen fixture rather than guessing equivalence or weakening validation. Actual adoption remains unapproved and all acceptance criteria remain unchecked.
 
 The separate image-only runtime security rollout completed successfully; metadata-only post-verification shows identical schema definitions and schema_version 22. No database adoption or operator upgrade happened. Production now runs main 5d0f565/runtime10.0.14 with the unchanged installed operator and contract. Exact migration activation approval remains outstanding.
+
+TASK-43 offline implementation is complete: connected v2 updater/current-main code head 8d724cabdebc1735fdacf38d7c1b82e1cd4a8a36 passed full CI 41859648784, including actual native backup/restore, writer recovery, installer and image gates. The initial unactivated baseline now exactly matches the previously approved private schema inventory, with independent frozen fixtures; earlier mismatch notes are historical. Owner selected Finish first before merging, not permission for live adoption or updater activation.
+Next requires fresh scoped read-only rollout preflight because production has received ordinary frontend-only releases since the last independent runtime inspection. Do not treat old 5d0f565 runtime evidence as current source. Gather only approved schema/history/runtime/policy/ledger/storage metadata privately, then present the exact one-time sequence for approval before changes. No live preflight or adoption has been performed here; all Task-44 AC remain unchecked.
 <!-- SECTION:NOTES:END -->

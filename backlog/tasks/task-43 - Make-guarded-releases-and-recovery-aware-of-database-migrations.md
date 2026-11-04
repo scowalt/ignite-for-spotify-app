@@ -1,11 +1,11 @@
 ---
 id: TASK-43
 title: Make guarded releases and recovery aware of database migrations
-status: In Progress
+status: Done
 assignee:
   - '@pi'
 created_date: '2026-11-03 15:51'
-updated_date: '2026-11-04 15:35'
+updated_date: '2026-11-04 15:43'
 labels:
   - deployment
   - database
@@ -29,12 +29,12 @@ Integrate the journaled SQLite foundation into the signed-release and guarded-up
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Signed release metadata binds the exact backend image and immutable migration catalogue to a versioned migration protocol; compatible catalogue additions no longer require manually repinning the entire startup-file fingerprint, while unrelated operating-contract changes remain guarded.
-- [ ] #2 Migration releases serialize deployment, prepare before downtime, quiesce the old backend and all its HTTP/background writers, verify a fresh encrypted backup and isolated restore of the stopped state, then migrate before requests or background jobs are accepted.
-- [ ] #3 Durable recovery distinguishes unchanged or rolled-back migration history from committed or uncertain schema changes; prior-image rollback is permitted only with verified compatibility, and incompatible/unknown states stop safely rather than restoring live data, repeating migrations blindly or launching an incompatible old image.
-- [ ] #4 The first automatic policy supports reviewed backward-compatible bounded migrations; destructive changes, unbounded backfills, provider-managed Hangfire schema changes and operator/infrastructure changes are not implicitly authorized. A declaration alone is not treated as proof of compatibility.
-- [ ] #5 Real SQLite/container and process-kill fixtures verify migration failure, commit-before-health-failure, restart/concurrency, backup budgets/cleanup and preservation of data/mount/auxiliary identities; existing signing, CI, replay/failure fences and secret boundaries remain enforced.
-- [ ] #6 Production remains on the existing reviewed path until an explicit adoption/upgrade procedure is approved; no automatic operator upgrade, ledger reset, database initialization, restoration, pruning or credential change is introduced.
+- [x] #1 Signed release metadata binds the exact backend image and immutable migration catalogue to a versioned migration protocol; compatible catalogue additions no longer require manually repinning the entire startup-file fingerprint, while unrelated operating-contract changes remain guarded.
+- [x] #2 Migration releases serialize deployment, prepare before downtime, quiesce the old backend and all its HTTP/background writers, verify a fresh encrypted backup and isolated restore of the stopped state, then migrate before requests or background jobs are accepted.
+- [x] #3 Durable recovery distinguishes unchanged or rolled-back migration history from committed or uncertain schema changes; prior-image rollback is permitted only with verified compatibility, and incompatible/unknown states stop safely rather than restoring live data, repeating migrations blindly or launching an incompatible old image.
+- [x] #4 The first automatic policy supports reviewed backward-compatible bounded migrations; destructive changes, unbounded backfills, provider-managed Hangfire schema changes and operator/infrastructure changes are not implicitly authorized. A declaration alone is not treated as proof of compatibility.
+- [x] #5 Real SQLite/container and process-kill fixtures verify migration failure, commit-before-health-failure, restart/concurrency, backup budgets/cleanup and preservation of data/mount/auxiliary identities; existing signing, CI, replay/failure fences and secret boundaries remain enforced.
+- [x] #6 Production remains on the existing reviewed path until an explicit adoption/upgrade procedure is approved; no automatic operator upgrade, ledger reset, database initialization, restoration, pruning or credential change is introduced.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -98,3 +98,18 @@ CLI and immutable installer require matching explicit v2 policy/ledger and separ
 
 Connected updater local verification: 167 script tests run with backend/writer/Cosign fixtures configured, 160 execute successfully and seven pre-existing native fixtures remain for hosted CI. All 11 outer-ledger/SQLite cases and the new driver/transport/installer paths pass; all ten Docker adapter cases pass apart from the pre-existing actual-backup-image fixture not configured locally. Native writer/startup cases and real pinned-signer installation pass. Writable bind aliases and unknown option-backed volume isolation fail closed. Actionlint, diff checks and 342-file comment scan pass. Ready for protected exact-head CI; no production reads, policy/state changes, service operations or merge performed.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented migration-aware guarded deployment without activating it in production.
+
+- Signed schema-v2 records bind immutable catalogue/source and resolved engine/Hangfire identities; reviewed dependency policy and retained host/application contract separation remain mandatory.
+- Connected versioned outer ledger, exact-state upgrade API, isolated CLI/runtime, stopped-state encrypted recovery, writer inventory/quiescence, database verification and bounded image admission.
+- Recovery distinguishes unchanged from committed/uncertain history, never replays interrupted SQL or restores live data, permits only one compatible image rollback, and preserves replay/failure/identity fences.
+- Status/read-only checks and the installer cannot silently upgrade state or activate services. Real SQLite/Docker process-kill, health-failure, installer and native backup fixtures cover the public interfaces.
+
+Verification: 167 local script tests run with 160 executed successfully and seven pre-existing native fixtures deferred to hosted CI; backend suite 187 tests. Exact connected/current-base head 8d724cabdebc1735fdacf38d7c1b82e1cd4a8a36 passed CI 41859648784, all ten validation/image jobs and actual native backup/restore, metadata, writer, installer, secret/security/notice steps. Actionlint, comment policy (342 files) and pre-commit gitleaks passed.
+
+Development completion only: PRs #21/#22 remain unmerged, deployed v1 operator/data/policy unchanged. Before merging the new publisher protocol, TASK-44 needs fresh private read-only readiness evidence and a separately approved exact source/operator/ledger/baseline adoption sequence. No production migration, service operation, restore, credential or infrastructure change was performed.
+<!-- SECTION:FINAL_SUMMARY:END -->
