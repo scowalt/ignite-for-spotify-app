@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import re
 
-from migration_record import MigrationMetadataRejected, MigrationSummary, descriptor_summary, hangfire_identity, parse_summary, verify_source_descriptor
+from migration_record import MigrationMetadataRejected, MigrationSummary, descriptor_summary, hangfire_identity, parse_summary, verify_source_descriptor, migration_engine_identity
 
 REPOSITORY = 'scowalt/ignite-for-spotify-app'
 REPOSITORY_ID = 1441388195
@@ -46,6 +46,12 @@ class ReleasePending(ReleaseRejected):
 
 
 @dataclass(frozen=True)
+class MigrationDependencyPolicy:
+    engine_sha256: str
+    hangfire_sha256: str
+
+
+@dataclass(frozen=True)
 class SignatureProof:
     artifact_digest: str
     source_sha: str
@@ -64,6 +70,7 @@ class ReleaseRecord:
     artifact_digest: str
     migrations: MigrationSummary | None = None
     hangfire_sha256: str | None = None
+    migration_engine_sha256: str | None = None
 
     @property
     def order(self) -> tuple[int, int]:
@@ -111,7 +118,7 @@ def _decode_record(payload: bytes, expected_contract: str) -> dict:
         raise ReleaseRejected('Malformed release record.') from None
     fields = {'schema', 'repository', 'source_sha', 'run_id', 'run_attempt', 'run_number', 'contract_sha256', 'images'}
     if isinstance(record, dict) and type(record.get('schema')) is int and record['schema'] == 2:
-        fields |= {'migrations', 'hangfire_sha256'}
+        fields |= {'migrations', 'hangfire_sha256', 'migration_engine_sha256'}
     if not isinstance(record, dict) or set(record) != fields:
         raise ReleaseRejected('Unexpected release schema.')
     if type(record['schema']) is not int or record['schema'] not in [1, 2] or record['repository'] != REPOSITORY:
@@ -128,8 +135,9 @@ def _decode_record(payload: bytes, expected_contract: str) -> dict:
             parse_summary(record['migrations'])
         except MigrationMetadataRejected:
             raise ReleaseRejected('Migration release metadata is invalid.') from None
-        if not isinstance(record['hangfire_sha256'], str) or not re.fullmatch(r'[a-f0-9]{64}', record['hangfire_sha256']):
-            raise ReleaseRejected('Job storage identity is invalid.')
+        for field in ['hangfire_sha256', 'migration_engine_sha256']:
+            if not isinstance(record[field], str) or not re.fullmatch(r'[a-f0-9]{64}', record[field]):
+                raise ReleaseRejected('Migration or job storage dependency identity is invalid.')
     images = record.get('images')
     if not isinstance(images, dict) or set(images) != {'backend', 'backup', 'frontend'}:
         raise ReleaseRejected('A complete three-image release is required.')
@@ -140,13 +148,14 @@ def _decode_record(payload: bytes, expected_contract: str) -> dict:
     return record
 
 
-def create_release_record(root: Path, environment: dict[str, str], images: dict[str, str], *, migration_descriptor=None, backend_deps=None) -> bytes:
+def create_release_record(root: Path, environment: dict[str, str], images: dict[str, str], *, migration_descriptor=None, backend_deps=None, migration_deps=None) -> bytes:
     if (environment.get('GITHUB_REPOSITORY') != REPOSITORY or
             environment.get('GITHUB_REF') != 'refs/heads/main' or
             environment.get('GITHUB_EVENT_NAME') not in ['push', 'workflow_dispatch']):
         raise ReleaseRejected('Only the trusted main publisher can create a release record.')
-    migration_protocol = migration_descriptor is not None or backend_deps is not None
-    if migration_protocol and (migration_descriptor is None or backend_deps is None):
+    metadata = [migration_descriptor, backend_deps, migration_deps]
+    migration_protocol = any(value is not None for value in metadata)
+    if migration_protocol and any(value is None for value in metadata):
         raise ReleaseRejected('Complete migration image metadata is required.')
     contract = deployment_contract(root, migration_protocol=migration_protocol)
     try:
@@ -159,7 +168,8 @@ def create_release_record(root: Path, environment: dict[str, str], images: dict[
         try:
             descriptor = verify_source_descriptor(migration_descriptor, root)
             record.update({'schema': 2, 'migrations': asdict(descriptor_summary(descriptor)),
-                           'hangfire_sha256': hangfire_identity(backend_deps)})
+                           'hangfire_sha256': hangfire_identity(backend_deps),
+                           'migration_engine_sha256': migration_engine_identity(migration_deps)})
         except MigrationMetadataRejected:
             raise ReleaseRejected('Migration image metadata does not match reviewed source.') from None
     encoded = json.dumps(record, sort_keys=True, separators=(',', ':')).encode()
@@ -173,13 +183,18 @@ def validate_release(
     run: object,
     expected_contract: str,
     *,
-    allow_migrations: bool = False,
+    migration_dependencies: MigrationDependencyPolicy | None = None,
 ) -> ReleaseRecord:
     if proof is None:
         raise ReleaseRejected('Signature verification is required.')
     record = _decode_record(payload, expected_contract)
-    if record['schema'] == 2 and allow_migrations is not True:
-        raise ReleaseRejected('Migration-aware release requires explicit operator policy.')
+    if record['schema'] == 2:
+        if (not isinstance(migration_dependencies, MigrationDependencyPolicy) or
+                record['migration_engine_sha256'] != migration_dependencies.engine_sha256 or
+                record['hangfire_sha256'] != migration_dependencies.hangfire_sha256):
+            raise ReleaseRejected('Migration-aware release requires matching reviewed dependency policy.')
+    elif migration_dependencies is not None:
+        raise ReleaseRejected('Migration-aware policy cannot accept a legacy release downgrade.')
     if (not isinstance(proof, SignatureProof) or proof.identity != PUBLISHER_IDENTITY or
             proof.issuer != OIDC_ISSUER or proof.source_sha != record['source_sha'] or
             not isinstance(proof.artifact_digest, str) or
@@ -207,4 +222,4 @@ def validate_release(
                          record['run_number'], record['contract_sha256'],
                          tuple(sorted(record['images'].items())), proof.artifact_digest,
                          parse_summary(record['migrations']) if record['schema'] == 2 else None,
-                         record.get('hangfire_sha256'))
+                         record.get('hangfire_sha256'), record.get('migration_engine_sha256'))

@@ -30,7 +30,7 @@ class MigrationTransitionTests(unittest.TestCase):
         self.runtime.initialize()
         self.before = self.runtime.inspect_database(self.workspace)
         self.plan = prepare_transition(self.before, catalogue(1), catalogue(2))
-        self.release = replace(candidate(), migrations=descriptor_summary(catalogue(2)), hangfire_sha256='f' * 64)
+        self.release = replace(candidate(), migrations=descriptor_summary(catalogue(2)), hangfire_sha256='f' * 64, migration_engine_sha256='e' * 64)
         self.transition = MigrationTransition(self.workspace)
 
     def test_verified_transition_is_durable_and_cannot_be_migrated_again(self):

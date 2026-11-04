@@ -91,13 +91,14 @@ class MigrationTransition:
                 self.clock() - datetime.fromisoformat(recovery['snapshot_time']).timestamp() <= 300 - reserve)
 
     def _validate(self, state):
-        fields = {'schema', 'candidate_digest', 'source_sha', 'backend_image', 'contract_sha256', 'hangfire_sha256',
+        fields = {'schema', 'candidate_digest', 'source_sha', 'backend_image', 'contract_sha256', 'hangfire_sha256', 'migration_engine_sha256',
                   'created_at', 'plan', 'phase', 'recovery', 'observed'}
         phases = {'prepared', 'migration_started', 'verified', 'recovery_started', 'unchanged', 'committed', 'uncertain', 'blocked'}
         if (not isinstance(state, dict) or set(state) != fields or type(state['schema']) is not int or state['schema'] != 1 or
                 state['candidate_digest'] != 'sha256:' + self.workspace.name or not _hex(state['source_sha'], 40) or
                 not _hex(state['backend_image'], 64, 'ghcr.io/' + REPOSITORY + '/backend@sha256:') or
                 not _hex(state['contract_sha256'], 64) or not _hex(state['hangfire_sha256'], 64) or
+                not _hex(state['migration_engine_sha256'], 64) or
                 type(state['created_at']) is not int or not 0 < state['created_at'] <= self.clock() + 30 or
                 not isinstance(state['phase'], str) or state['phase'] not in phases):
             _reject()
@@ -160,7 +161,8 @@ class MigrationTransition:
                 _reject()
             state = {'schema': 1, 'candidate_digest': release.artifact_digest, 'source_sha': release.source_sha,
                      'backend_image': dict(release.images).get('backend'), 'contract_sha256': release.contract_sha256,
-                     'hangfire_sha256': release.hangfire_sha256, 'created_at': int(self.clock()), 'plan': plan,
+                     'hangfire_sha256': release.hangfire_sha256, 'migration_engine_sha256': release.migration_engine_sha256,
+                     'created_at': int(self.clock()), 'plan': plan,
                      'phase': 'prepared', 'recovery': None, 'observed': None}
             self._save(state)
 

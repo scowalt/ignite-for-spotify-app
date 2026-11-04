@@ -39,8 +39,8 @@ def main():
             client_env = {key: os.environ[key] for key in ['PATH', 'HOME', 'DOCKER_HOST', 'DOCKER_CONFIG', 'XDG_RUNTIME_DIR'] if key in os.environ}
             run(['docker', 'pull', '--platform', 'linux/amd64', images['backend']], env=client_env, timeout=180)
             operation = 'publisher-' + os.environ.get('GITHUB_RUN_ID', '') + '-' + os.environ.get('GITHUB_RUN_ATTEMPT', '')
-            descriptor, dependencies = read_image_metadata(images['backend'], revision, operation, docker=['docker'], env=client_env)
-            metadata = {'migration_descriptor': descriptor, 'backend_deps': dependencies}
+            descriptor, dependencies, migration_dependencies = read_image_metadata(images['backend'], revision, operation, docker=['docker'], env=client_env)
+            metadata = {'migration_descriptor': descriptor, 'backend_deps': dependencies, 'migration_deps': migration_dependencies}
         payload = create_release_record(args.root, dict(os.environ), images, **metadata)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         with args.output.open('xb') as target:

@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from migration_record import MigrationMetadataRejected, descriptor_summary, parse_descriptor, parse_inspection, parse_summary, verify_source_descriptor, hangfire_identity
+from migration_record import MigrationMetadataRejected, descriptor_summary, parse_descriptor, parse_inspection, parse_summary, verify_source_descriptor, hangfire_identity, migration_engine_identity
 
 
 DESCRIPTOR = {
@@ -18,6 +18,19 @@ DESCRIPTOR = {
         {'id': '0002_note.sql', 'sha256': '94eba019e9aaada38dfbf837a68a2e90a4f0f2357c695925dbd35e0f2b73ce0d', 'delivery': 'automatic-schema'},
     ],
 }
+
+
+ENGINE_IDENTITY = '12dec86c4c8dcad35647cd2494d2c11bef68ca72981f8f5652d98adeaa895549'
+HANGFIRE_IDENTITY = '7c6967617e1775e1aaf4201d3ff381d5edecb2c2497658b5672efe179815c218'
+
+
+def engine_dependencies():
+    names = ['dbup-core', 'dbup-sqlite', 'FSharp.Core', 'Microsoft.Data.Sqlite.Core', 'SQLitePCLRaw.core',
+             'SQLitePCLRaw.bundle_e_sqlite3', 'SQLitePCLRaw.lib.e_sqlite3', 'SQLitePCLRaw.provider.e_sqlite3', 'EngineDependency']
+    libraries = {name + '/1.0.0': {'type': 'package', 'sha512': 'sha512-' + base64.b64encode(b'a' * 64).decode()} for name in names}
+    target = {name: {} for name in libraries}
+    target['dbup-core/1.0.0']['dependencies'] = {'EngineDependency': '1.0.0'}
+    return {'runtimeTarget': {'name': '.NETCoreApp,Version=v10.0'}, 'targets': {'.NETCoreApp,Version=v10.0': target}, 'libraries': libraries}
 
 
 class MigrationRecordTests(unittest.TestCase):
@@ -64,7 +77,7 @@ class MigrationRecordTests(unittest.TestCase):
         libraries = {name + '/1.0.0': {'type': 'package', 'sha512': 'sha512-' + base64.b64encode(b'a' * 64).decode()} for name in names}
         payload = {'libraries': libraries}
         baseline = hangfire_identity(json.dumps(payload).encode())
-        self.assertRegex(baseline, r'^[a-f0-9]{64}$')
+        self.assertEqual(baseline, HANGFIRE_IDENTITY)
         libraries['unrelated/2.0.0'] = {'type': 'package'}
         self.assertEqual(hangfire_identity(json.dumps(payload).encode()), baseline)
         libraries['Hangfire.Core/1.0.0']['sha512'] = 'sha512-' + base64.b64encode(b'b' * 64).decode()
@@ -72,6 +85,35 @@ class MigrationRecordTests(unittest.TestCase):
         del libraries['Hangfire.Storage.SQLite/1.0.0']
         with self.assertRaises(MigrationMetadataRejected):
             hangfire_identity(json.dumps(payload).encode())
+
+    def test_migration_engine_identity_binds_native_and_transitive_package_content(self):
+        value = engine_dependencies()
+        baseline = migration_engine_identity(json.dumps(value).encode())
+        self.assertEqual(baseline, ENGINE_IDENTITY)
+        value['libraries']['Unrelated/2.0.0'] = {'type': 'package'}
+        self.assertEqual(migration_engine_identity(json.dumps(value).encode()), baseline)
+        for package in ['dbup-core', 'SQLitePCLRaw.lib.e_sqlite3', 'EngineDependency']:
+            changed = engine_dependencies()
+            changed['libraries'][package + '/1.0.0']['sha512'] = 'sha512-' + base64.b64encode(b'b' * 64).decode()
+            self.assertNotEqual(migration_engine_identity(json.dumps(changed).encode()), baseline)
+        del value['libraries']['EngineDependency/1.0.0']
+        with self.assertRaises(MigrationMetadataRejected):
+            migration_engine_identity(json.dumps(value).encode())
+
+    def test_engine_identity_refuses_missing_native_packages_and_inconsistent_resolution(self):
+        for mutate in [lambda value: value['libraries'].pop('SQLitePCLRaw.lib.e_sqlite3/1.0.0'),
+                       lambda value: value['targets']['.NETCoreApp,Version=v10.0']['dbup-core/1.0.0']['dependencies'].update(EngineDependency='2.0.0'),
+                       lambda value: value['libraries'].update({'DBUP-CORE/1.0.0': value['libraries']['dbup-core/1.0.0']}),
+                       lambda value: value['libraries']['dbup-core/1.0.0'].update(sha512='not-a-checksum')]:
+            value = engine_dependencies()
+            mutate(value)
+            with self.assertRaises(MigrationMetadataRejected):
+                migration_engine_identity(json.dumps(value).encode())
+        original = engine_dependencies()
+        changed = engine_dependencies()
+        changed['runtimeTarget']['name'] = '.NETCoreApp,Version=v11.0'
+        changed['targets']['.NETCoreApp,Version=v11.0'] = changed['targets'].pop('.NETCoreApp,Version=v10.0')
+        self.assertNotEqual(migration_engine_identity(json.dumps(original).encode()), migration_engine_identity(json.dumps(changed).encode()))
 
     def test_changed_sql_or_policy_cannot_reuse_a_descriptor_binding(self):
         for field, value in [('sha256', 'c' * 64), ('delivery', 'manual')]:

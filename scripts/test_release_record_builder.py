@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from release_record import CONTRACT_PATHS, MIGRATION_CONTRACT_PATHS
-from test_migration_record import DESCRIPTOR
+from test_migration_record import DESCRIPTOR, engine_dependencies
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,6 +31,7 @@ class ReleaseBuilderTests(unittest.TestCase):
             (state / 'migration-catalogue.json').write_text(json.dumps(DESCRIPTOR))
             names = ['Hangfire.AspNetCore', 'Hangfire.Core', 'Hangfire.NetCore', 'Hangfire.Storage.SQLite', 'sqlite-net-pcl']
             (state / 'Ignite.Api.deps.json').write_text(json.dumps({'libraries': {name + '/1.0.0': {'type': 'package', 'sha512': 'sha512-' + base64.b64encode(b'a' * 64).decode()} for name in names}}))
+            (state / 'Ignite.Migrations.deps.json').write_text(json.dumps(engine_dependencies()))
             docker = base / 'docker'
             docker.write_text('#!/usr/bin/env python3\nimport os,runpy\nos.environ["FIXTURE_ROOT"]=' + repr(str(state)) + '\nrunpy.run_path(' + repr(str(ROOT / 'scripts/fixtures/migration_image.py')) + ', run_name="__main__")\n')
             docker.chmod(0o700)
@@ -43,6 +44,7 @@ class ReleaseBuilderTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             record = json.loads(output.read_text())
             self.assertEqual(record['schema'], 2)
+            self.assertRegex(record['migration_engine_sha256'], r'^[a-f0-9]{64}$')
             self.assertEqual(record['migrations']['catalogue_sha256'], DESCRIPTOR['catalogue_sha256'])
             commands = [json.loads(line) for line in (state / 'commands.jsonl').read_text().splitlines()]
             self.assertFalse(any(row[0] in ['run', 'start', 'exec'] for row in commands))

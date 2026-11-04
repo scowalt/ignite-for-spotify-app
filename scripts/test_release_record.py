@@ -6,8 +6,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from test_migration_record import DESCRIPTOR
-from release_record import CONTRACT_PATHS, MIGRATION_CONTRACT_PATHS, runtime_contract, ReleasePending, ReleaseRejected, SignatureProof, create_release_record, deployment_contract, validate_release
+from test_migration_record import DESCRIPTOR, ENGINE_IDENTITY, HANGFIRE_IDENTITY, engine_dependencies
+from release_record import MigrationDependencyPolicy, CONTRACT_PATHS, MIGRATION_CONTRACT_PATHS, runtime_contract, ReleasePending, ReleaseRejected, SignatureProof, create_release_record, deployment_contract, validate_release
 
 
 class ReleaseRecordTests(unittest.TestCase):
@@ -50,16 +50,24 @@ class ReleaseRecordTests(unittest.TestCase):
     def test_version_two_binds_migration_and_job_storage_metadata_to_the_release(self):
         migrations = {'protocol': 1, 'catalogue_sha256': '1' * 64, 'baseline_schema_sha256': '2' * 64,
                       'schema_sha256': '3' * 64, 'migration_count': 2}
-        record = self.record | {'schema': 2, 'migrations': migrations, 'hangfire_sha256': '4' * 64}
+        record = self.record | {'schema': 2, 'migrations': migrations, 'hangfire_sha256': '4' * 64, 'migration_engine_sha256': '5' * 64}
         with self.assertRaises(ReleaseRejected):
             validate_release(json.dumps(record).encode(), self.proof, self.run, 'b' * 64)
-        release = validate_release(json.dumps(record).encode(), self.proof, self.run, 'b' * 64, allow_migrations=True)
+        dependencies = MigrationDependencyPolicy('5' * 64, '4' * 64)
+        release = validate_release(json.dumps(record).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
         self.assertEqual(release.migrations.catalogue_sha256, '1' * 64)
         self.assertEqual(release.hangfire_sha256, '4' * 64)
+        self.assertEqual(release.migration_engine_sha256, '5' * 64)
+        with self.assertRaises(ReleaseRejected):
+            validate_release(json.dumps(self.record).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
+        incomplete = dict(record)
+        del incomplete['migration_engine_sha256']
+        with self.assertRaises(ReleaseRejected):
+            validate_release(json.dumps(incomplete).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
         for change in [{'migrations': None}, {'migrations': migrations | {'protocol': True}},
-                       {'hangfire_sha256': 'not-a-hash'}, {'schema': 1}]:
+                       {'hangfire_sha256': 'not-a-hash'}, {'migration_engine_sha256': 'invalid'}, {'migration_engine_sha256': '6' * 64}, {'hangfire_sha256': '7' * 64}, {'schema': 1}]:
             with self.subTest(change=change), self.assertRaises(ReleaseRejected):
-                validate_release(json.dumps(record | change).encode(), self.proof, self.run, 'b' * 64, allow_migrations=True)
+                validate_release(json.dumps(record | change).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
 
     def test_signature_must_bind_the_trusted_publisher_and_this_revision(self):
         for changes in [
@@ -196,16 +204,19 @@ class ReleaseRecordTests(unittest.TestCase):
                    'GITHUB_EVENT_NAME': 'push', 'GITHUB_SHA': 'a' * 40,
                    'GITHUB_RUN_ID': '123', 'GITHUB_RUN_ATTEMPT': '1', 'GITHUB_RUN_NUMBER': '42'}
             descriptor = json.dumps(DESCRIPTOR).encode()
-            payload = create_release_record(root, env, self.record['images'], migration_descriptor=descriptor, backend_deps=deps)
+            engine = json.dumps(engine_dependencies()).encode()
+            payload = create_release_record(root, env, self.record['images'], migration_descriptor=descriptor, backend_deps=deps, migration_deps=engine)
             self.assertEqual(json.loads(payload)['schema'], 2)
-            verified = validate_release(payload, self.proof, self.run, deployment_contract(root, migration_protocol=True), allow_migrations=True)
+            self.assertRegex(json.loads(payload)['migration_engine_sha256'], r'^[a-f0-9]{64}$')
+            pins = MigrationDependencyPolicy(ENGINE_IDENTITY, HANGFIRE_IDENTITY)
+            verified = validate_release(payload, self.proof, self.run, deployment_contract(root, migration_protocol=True), migration_dependencies=pins)
             self.assertEqual(verified.migrations.catalogue_sha256, DESCRIPTOR['catalogue_sha256'])
-            for missing in [{'migration_descriptor': descriptor}, {'backend_deps': deps}]:
+            for missing in [{'migration_descriptor': descriptor}, {'backend_deps': deps}, {'migration_deps': engine}, {'migration_descriptor': descriptor, 'backend_deps': deps}]:
                 with self.assertRaises(ReleaseRejected):
                     create_release_record(root, env, self.record['images'], **missing)
             (migrations / '0002_note.sql').write_text('SELECT 1;\n')
             with self.assertRaises(ReleaseRejected):
-                create_release_record(root, env, self.record['images'], migration_descriptor=descriptor, backend_deps=deps)
+                create_release_record(root, env, self.record['images'], migration_descriptor=descriptor, backend_deps=deps, migration_deps=engine)
 
     def test_finishing_trusted_workflow_is_deferred_not_treated_as_a_deployment_failure(self):
         with self.assertRaises(ReleasePending):

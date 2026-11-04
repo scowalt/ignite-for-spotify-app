@@ -146,6 +146,66 @@ def hangfire_identity(payload):
     return hashlib.sha256(text.encode('ascii')).hexdigest()
 
 
+def migration_engine_identity(payload):
+    value = decode(payload, HISTORY_LIMIT)
+    if not isinstance(value, dict) or not isinstance(value.get('runtimeTarget'), dict):
+        _reject()
+    target_name = value['runtimeTarget'].get('name')
+    libraries, targets = value.get('libraries'), value.get('targets')
+    if (not isinstance(target_name, str) or not re.fullmatch(r'[A-Za-z0-9.,=+/_-]{1,256}', target_name) or
+            not isinstance(libraries, dict) or len(libraries) > 10000 or not isinstance(targets, dict)):
+        _reject()
+    target = targets.get(target_name)
+    if not isinstance(target, dict) or len(target) > 10000:
+        _reject()
+    identities = {}
+    for identity in libraries:
+        if not isinstance(identity, str) or '/' not in identity:
+            _reject()
+        name, version = identity.rsplit('/', 1)
+        name = name.lower()
+        if name in identities or len(name) > 128 or not re.fullmatch(r'[a-z0-9._-]+', name):
+            _reject()
+        identities[name] = (identity, version)
+    required = {'dbup-core', 'dbup-sqlite', 'fsharp.core', 'microsoft.data.sqlite.core', 'sqlitepclraw.core',
+                'sqlitepclraw.bundle_e_sqlite3', 'sqlitepclraw.lib.e_sqlite3', 'sqlitepclraw.provider.e_sqlite3'}
+    if not required.issubset(identities):
+        _reject()
+    pending = [name for name in identities if name.startswith(('dbup-', 'sqlitepclraw.', 'microsoft.data.sqlite')) or name == 'fsharp.core']
+    found = {}
+    while pending:
+        name = pending.pop()
+        if name in found:
+            continue
+        identity, version = identities[name]
+        metadata, assets = libraries[identity], target.get(identity)
+        if (not re.fullmatch(r'[0-9]+(?:\.[0-9]+){1,3}(?:[-+][A-Za-z0-9.-]+)?', version) or
+                not isinstance(metadata, dict) or metadata.get('type') != 'package' or not isinstance(assets, dict)):
+            _reject()
+        checksum = metadata.get('sha512')
+        if not isinstance(checksum, str) or not checksum.startswith('sha512-') or len(checksum) != 95:
+            _reject()
+        try:
+            digest = base64.b64decode(checksum[7:], validate=True)
+        except ValueError:
+            raise MigrationMetadataRejected('migration_metadata_invalid') from None
+        if len(digest) != 64:
+            _reject()
+        dependencies = assets.get('dependencies', {})
+        if not isinstance(dependencies, dict) or len(dependencies) > 10000:
+            _reject()
+        edges = []
+        for dependency, resolved in dependencies.items():
+            dependency = dependency.lower()
+            if dependency not in identities or identities[dependency][1] != resolved or dependency in edges:
+                _reject()
+            edges.append(dependency)
+            pending.append(dependency)
+        found[name] = {'name': name, 'version': version, 'sha512': digest.hex(), 'dependencies': sorted(edges)}
+    canonical = {'target': target_name, 'packages': [found[name] for name in sorted(found)]}
+    return hashlib.sha256(b'ignite-migration-engine-v1\n' + json.dumps(canonical, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
 def verify_source_descriptor(payload, root):
     descriptor = parse_descriptor(payload)
     root = Path(root).resolve()

@@ -11,7 +11,7 @@ import uuid
 
 from deployment_process import OperationFailed, run
 from migration_image import metadata_file
-from migration_record import verify_source_descriptor
+from migration_record import verify_source_descriptor, migration_engine_identity
 from migration_tool import MigrationTool
 
 
@@ -81,6 +81,8 @@ class MigrationStartupNativeTests(unittest.TestCase):
                                   '--label', 'ignite.test-migration=' + self.operation, '--entrypoint', '/not-executed', self.image]).decode().strip()
         try:
             content = metadata_file(self.docker(['cp', identifier + ':/app/migration-catalogue.json', '-'], limit=1024**2 + 65536), 'migration-catalogue.json', 1024**2)
+            engine = metadata_file(self.docker(['cp', identifier + ':/app/migrations/Ignite.Migrations.deps.json', '-'], limit=2 * 1024**2 + 65536), 'Ignite.Migrations.deps.json', 2 * 1024**2)
+            self.assertRegex(migration_engine_identity(engine), r'^[a-f0-9]{64}$')
             return verify_source_descriptor(content, ROOT)
         finally:
             self.docker(['rm', identifier])

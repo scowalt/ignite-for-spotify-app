@@ -39,8 +39,10 @@ def read_image_metadata(reference, revision, operation, *, docker, env):
         if not re.fullmatch(r'[a-f0-9]{64}', identifier):
             raise OperationFailed('inspection_identity_invalid')
         values = []
-        for name, maximum in [('migration-catalogue.json', 1024**2), ('Ignite.Api.deps.json', 2 * 1024**2)]:
-            payload = execute(['cp', identifier + ':/app/' + name, '-'], maximum + 65536)
+        for name, directory, maximum in [('migration-catalogue.json', '/app/', 1024**2),
+                                          ('Ignite.Api.deps.json', '/app/', 2 * 1024**2),
+                                          ('Ignite.Migrations.deps.json', '/app/migrations/', 2 * 1024**2)]:
+            payload = execute(['cp', identifier + ':' + directory + name, '-'], maximum + 65536)
             values.append(metadata_file(payload, name, maximum))
         return tuple(values)
     finally:
@@ -55,7 +57,7 @@ def read_image_metadata(reference, revision, operation, *, docker, env):
 
 
 def metadata_file(payload, name, maximum):
-    if name not in ['migration-catalogue.json', 'Ignite.Api.deps.json'] or len(payload) > maximum + 65536:
+    if name not in ['migration-catalogue.json', 'Ignite.Api.deps.json', 'Ignite.Migrations.deps.json'] or len(payload) > maximum + 65536:
         raise OperationFailed('migration_image_metadata_invalid')
     try:
         with tarfile.open(fileobj=io.BytesIO(payload), mode='r:') as archive:

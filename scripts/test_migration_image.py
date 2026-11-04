@@ -32,12 +32,13 @@ class MigrationImageTests(unittest.TestCase):
             fixture = Path(__file__).parent / 'fixtures/migration_image.py'
             reference = 'ghcr.io/scowalt/ignite-for-spotify-app/backend@sha256:' + 'e' * 64
             env = {**os.environ, 'FIXTURE_ROOT': str(root)}
-            manifest, deps = read_image_metadata(reference, 'a' * 40, 'fixture', docker=[sys.executable, str(fixture)], env=env)
-            self.assertEqual((manifest, deps), (b'{}', b'{}'))
+            manifest, deps, engine = read_image_metadata(reference, 'a' * 40, 'fixture', docker=[sys.executable, str(fixture)], env=env)
+            self.assertEqual((manifest, deps, engine), (b'{}', b'{}', b'{}'))
             self.assertFalse((root / 'container').exists())
             commands = [json.loads(line) for line in (root / 'commands.jsonl').read_text().splitlines()]
             self.assertFalse(any(row[0] in ['run', 'start', 'exec'] for row in commands))
             self.assertEqual(commands[-1], ['rm', 'c' * 64])
+            self.assertIn(['cp', 'c' * 64 + ':/app/migrations/Ignite.Migrations.deps.json', '-'], commands)
 
     def test_failed_copy_is_cleaned_but_unknown_ownership_is_not_removed(self):
         for mode in ['bad-copy', 'ownership-drift']:

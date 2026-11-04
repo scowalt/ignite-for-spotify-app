@@ -5,7 +5,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-03 15:51'
-updated_date: '2026-11-03 23:55'
+updated_date: '2026-11-04 00:15'
 labels:
   - deployment
   - database
@@ -85,4 +85,9 @@ Added bounded validated migration plans and a private fsynced per-attempt databa
 New real SQLite process tests cover uncommitted spill/kill, commit-before-controller-death, commit followed by error, no-op, concurrency, metadata drift, invalid/expired backup evidence and failed durable writes. A test-only .NET writer image now proves actual Docker-daemon behavior: killing the controller leaves its writer container running; restarted cleanup stops it before native settlement, preserving either rolled-back or committed history correctly. All five real-container startup/writer cases pass locally. CI will build this nonpublished fixture and run the same cases. No production operations or activation.
 
 Recovery slice verification: 148 script tests run successfully with both native image fixtures configured; 141 execute and seven pre-existing unrelated native fixtures remain skipped locally. This includes all five actual Docker startup/writer cases and 13 durable SQLite transition cases. The test-only writer rebuild has no new compiler warnings; actionlint and 340-file comment scan pass. The legacy rollback guard also refuses journals discovered during preflight/cleanup. Full protected exact-head CI is next; no AC is marked complete and the production operator remains untouched.
+
+Recovery head 356c839 (includes current-main Caddy update) passed full hosted CI 41743032295, including actual native writer-fixture build/crash tests and unchanged image/security/notice gates; publication remained skipped.
+Added resolved migration-engine binding next: source-bound v2 records require migration_engine_sha256 from the independently published CLI dependency graph, in addition to Hangfire identity. Identity covers target framework, package versions/content and transitive edges for DbUp, SQLite provider/native libraries and FSharp.Core. Three bounded files are copied from an unstarted immutable image. Validation now requires reviewed MigrationDependencyPolicy pins instead of a boolean opt-in; changed identities and schema-v1 downgrades are refused. Default transport still has no migration policy. Transition evidence retains the engine identity. Actual local image metadata produced engine hash f307982bc4cf65d0ff1088dfc596266471821a55eac7341d4394e09f619f5ae4 without executing it. Outer operator/policy/runtime activation remains unfinished and unauthorized.
+
+Engine-binding verification: 150 script tests run with actual backend/writer fixtures configured, 143 executed successfully and seven older native fixtures skipped. Independent fixed canonical hash vectors cover engine and Hangfire identities. Missing native packages, inconsistent dependency resolution, changed content/framework, mismatched policy pins and valid signed-v1 downgrade are refused. Actual three-file unstarted-image metadata extraction passes. Comment policy remains clean at 340 files. This changes only the still-unactivated v2/interface/journal formats; the live v1 path and deployed operator are unchanged.
 <!-- SECTION:NOTES:END -->

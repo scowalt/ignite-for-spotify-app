@@ -180,6 +180,30 @@ Unknown ownership or extra mounts stop cleanup rather than touching another cont
 Neither a clean process exit nor a successful cleanup is proof of migration outcome: the
 controller must still inspect durable history before admitting images.
 
+## Signed dependency compatibility (not activated)
+
+Schema-v2 records require both `hangfire_sha256` and `migration_engine_sha256`. The
+publisher copies three bounded regular metadata files from the exact unstarted backend
+image: its catalogue descriptor, API dependencies and independently published CLI
+`/app/migrations/Ignite.Migrations.deps.json`. Neither metadata extraction nor release
+creation runs the backend or receives production service credentials.
+
+The engine identity binds the CLI target framework and the resolved package versions,
+NuGet SHA-512 content and dependency edges reachable from DbUp, the Microsoft SQLite
+provider, all SQLitePCLRaw packages (including native assets) and FSharp.Core. Missing
+required native packages, duplicate identities and unresolved/inconsistent edges fail.
+Unrelated packages outside that closure do not affect this identity. This complements,
+not replaces, source/operating-contract checks and actual image verification; it is not
+a declaration that arbitrary runtime or package upgrades are compatible.
+
+`validate_release` accepts migration metadata only with an explicit
+`MigrationDependencyPolicy` containing independently reviewed engine and Hangfire pins.
+A boolean opt-in alone is insufficient. A changed identity or a schema-v1 downgrade is
+refused; never derive the policy pins from the incoming release to make it pass. The
+per-attempt transition journal retains both identities. Default transport still supplies
+no migration policy and therefore cannot enable schema-v2 releases. Host policy/installer
+and coordinated runtime integration remain unfinished.
+
 ## Durable database-transition journal (not activated)
 
 `migration_plan.py` validates complete prior history/schema and the immutable candidate
@@ -190,7 +214,7 @@ and a baseline-only candidate. Target history must preserve all prior timestamps
 
 `MigrationTransition` records bounded private `migration.json` evidence in the existing
 artifact-specific attempt directory. Preparation binds it to the authenticated release's
-artifact, source, backend image, contract, Hangfire identity and catalogue summary. The
+artifact, source, backend image, contract, engine/Hangfire identities and catalogue summary. The
 caller still owns signature/policy verification, the global deployment lock, physical
 volume/configuration checks and actual encrypted backup/restore verification. A per-attempt
 lock supplements, but does not replace, global deployment serialization.
