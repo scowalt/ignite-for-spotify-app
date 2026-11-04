@@ -5,6 +5,7 @@
     <Project Path="src/Ignite.Infrastructure/Ignite.Infrastructure.fsproj" />
     <Project Path="src/Ignite.Jobs/Ignite.Jobs.fsproj" />
     <Project Path="src/Ignite.Matching/Ignite.Matching.fsproj" />
+    <Project Path="src/Ignite.Migrations/Ignite.Migrations.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Ignite.Core.Tests/Ignite.Core.Tests.fsproj" />

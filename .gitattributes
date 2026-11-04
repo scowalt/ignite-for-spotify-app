@@ -1,1 +1,2 @@
 third-party/DEPENDENCY_LICENSES.txt -whitespace
+*.sql text eol=lf

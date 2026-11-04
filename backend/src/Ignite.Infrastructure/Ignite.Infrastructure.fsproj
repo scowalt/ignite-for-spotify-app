@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="1.8.2" />
+    <PackageReference Include="dbup-core" Version="6.1.1" />
+    <PackageReference Include="dbup-sqlite" Version="6.0.4" />
     <PackageReference Include="FSharp.Control.TaskSeq" Version="1.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.20" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
@@ -25,8 +27,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Data/Migrations/*.sql" LogicalName="Ignite.Migrations.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Data/Migrations/manifest.json" LogicalName="Ignite.MigrationDelivery.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Config.fs" />
     <Compile Include="Data/DatabaseConfiguration.fs" />
+    <Compile Include="Data/MigrationContracts.fs" />
+    <Compile Include="Data/MigrationExpansion.fs" />
+    <Compile Include="Data/DatabaseMigrations.fs" />
+    <Compile Include="Data/MigrationCatalogue.fs" />
+    <Compile Include="Data/ApplicationMigrations.fs" />
+    <Compile Include="Data/DatabaseStartup.fs" />
     <Compile Include="Data/IgniteDbContext.fs" />
     <Compile Include="Data/SongRepository.fs" />
     <Compile Include="Data/UserSessionRepository.fs" />

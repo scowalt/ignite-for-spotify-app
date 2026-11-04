@@ -205,7 +205,15 @@ def copy_package_notices(archive, directory):
 def collect_dotnet(args):
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
-    dependencies = json.loads(Path(args.deps).read_text())["libraries"]
+    dependencies = {}
+    sources = [args.deps] if isinstance(args.deps, str) else args.deps
+    for source in sources:
+        for spec, library in json.loads(Path(source).read_text())["libraries"].items():
+            if library["type"] != "package":
+                continue
+            if spec in dependencies and dependencies[spec] != library:
+                raise ValueError("Conflicting published package identity")
+            dependencies[spec] = library
     cache = {}
     components = []
     for spec, library in sorted(dependencies.items()):
@@ -285,7 +293,7 @@ def collect_dotnet(args):
             for c in components
             if not c["notice_files"]
         ],
-        "scope": "Packages in the published deps.json, not the SDK/test dependency graph. Texts copied unchanged from packages and, where available, their pinned upstream source commits. Framework and OS notices remain in the base image.",
+        "scope": "Packages in every supplied published deps.json, not the SDK/test dependency graph. Texts copied unchanged from packages and, where available, their pinned upstream source commits. Framework and OS notices remain in the base image.",
     }
 
 
@@ -304,7 +312,8 @@ def main():
     ):
         go.add_argument("--" + option, required=True)
     dotnet = sub.add_parser("dotnet")
-    for option in ("deps", "packages", "output"):
+    dotnet.add_argument("--deps", required=True, action="append")
+    for option in ("packages", "output"):
         dotnet.add_argument("--" + option, required=True)
     args = parser.parse_args()
     result = collect_go(args) if args.kind == "go" else collect_dotnet(args)

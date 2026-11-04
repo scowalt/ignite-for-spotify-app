@@ -1,3 +1,4 @@
+import base64
 from dataclasses import replace
 import copy
 import json
@@ -5,7 +6,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from release_record import CONTRACT_PATHS, ReleasePending, ReleaseRejected, SignatureProof, create_release_record, deployment_contract, validate_release
+from test_migration_record import DESCRIPTOR, ENGINE_IDENTITY, HANGFIRE_IDENTITY, engine_dependencies
+from release_record import MigrationDependencyPolicy, CONTRACT_PATHS, MIGRATION_CONTRACT_PATHS, runtime_contract, ReleasePending, ReleaseRejected, SignatureProof, create_release_record, deployment_contract, validate_release
 
 
 class ReleaseRecordTests(unittest.TestCase):
@@ -44,6 +46,28 @@ class ReleaseRecordTests(unittest.TestCase):
         self.assertEqual(release.order, (42, 1))
         self.assertEqual(dict(release.images), self.record['images'])
         self.assertEqual(release.artifact_digest, 'sha256:' + 'f' * 64)
+
+    def test_version_two_binds_migration_and_job_storage_metadata_to_the_release(self):
+        migrations = {'protocol': 1, 'catalogue_sha256': '1' * 64, 'baseline_schema_sha256': '2' * 64,
+                      'schema_sha256': '3' * 64, 'migration_count': 2}
+        record = self.record | {'schema': 2, 'migrations': migrations, 'hangfire_sha256': '4' * 64, 'migration_engine_sha256': '5' * 64}
+        with self.assertRaises(ReleaseRejected):
+            validate_release(json.dumps(record).encode(), self.proof, self.run, 'b' * 64)
+        dependencies = MigrationDependencyPolicy('5' * 64, '4' * 64)
+        release = validate_release(json.dumps(record).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
+        self.assertEqual(release.migrations.catalogue_sha256, '1' * 64)
+        self.assertEqual(release.hangfire_sha256, '4' * 64)
+        self.assertEqual(release.migration_engine_sha256, '5' * 64)
+        with self.assertRaises(ReleaseRejected):
+            validate_release(json.dumps(self.record).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
+        incomplete = dict(record)
+        del incomplete['migration_engine_sha256']
+        with self.assertRaises(ReleaseRejected):
+            validate_release(json.dumps(incomplete).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
+        for change in [{'migrations': None}, {'migrations': migrations | {'protocol': True}},
+                       {'hangfire_sha256': 'not-a-hash'}, {'migration_engine_sha256': 'invalid'}, {'migration_engine_sha256': '6' * 64}, {'hangfire_sha256': '7' * 64}, {'schema': 1}]:
+            with self.subTest(change=change), self.assertRaises(ReleaseRejected):
+                validate_release(json.dumps(record | change).encode(), self.proof, self.run, 'b' * 64, migration_dependencies=dependencies)
 
     def test_signature_must_bind_the_trusted_publisher_and_this_revision(self):
         for changes in [
@@ -117,6 +141,28 @@ class ReleaseRecordTests(unittest.TestCase):
             with self.assertRaises(ReleaseRejected):
                 deployment_contract(root)
 
+    def test_migration_protocol_pins_safety_code_separately_from_host_configuration_and_sql(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in CONTRACT_PATHS + MIGRATION_CONTRACT_PATHS:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('reviewed fixture')
+            legacy = deployment_contract(root)
+            host = runtime_contract(root)
+            full = deployment_contract(root, migration_protocol=True)
+            self.assertNotEqual(full, legacy)
+            sql = root / 'backend/src/Ignite.Infrastructure/Data/Migrations/0002_added.sql'
+            sql.parent.mkdir(parents=True, exist_ok=True)
+            sql.write_text('CREATE TABLE extra (id INTEGER);\n')
+            self.assertEqual(deployment_contract(root, migration_protocol=True), full)
+            (root / MIGRATION_CONTRACT_PATHS[0]).write_text('changed migration safety logic')
+            self.assertNotEqual(deployment_contract(root, migration_protocol=True), full)
+            self.assertEqual(runtime_contract(root), host)
+            self.assertEqual(deployment_contract(root), legacy)
+            (root / CONTRACT_PATHS[0]).write_text('changed runtime config')
+            self.assertNotEqual(runtime_contract(root), host)
+
     def test_publisher_record_is_bounded_to_trusted_ci_metadata(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -139,6 +185,38 @@ class ReleaseRecordTests(unittest.TestCase):
             for changed in [{'GITHUB_REF': 'refs/pull/1/merge'}, {'GITHUB_REPOSITORY': 'other/repo'}, {'GITHUB_RUN_ID': 'no'}, {'GITHUB_EVENT_NAME': 'pull_request'}]:
                 with self.subTest(changed=changed), self.assertRaises(ReleaseRejected):
                     create_release_record(root, {**env, **changed}, self.record['images'])
+
+    def test_publisher_creates_v2_only_with_source_bound_catalogue_and_resolved_storage_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in CONTRACT_PATHS + MIGRATION_CONTRACT_PATHS:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('reviewed fixture')
+            migrations = root / 'backend/src/Ignite.Infrastructure/Data/Migrations'
+            migrations.mkdir()
+            (migrations / '0001_initial.sql').write_text('CREATE TABLE sample (id INTEGER PRIMARY KEY, value TEXT);\n')
+            (migrations / '0002_note.sql').write_text('ALTER TABLE sample ADD COLUMN note TEXT;\n')
+            (migrations / 'manifest.json').write_text(json.dumps({'schema': 1, 'migrations': [{key: row[key] for key in ['id', 'delivery']} for row in DESCRIPTOR['migrations']]}))
+            names = ['Hangfire.AspNetCore', 'Hangfire.Core', 'Hangfire.NetCore', 'Hangfire.Storage.SQLite', 'sqlite-net-pcl']
+            deps = json.dumps({'libraries': {name + '/1.0.0': {'type': 'package', 'sha512': 'sha512-' + base64.b64encode(b'a' * 64).decode()} for name in names}}).encode()
+            env = {'GITHUB_REPOSITORY': 'scowalt/ignite-for-spotify-app', 'GITHUB_REF': 'refs/heads/main',
+                   'GITHUB_EVENT_NAME': 'push', 'GITHUB_SHA': 'a' * 40,
+                   'GITHUB_RUN_ID': '123', 'GITHUB_RUN_ATTEMPT': '1', 'GITHUB_RUN_NUMBER': '42'}
+            descriptor = json.dumps(DESCRIPTOR).encode()
+            engine = json.dumps(engine_dependencies()).encode()
+            payload = create_release_record(root, env, self.record['images'], migration_descriptor=descriptor, backend_deps=deps, migration_deps=engine)
+            self.assertEqual(json.loads(payload)['schema'], 2)
+            self.assertRegex(json.loads(payload)['migration_engine_sha256'], r'^[a-f0-9]{64}$')
+            pins = MigrationDependencyPolicy(ENGINE_IDENTITY, HANGFIRE_IDENTITY)
+            verified = validate_release(payload, self.proof, self.run, deployment_contract(root, migration_protocol=True), migration_dependencies=pins)
+            self.assertEqual(verified.migrations.catalogue_sha256, DESCRIPTOR['catalogue_sha256'])
+            for missing in [{'migration_descriptor': descriptor}, {'backend_deps': deps}, {'migration_deps': engine}, {'migration_descriptor': descriptor, 'backend_deps': deps}]:
+                with self.assertRaises(ReleaseRejected):
+                    create_release_record(root, env, self.record['images'], **missing)
+            (migrations / '0002_note.sql').write_text('SELECT 1;\n')
+            with self.assertRaises(ReleaseRejected):
+                create_release_record(root, env, self.record['images'], migration_descriptor=descriptor, backend_deps=deps, migration_deps=engine)
 
     def test_finishing_trusted_workflow_is_deferred_not_treated_as_a_deployment_failure(self):
         with self.assertRaises(ReleasePending):

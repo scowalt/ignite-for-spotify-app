@@ -8,11 +8,10 @@ from pathlib import Path
 import re
 import stat
 import sys
-import tempfile
 
 from deployment_runtime import DockerRuntime
-from deployment_transaction import Deployment
-from release_record import ReleasePending, ReleaseRecord, deployment_contract
+from deployment_transaction import Deployment, validate_migration_policy
+from release_record import MigrationDependencyPolicy, ReleasePending, ReleaseRecord, deployment_contract, runtime_contract
 from release_signature import SignatureVerifier
 from release_transport import load_release
 
@@ -30,13 +29,22 @@ def poll_lock(root):
         os.close(descriptor)
 
 
+def unique_fields(pairs):
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise ValueError('Duplicate operator field.')
+        value[key] = item
+    return value
+
+
 def private_json(path):
     descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     with os.fdopen(descriptor, 'rb') as stream:
         metadata = os.fstat(stream.fileno())
-        if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid() or metadata.st_mode & 0o077 or metadata.st_size > 65536:
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid() or metadata.st_mode & 0o077 or metadata.st_size > 65536 or metadata.st_nlink != 1:
             raise ValueError('Invalid operator file.')
-        return json.loads(stream.read(65537))
+        return json.loads(stream.read(65537), object_pairs_hook=unique_fields)
 
 
 def main():
@@ -49,17 +57,34 @@ def main():
         root = args.state
         deployment = Deployment(root)
         policy = private_json(root / 'policy.json')
-        if (set(policy) != {'schema', 'contract_sha256', 'repository_id', 'operator_sha'} or type(policy['schema']) is not int or policy['schema'] != 1 or
+        fields = {'schema', 'contract_sha256', 'repository_id', 'operator_sha'}
+        if policy.get('schema') == 2:
+            fields.add('migration_policy')
+        if (set(policy) != fields or type(policy['schema']) is not int or policy['schema'] not in [1, 2] or
                 any(not isinstance(policy[key], str) or not re.fullmatch(r'[a-f0-9]{64}', policy[key]) for key in ['contract_sha256', 'repository_id']) or
                 not re.fullmatch(r'[a-f0-9]{40}', policy['operator_sha'])):
             raise ValueError('Invalid deployment policy.')
-        if Path(__file__).resolve().parents[1].name != policy['operator_sha']:
+        bundle = Path(__file__).resolve().parents[1]
+        if bundle.name != policy['operator_sha']:
             raise ValueError('Operator bundle version differs from policy.')
         checkout = Path.home() / 'Code/ignite-for-spotify-app'
         anchor = Path.home() / 'Code/ignite-for-spotify-2/docker'
-        if deployment_contract(checkout) != policy['contract_sha256']:
+        migration_policy = None
+        dependencies = None
+        if policy['schema'] == 2:
+            migration_policy = validate_migration_policy(policy['migration_policy'])
+            if (deployment_contract(bundle, migration_protocol=True) != policy['contract_sha256'] or
+                    runtime_contract(checkout) != migration_policy['runtime_contract_sha256'] or args.action == 'bootstrap'):
+                raise ValueError('Reviewed migration operator/configuration differs.')
+            dependencies = MigrationDependencyPolicy(migration_policy['engine_sha256'], migration_policy['hangfire_sha256'])
+        elif deployment_contract(checkout) != policy['contract_sha256']:
             raise ValueError('Installed contract differs from policy.')
-        runtime = DockerRuntime(checkout, anchor, policy['contract_sha256'], policy['repository_id'])
+        if args.action != 'bootstrap':
+            state = deployment.status()
+            if (state['schema'] != policy['schema'] or state['contract_sha256'] != policy['contract_sha256'] or
+                    (migration_policy is not None and state['migration_policy'] != migration_policy)):
+                raise ValueError('Ledger and operator policy differ; no automatic conversion.')
+        runtime = DockerRuntime(checkout, anchor, policy['contract_sha256'], policy['repository_id'], migration_policy=migration_policy)
         if args.action == 'status':
             print(json.dumps(deployment.status(), sort_keys=True))
             return 0
@@ -84,27 +109,19 @@ def main():
             else:
                 if args.action == 'check' and deployment.status()['transaction'] is not None:
                     raise ValueError('Read-only preflight is unavailable during recovery.')
-                outcome = deployment.run(None, runtime)
+                outcome = 'waiting' if args.action == 'check' else deployment.run(None, runtime)
                 if outcome != 'waiting':
                     print(json.dumps({'outcome': outcome}))
                     return 0 if outcome in ['deployed', 'unchanged'] else 1
                 verifier = SignatureVerifier(Path.home() / '.local/lib/ignite-deployer/tools/cosign-v3.1.4')
                 known_artifact = deployment.status()['active']['artifact_digest'] if args.action == 'once' else None
-                release = load_release(policy['contract_sha256'], docker=runtime.docker, verifier=verifier, known_artifact=known_artifact)
+                release = load_release(policy['contract_sha256'], docker=runtime.docker, verifier=verifier, known_artifact=known_artifact,
+                                       migration_dependencies=dependencies)
                 if release is None:
                     print(json.dumps({'outcome': 'unchanged'}))
                     return 0
                 if args.action == 'check':
-                    checks = root / 'checks'
-                    checks.mkdir(mode=0o700, exist_ok=True)
-                    with tempfile.TemporaryDirectory(dir=checks) as temporary:
-                        workspace = Path(temporary) / release.artifact_digest.removeprefix('sha256:')
-                        workspace.mkdir(mode=0o700)
-                        try:
-                            runtime.preflight(release, deployment.status()['active'], workspace)
-                        finally:
-                            runtime.cleanup(workspace)
-                    outcome = 'verified_without_deployment'
+                    outcome = deployment.check(release, runtime)
                 else:
                     outcome = deployment.run(release, runtime)
             print(json.dumps({'outcome': outcome}))

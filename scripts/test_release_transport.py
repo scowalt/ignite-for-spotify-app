@@ -13,7 +13,7 @@ from deployment_process import run
 
 from release_transport import load_release, record_from_image_archive
 from release_signature import SignatureVerifier
-from release_record import ReleaseRejected
+from release_record import MigrationDependencyPolicy, ReleaseRejected
 
 
 def archive(files):
@@ -79,6 +79,17 @@ class ReleaseTransportTests(unittest.TestCase):
                                   workflow_reader=lambda identifier: run if identifier == 123 else None)
             self.assertEqual(dict(loaded.images), images)
             self.assertEqual(loaded.artifact_digest, 'sha256:' + 'a' * 64)
+            record.update(schema=2, migrations={'protocol': 1, 'catalogue_sha256': '1' * 64, 'baseline_schema_sha256': '2' * 64,
+                                               'schema_sha256': '2' * 64, 'migration_count': 1},
+                          migration_engine_sha256='3' * 64, hangfire_sha256='4' * 64)
+            (root / 'image.tar').write_bytes(archive({'manifest.json': json.dumps([{'Layers': ['layer.tar']}]).encode(),
+                                                     'layer.tar': archive({'release.json': json.dumps(record).encode()})}))
+            verifier = SignatureVerifier(signer, hashlib.sha256(content.encode()).hexdigest())
+            with self.assertRaises(ReleaseRejected):
+                load_release('d' * 64, docker=[sys.executable, str(docker)], verifier=verifier, workflow_reader=lambda _: run)
+            loaded = load_release('d' * 64, docker=[sys.executable, str(docker)], verifier=verifier, workflow_reader=lambda _: run,
+                                  migration_dependencies=MigrationDependencyPolicy('3' * 64, '4' * 64))
+            self.assertEqual(loaded.migration_engine_sha256, '3' * 64)
 
     @unittest.skipUnless(os.environ.get('IGNITE_BACKUP_FIXTURE_IMAGE'), 'Requires the isolated Docker fixture environment.')
     def test_actual_docker_export_is_read_without_creating_a_container(self):

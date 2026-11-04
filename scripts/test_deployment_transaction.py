@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import replace
 from datetime import datetime, timezone
 import json
 import multiprocessing
@@ -11,6 +12,7 @@ from unittest.mock import patch
 
 from deployment_transaction import Deployment, StateRejected
 from release_record import ReleaseRecord
+from migration_record import MigrationSummary
 
 
 def image_set(character):
@@ -114,6 +116,15 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.active = {'source_sha': 'a' * 40, 'images': image_set('a'), 'order': [42, 1], 'artifact_digest': None}
         self.deployment.bootstrap(self.active, 'b' * 64)
 
+    def test_legacy_transactions_cannot_ignore_migration_metadata(self):
+        before = self.deployment.status()
+        release = replace(candidate(), migrations=MigrationSummary(1, '1' * 64, '2' * 64, '3' * 64, 2), hangfire_sha256='4' * 64)
+        with self.assertRaises(StateRejected):
+            self.deployment.run(release, self.runtime)
+        self.assertEqual(self.deployment.status(), before)
+        self.assertEqual(self.runtime.images, image_set('a'))
+        self.assertTrue(self.runtime.backup_running)
+
     def test_success_is_durable_and_polling_does_not_repeat_the_deployment(self):
         release = candidate()
         self.assertEqual(self.deployment.run(release, self.runtime), 'deployed')
@@ -152,6 +163,41 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(self.runtime.images, image_set('a'))
         self.assertTrue(self.runtime.backup_running)
         self.assertFalse(self.runtime.owned_plaintext)
+
+    def test_legacy_recovery_refuses_any_database_transition_journal(self):
+        self.runtime.interrupt_dependents = True
+        with self.assertRaises(InterruptedProcess):
+            self.deployment.run(candidate(), self.runtime)
+        workspace = self.root / candidate().artifact_digest.removeprefix('sha256:')
+        (workspace / 'migration.json').write_text('{}')
+        before = self.deployment.status()
+        before_plaintext = self.runtime.owned_plaintext
+        before_images = deepcopy(self.runtime.images)
+        self.assertEqual(Deployment(self.root).run(None, self.runtime), 'manual_recovery')
+        self.assertEqual(self.deployment.status(), before)
+        self.assertTrue(self.runtime.rollback_available)
+        self.assertEqual(self.runtime.owned_plaintext, before_plaintext)
+        self.assertEqual(self.runtime.images, before_images)
+        self.assertTrue((workspace / 'migration.json').exists())
+
+    def test_legacy_preflight_cannot_introduce_a_migration_journal_and_continue(self):
+        workspace = self.root / candidate().artifact_digest.removeprefix('sha256:')
+        self.runtime.during_preflight = lambda: (workspace / 'migration.json').write_text('{}')
+        self.assertEqual(self.deployment.run(candidate(), self.runtime), 'manual_recovery')
+        self.assertFalse(self.runtime.recovery_verified)
+        self.assertEqual(self.runtime.images, image_set('a'))
+        self.assertTrue(self.runtime.rollback_available)
+
+    def test_legacy_cleanup_cannot_hide_a_migration_journal_before_rollback(self):
+        workspace = self.root / candidate().artifact_digest.removeprefix('sha256:')
+        def create_journal_after_switch():
+            if self.runtime.images != image_set('a'):
+                (workspace / 'migration.json').write_text('{}')
+        self.runtime.during_cleanup = create_journal_after_switch
+        self.runtime.fail_backend_health = True
+        self.assertEqual(self.deployment.run(candidate(), self.runtime), 'manual_recovery')
+        self.assertTrue(self.runtime.rollback_available)
+        self.assertNotEqual(self.runtime.images, image_set('a'))
 
     def test_failed_rollback_cleans_owned_plaintext_and_requires_manual_recovery(self):
         self.runtime.fail_dependents = True

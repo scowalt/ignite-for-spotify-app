@@ -4,16 +4,36 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 
 from deployment_runtime import save_metadata
-from release_record import deployment_contract
+from deployment_transaction import Deployment, validate_migration_policy
+from release_record import deployment_contract, runtime_contract
 from release_signature import COSIGN_SHA256
+
+
+def private_policy(path):
+    def unique(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError('Duplicate policy field.')
+            value[key] = item
+        return value
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(descriptor, 'rb') as stream:
+        metadata = os.fstat(stream.fileno())
+        if (not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid() or metadata.st_mode & 0o077 or
+                metadata.st_nlink != 1 or metadata.st_size > 65536):
+            raise ValueError('Policy is not private and bounded.')
+        return json.loads(stream.read(65537), object_pairs_hook=unique)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--repository-id', required=True)
+    parser.add_argument('--migration-policy', type=Path)
     args = parser.parse_args()
     try:
         os.umask(0o077)
@@ -33,10 +53,21 @@ def main():
         with signer.open('rb') as stream:
             if hashlib.file_digest(stream, 'sha256').hexdigest() != COSIGN_SHA256:
                 raise ValueError('Signer integrity differs.')
+        checkout = home / 'Code/ignite-for-spotify-app'
         policy = {'schema': 1, 'operator_sha': bundle.name, 'repository_id': args.repository_id,
-                  'contract_sha256': deployment_contract(home / 'Code/ignite-for-spotify-app')}
+                  'contract_sha256': deployment_contract(checkout)}
+        if args.migration_policy is not None:
+            pins = validate_migration_policy(private_policy(args.migration_policy))
+            if runtime_contract(checkout) != pins['runtime_contract_sha256']:
+                raise ValueError('Reviewed host configuration differs.')
+            policy.update(schema=2, contract_sha256=deployment_contract(bundle, migration_protocol=True), migration_policy=pins)
+        if (state / 'state.json').exists() or (state / 'state.json').is_symlink() or args.migration_policy is not None:
+            ledger = Deployment(state).status()
+            if (ledger['schema'] != policy['schema'] or ledger['contract_sha256'] != policy['contract_sha256'] or
+                    (policy['schema'] == 2 and ledger['migration_policy'] != policy['migration_policy'])):
+                raise ValueError('Reviewed ledger transition required; no automatic upgrade.')
         policy_path = state / 'policy.json'
-        if policy_path.is_symlink() or (policy_path.exists() and json.loads(policy_path.read_text()) != policy):
+        if policy_path.is_symlink() or (policy_path.exists() and private_policy(policy_path) != policy):
             raise ValueError('Existing policy differs; no automatic replacement.')
         current = library / 'current'
         if current.exists() or current.is_symlink():

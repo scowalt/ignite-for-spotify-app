@@ -1,0 +1,11 @@
+ARG BACKEND_IMAGE
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402 AS fixture
+WORKDIR /src
+COPY backend/src/ backend/src/
+COPY backend/tests/Ignite.MigrationWriterFixture/ backend/tests/Ignite.MigrationWriterFixture/
+RUN dotnet publish backend/tests/Ignite.MigrationWriterFixture/Ignite.MigrationWriterFixture.fsproj -c Release -o /fixture
+
+FROM ${BACKEND_IMAGE}
+COPY --from=fixture /fixture/Ignite.Migrations.dll /app/migrations/Ignite.Migrations.dll
+COPY --from=fixture /fixture/Ignite.Migrations.deps.json /app/migrations/Ignite.Migrations.deps.json
+COPY --from=fixture /fixture/Ignite.Migrations.runtimeconfig.json /app/migrations/Ignite.Migrations.runtimeconfig.json

@@ -286,7 +286,7 @@ jobs:
       - name: Create coherent release record
         run: |
           printf '424e2c97d0b45fd7a6b608a87f090f35633f4c23ece5f092d48bba11aaf4bbfa  %s\n' "$(command -v cosign)" | sha256sum --check
-          python3 scripts/prepare-release-record.py --root . --output "$RUNNER_TEMP/release/release.json"
+          python3 scripts/prepare-release-record.py --migration-protocol --root . --output "$RUNNER_TEMP/release/release.json"
           cp LICENSE "$RUNNER_TEMP/release/LICENSE"
           docker buildx build --load --platform linux/amd64 --provenance=false --sbom=false \
             --file ops/deployer/Dockerfile.release \

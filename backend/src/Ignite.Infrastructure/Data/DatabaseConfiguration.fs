@@ -4,9 +4,6 @@ open System
 open System.IO
 open Microsoft.Data.Sqlite
 
-type DatabaseStartupOptions(requireExisting: bool) =
-    member _.RequireExisting = requireExisting
-
 [<RequireQualifiedAccess>]
 module DatabaseConfiguration =
     let private isRemoteConnectionString (connectionString: string) =
