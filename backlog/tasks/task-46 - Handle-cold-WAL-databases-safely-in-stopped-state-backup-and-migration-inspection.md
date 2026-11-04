@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-04 22:01'
-updated_date: '2026-11-04 22:47'
+updated_date: '2026-11-04 22:58'
 labels:
   - database
   - deployment
@@ -52,4 +52,6 @@ Confirmed the recorded production failure with a native cold-WAL fixture, then a
 Native green evidence now includes unchanged main-file/no-new-sidecar inspection, actual encrypted cold-WAL snapshot and exact restore, committed uncheckpointed WAL retained while a read-only reader holds an older snapshot, and a joined cold-WAL backup → inspection → adoption → real API health path. Hot-journal inspect-stopped remains rejected until explicit recovery. Runtime/controller call sites now distinguish stopped inspection from live verification, and the stopped entry point refuses active writers. No production changes were made.
 
 Full local verification: 190 backend tests pass with no skips. Python suite: 171 run, 170 executed successfully with real backend/writer/backup/Cosign fixtures, one pre-existing source-map CLI fixture deferred to its hosted job. Six actual backup tests pass, including cold WAL and retained uncheckpointed WAL; the joined backup/restore/adoption/health fixture passes. Hot-journal and sidecar-alias guards, caller quiescence, read-only mounts and source checksums are covered. Backend image security/secret/notice gates pass unchanged after tagging the local image in the verifier’s required namespace. Actionlint, formatting/diff checks and 344-file comment scan pass. Preparing draft fix/CI and an exact revised recovery proposal; production remains untouched.
+
+Hosted CI at 8a135b8 exposed a fixture-only rootful-Docker cleanup failure: the joined test body passed, but its host-bound synthetic Restic repository contained root-owned private directories the unprivileged runner could not delete. The existing standalone backup job uses sudo; instead of broadening privileges, the joined fixture now owns a separately labelled Docker volume for its local repository and removes it after all owned containers stop. The local joined test passes with this topology; full exact-head CI will be rerun. No gates were bypassed and no production action occurred.
 <!-- SECTION:NOTES:END -->
