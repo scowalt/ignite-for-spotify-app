@@ -1,3 +1,4 @@
+import hashlib
 import os
 from pathlib import Path
 import sqlite3
@@ -65,6 +66,89 @@ class DeploymentBackupTests(unittest.TestCase):
             self.assertFalse(scratch.exists())
             self.assertEqual(writer.execute('select value from fixture').fetchall(), [(42,)])
             writer.close()
+
+    def test_quiesced_cold_wal_snapshot_restores_exact_data_without_creating_source_sidecars(self):
+        with tempfile.TemporaryDirectory(prefix='ignite-cold-wal-backup-') as directory:
+            root = Path(directory)
+            data, repository, scratch = [root / name for name in ['data', 'repository', 'scratch']]
+            for path in [data, repository, scratch]:
+                path.mkdir(mode=0o700)
+            path = data / 'ignite.db'
+            writer = sqlite3.connect(path)
+            try:
+                writer.execute('PRAGMA journal_mode=WAL')
+                writer.execute('CREATE TABLE fixture(value INTEGER)')
+                writer.execute('INSERT INTO fixture VALUES(42)')
+                writer.commit()
+            finally:
+                writer.close()
+            self.assertFalse((data / 'ignite.db-wal').exists())
+            original = hashlib.sha256(path.read_bytes()).hexdigest()
+            env = {**os.environ, 'RESTIC_REPOSITORY': '/repository', 'RESTIC_PASSWORD': 'fixture-only'}
+            initialized = subprocess.run(['docker', 'run', '--rm', '--network', 'none',
+                '--mount', 'type=bind,src=' + str(repository) + ',dst=/repository',
+                '--env', 'RESTIC_REPOSITORY', '--env', 'RESTIC_PASSWORD',
+                '--entrypoint', 'restic', IMAGE, '--no-cache', 'init'], env=env, capture_output=True, timeout=60)
+            self.assertEqual(initialized.returncode, 0)
+            tool = BackupTool(['docker'], IMAGE, scratch, env, 'fixture-' + uuid.uuid4().hex,
+                              'type=bind,src=' + str(data) + ',dst=/data,readonly', network='none', quiesced=True,
+                              extra_mounts=['type=bind,src=' + str(repository) + ',dst=/repository'])
+            try:
+                tool.start()
+                result = tool.snapshot_restore()
+                self.assertTrue(result['restore_verified'] and result['integrity_ok'])
+                self.assertEqual(tool.exec(['sqlite3', '-readonly', '/scratch/restore/ignite.db', 'SELECT value FROM fixture;']).strip(), '42')
+                self.assertLessEqual(result['snapshot_bytes'], 256 * 1024**2)
+                self.assertLessEqual(result['scratch_bytes'], 1024**3)
+                self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), original)
+                self.assertEqual(sorted(entry.name for entry in data.iterdir()), ['ignite.db'])
+            finally:
+                tool.close()
+            self.assertFalse(scratch.exists())
+
+    def test_quiesced_source_reads_committed_wal_when_a_readonly_reader_holds_old_snapshot(self):
+        with tempfile.TemporaryDirectory(prefix='ignite-pending-wal-') as directory:
+            root = Path(directory)
+            data, repository, scratch = [root / name for name in ['data', 'repository', 'scratch']]
+            for path in [data, repository, scratch]:
+                path.mkdir(mode=0o700)
+            path = data / 'ignite.db'
+            writer = sqlite3.connect(path)
+            reader = None
+            try:
+                writer.execute('PRAGMA journal_mode=WAL')
+                writer.execute('PRAGMA wal_autocheckpoint=0')
+                writer.execute('CREATE TABLE fixture(value INTEGER)')
+                writer.execute('INSERT INTO fixture VALUES(42)')
+                writer.commit()
+                writer.execute('PRAGMA wal_checkpoint(TRUNCATE)')
+                reader = sqlite3.connect(path.as_uri() + '?mode=ro', uri=True)
+                reader.execute('BEGIN')
+                self.assertEqual(reader.execute('SELECT value FROM fixture').fetchall(), [(42,)])
+                writer.execute('INSERT INTO fixture VALUES(43)')
+                writer.commit()
+                writer.close()
+                self.assertGreater((data / 'ignite.db-wal').stat().st_size, 0)
+                original = {entry.name: hashlib.sha256(entry.read_bytes()).hexdigest() for entry in data.iterdir() if entry.name != 'ignite.db-shm'}
+                env = {**os.environ, 'RESTIC_REPOSITORY': '/repository', 'RESTIC_PASSWORD': 'fixture-only'}
+                initialized = subprocess.run(['docker', 'run', '--rm', '--network', 'none',
+                    '--mount', 'type=bind,src=' + str(repository) + ',dst=/repository', '--env', 'RESTIC_REPOSITORY', '--env', 'RESTIC_PASSWORD',
+                    '--entrypoint', 'restic', IMAGE, '--no-cache', 'init'], env=env, capture_output=True, timeout=60)
+                self.assertEqual(initialized.returncode, 0)
+                tool = BackupTool(['docker'], IMAGE, scratch, env, 'fixture-' + uuid.uuid4().hex,
+                    'type=bind,src=' + str(data) + ',dst=/data,readonly', network='none', quiesced=True,
+                    extra_mounts=['type=bind,src=' + str(repository) + ',dst=/repository'])
+                try:
+                    tool.start()
+                    self.assertTrue(tool.snapshot_restore()['restore_verified'])
+                    self.assertEqual(tool.exec(['sqlite3', '-readonly', '/scratch/restore/ignite.db', 'SELECT value FROM fixture ORDER BY value;']).splitlines(), ['42', '43'])
+                    self.assertEqual({name: hashlib.sha256((data / name).read_bytes()).hexdigest() for name in original}, original)
+                finally:
+                    tool.close()
+            finally:
+                if reader is not None:
+                    reader.close()
+                writer.close()
 
     def test_fresh_operator_instance_can_clean_only_the_owned_interrupted_tool(self):
         with tempfile.TemporaryDirectory(prefix='ignite-interrupted-backup-') as directory:

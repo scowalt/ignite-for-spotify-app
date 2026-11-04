@@ -30,6 +30,7 @@
     <Compile Include="MigrationDeliveryTests.fs" />
     <Compile Include="MigrationCatalogueTests.fs" />
     <Compile Include="DatabaseStartupTests.fs" />
+    <Compile Include="StoppedDatabaseInspectionTests.fs" />
     <Compile Include="MigrationCommandTests.fs" />
     <Compile Include="UserSessionRepositoryTests.fs" />
     <Compile Include="PlaylistSearchSnapshotRepositoryTests.fs" />

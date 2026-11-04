@@ -175,7 +175,7 @@ class MigrationTransition:
             runtime.stop_database_writers(self.workspace)
             runtime.require_quiesced(self.workspace)
             runtime.settle_database(self.workspace)
-            observed = parse_inspection(json.dumps(runtime.inspect_database(self.workspace)).encode())
+            observed = parse_inspection(json.dumps(runtime.inspect_stopped_database(self.workspace)).encode())
             outcome = classify_transition(state['plan'], observed)
         except Exception:
             observed, outcome = None, 'blocked'
@@ -199,7 +199,7 @@ class MigrationTransition:
                 if not self._fresh(recovery, state['created_at'], reserve=180):
                     raise MigrationTransitionRejected('migration_recovery_not_fresh')
                 runtime.require_quiesced(self.workspace)
-                observed = parse_inspection(json.dumps(runtime.inspect_database(self.workspace)).encode())
+                observed = parse_inspection(json.dumps(runtime.inspect_stopped_database(self.workspace)).encode())
                 if observed != state['plan']['before']:
                     return self._recover(runtime, state)
                 if not self._fresh(recovery, state['created_at'], reserve=180):
@@ -212,7 +212,7 @@ class MigrationTransition:
                         runtime.migrate_database(deepcopy(state['plan']), self.workspace)
                     runtime.stop_migration_writer(self.workspace)
                     runtime.require_quiesced(self.workspace)
-                    observed = parse_inspection(json.dumps(runtime.inspect_database(self.workspace)).encode())
+                    observed = parse_inspection(json.dumps(runtime.inspect_stopped_database(self.workspace)).encode())
                     expected = 'unchanged' if state['plan']['mode'] == 'none' else 'committed'
                     verified = classify_transition(state['plan'], observed) == expected and self._fresh(recovery, state['created_at'])
                 except Exception:

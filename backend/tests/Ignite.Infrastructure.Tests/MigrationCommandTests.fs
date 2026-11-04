@@ -233,6 +233,8 @@ let ``explicit settlement recovers an interrupted SQLite transaction without run
         let request = JsonSerializer.Serialize({| database_path = path |})
         let readOnlyCode, _, _ = command [ "inspect" ] request
         Assert.Equal(1, readOnlyCode)
+        let stoppedCode, _, _ = command [ "inspect-stopped" ] request
+        Assert.Equal(1, stoppedCode)
         let code, output, errors = command [ "settle" ] request
         Assert.Equal(0, code)
         Assert.Equal("", errors)
@@ -303,6 +305,9 @@ let ``inspect emits only schema and history metadata and never creates a missing
         let missingCode, missingOutput, _ = command [ "inspect" ] request
         Assert.Equal(1, missingCode)
         Assert.DoesNotContain(path, missingOutput)
+        Assert.False(File.Exists(path))
+        let stoppedCode, _, _ = command [ "inspect-stopped" ] request
+        Assert.Equal(1, stoppedCode)
         Assert.False(File.Exists(path))
         let catalogue = ApplicationMigrations.catalogue ()
         DatabaseMigrations.run path CreateNew catalogue |> ignore

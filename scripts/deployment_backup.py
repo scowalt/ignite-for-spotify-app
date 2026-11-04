@@ -89,7 +89,7 @@ def bucket_inventory(env):
 
 
 class BackupTool:
-    def __init__(self, docker, image, scratch, env, operation, source_mount, state_mount=None, network='host', extra_mounts=()):
+    def __init__(self, docker, image, scratch, env, operation, source_mount, state_mount=None, network='host', extra_mounts=(), quiesced=False):
         if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}', operation):
             raise Stop('Invalid backup operation identity.')
         self.docker, self.image, self.scratch = docker, image, Path(scratch)
@@ -99,6 +99,9 @@ class BackupTool:
         self.operation, self.source_mount, self.state_mount = operation, source_mount, state_mount
         self.network, self.extra_mounts = network, extra_mounts
         self.container = None
+        if type(quiesced) is not bool:
+            raise Stop('Invalid quiescence declaration.')
+        self.quiesced = quiesced
 
     def command(self, args, timeout=300, input=None):
         result = subprocess.run([*self.docker, *args], input=input, env=self.env,
@@ -141,10 +144,17 @@ class BackupTool:
         configuration = json.loads(self.restic(['--no-lock', 'cat', 'config']))
         if not re.fullmatch(r'[a-f0-9]{64}', configuration.get('id', '')):
             raise Stop('Existing repository identity unavailable.')
-        pages = self.exec(['sqlite3', '-readonly', '/data/ignite.db', 'PRAGMA page_count; PRAGMA page_size;']).splitlines()
+        source = '/data/ignite.db'
+        if self.quiesced:
+            source = self.exec(['sh', '-ec', 'test -f /data/ignite.db; test ! -L /data/ignite.db; present=false; for suffix in -wal -shm -journal; do path="/data/ignite.db$suffix"; test ! -L "$path"; if test -e "$path"; then present=true; fi; done; if "$present"; then printf /data/ignite.db; else printf "file:/data/ignite.db?mode=ro&immutable=1"; fi']).strip()
+            if source not in ['/data/ignite.db', 'file:/data/ignite.db?mode=ro&immutable=1']:
+                raise Stop('Stopped database source unavailable.')
+        pages = self.exec(['sqlite3', '-readonly', source, 'PRAGMA page_count; PRAGMA page_size;']).splitlines()
         if len(pages) != 2 or not all(p.isdigit() for p in pages) or int(pages[0]) * int(pages[1]) > INPUT_LIMIT:
             raise Stop('Database exceeds snapshot input budget.')
-        self.exec(['sh', '-ec', 'umask 077; sqlite3 -readonly -cmd ".timeout 60000" /data/ignite.db ".backup /scratch/snapshot/ignite.db"'])
+        self.exec(['sh', '-ec', 'umask 077; sqlite3 -readonly -cmd ".timeout 60000" "$1" ".backup /scratch/snapshot/ignite.db"', 'sh', source])
+        if source != '/data/ignite.db':
+            self.exec(['sh', '-ec', 'for suffix in -wal -shm -journal; do path="/data/ignite.db$suffix"; test ! -e "$path"; test ! -L "$path"; done'])
         size = int(self.exec(['stat', '-c', '%s', '/scratch/snapshot/ignite.db']).strip())
         if size <= 0 or size > INPUT_LIMIT:
             raise Stop('Snapshot exceeds input budget.')

@@ -171,6 +171,11 @@ module Program =
                     let path = request.RootElement.GetProperty("database_path").GetString() |> nonNull
                     let inspection = DatabaseMigrations.inspect path
                     Wire.json (fun writer -> Wire.writeInspection writer inspection)
+                | [| "inspect-stopped" |] ->
+                    use request = Wire.input [ "database_path" ]
+                    let path = request.RootElement.GetProperty("database_path").GetString() |> nonNull
+                    let inspection = DatabaseMigrations.inspectStopped path
+                    Wire.json (fun writer -> Wire.writeInspection writer inspection)
                 | [| "settle" |] ->
                     use request = Wire.input [ "database_path" ]
                     let path = request.RootElement.GetProperty("database_path").GetString() |> nonNull

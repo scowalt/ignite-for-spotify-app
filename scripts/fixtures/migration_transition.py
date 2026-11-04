@@ -95,6 +95,9 @@ class SqliteRuntime:
         finally:
             connection.close()
 
+    def inspect_stopped_database(self, workspace):
+        return self.inspect_database(workspace)
+
     def migrate_database(self, plan, workspace):
         self.record('migrate')
         assert plan['mode'] in ['apply', 'adopt']

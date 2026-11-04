@@ -1,10 +1,11 @@
 ---
 id: TASK-44
 title: Activate and verify migration-aware database delivery
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@pi'
 created_date: '2026-11-03 15:53'
-updated_date: '2026-11-04 15:43'
+updated_date: '2026-11-04 22:01'
 labels:
   - deployment
   - database
@@ -28,13 +29,21 @@ After offline migration/protocol verification, prepare and obtain approval for a
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The owner approves a concrete one-time procedure identifying the exact signed release/operator versions, legacy schema-only validation, maintenance window, baseline/history transition, backup budgets, failure handling and stop conditions before production mutations.
+- [x] #1 The owner approves a concrete one-time procedure identifying the exact signed release/operator versions, legacy schema-only validation, maintenance window, baseline/history transition, backup budgets, failure handling and stop conditions before production mutations.
 - [ ] #2 Production adoption preserves existing business data, application/Hangfire database separation, physical paths/volumes/ownership, backup repository/credentials/retention, auxiliary services and sole-updater identity; unknown schema/history/configuration stops rather than being guessed or reset.
 - [ ] #3 Fresh encrypted backup and isolated restore evidence is verified within existing budgets before the approved database transition; only bounded private schema/aggregate verification is exposed, never production records or credentials in CI, chat or public artifacts.
 - [ ] #4 A successful signed main release exercises the explicitly approved history adoption or a legitimate non-destructive migration through the actual timer, with no per-release approval or manual deployment command, verified migration history and healthy application behavior; no throwaway production schema is added solely for testing.
 - [ ] #5 Post-activation no-op polling, existing image-only delivery, migration failure/recovery behavior, alert visibility and ownership/cleanup are verified; no unsafe old-image rollback, automatic live restore, initialization, pruning or unrelated service change occurs.
 - [ ] #6 Runbooks and task evidence explain eligible automatic migrations, expected downtime, strict journal compatibility, forward-fix/manual recovery after committed changes and retained boundaries for destructive/Hangfire/operator/infrastructure changes; no temporary publication hold or paused timer is left unresolved.
 <!-- AC:END -->
+
+## Implementation Plan
+
+<!-- SECTION:PLAN:BEGIN -->
+1. Under the owner-approved read-only scope, inspect current deployed image/source, ledger/policy/operator/unit identities, mounts/writers, disk headroom and SQLite schema/history metadata. Keep raw evidence private; stop on active deployment, unexpected identities or changing snapshots. No user-row query, credential disclosure, backup, SQL write/recovery, service change, upgrade or merge.
+2. Compare the private inventory with the reviewed exact baseline and tested application/host/engine/Hangfire contracts; identify blockers without guessing equivalence.
+3. Present an exact bounded operator/ledger/adoption/merge sequence with maintenance, backup, verification and failure conditions. Pause for separate approval before any production mutation.
+<!-- SECTION:PLAN:END -->
 
 ## Implementation Notes
 
@@ -45,4 +54,18 @@ The separate image-only runtime security rollout completed successfully; metadat
 
 TASK-43 offline implementation is complete: connected v2 updater/current-main code head 8d724cabdebc1735fdacf38d7c1b82e1cd4a8a36 passed full CI 41859648784, including actual native backup/restore, writer recovery, installer and image gates. The initial unactivated baseline now exactly matches the previously approved private schema inventory, with independent frozen fixtures; earlier mismatch notes are historical. Owner selected Finish first before merging, not permission for live adoption or updater activation.
 Next requires fresh scoped read-only rollout preflight because production has received ordinary frontend-only releases since the last independent runtime inspection. Do not treat old 5d0f565 runtime evidence as current source. Gather only approved schema/history/runtime/policy/ledger/storage metadata privately, then present the exact one-time sequence for approval before changes. No live preflight or adoption has been performed here; all Task-44 AC remain unchecked.
+
+Owner approved fresh read-only production preflight in the Preflight question. Approval permits only the metadata inspection scope above; it does not authorize migration, backup, service/operator/state changes, merge or live rollout. Beginning private evidence collection.
+
+Approved read-only preflight completed privately at 2026-11-04 16:03 UTC. Production source is fe21dc7928bcdd50257c40847ef07737c60362ef, order [70,1], runtime 10.0.14; operator remains 7b1953e and configuration checkout 4ef6b03. Ledger/policy/runtime/configuration stayed stable, no pending transaction/failed fence/owned scratch or tools, all app images healthy, timer enabled/active and service successful.
+Exact legacy schema fingerprint still matches 91520ea3d23a8c812dea171d9bf5194e5f896069b3b540ffbab723e7b2ffa6a5; all known column shapes match, no unexpected objects or migration journal, WAL/schema_version 22. Logical size 71,942,144 bytes; data/workspace filesystem free space 13.43 GiB. Only backend/backup consume the data volume. Existing API dependency metadata confirms the reviewed Hangfire identity. Two probes stopped before SQL on an optional Docker Volumes field; a read-only-template correction resolved it. No production write/backup/service/operator/merge action occurred.
+Prepared a private proposed rollout plan bound to tested head/operator 9b6574bc9871a78fb08b38e7f8832f1ad9cbec7a and its exact tree/contracts/catalogue. It proposes a temporary owned-timer/publishing fence, protected merge and authenticated artifact capture, explicit preserving ledger/policy/operator transition, fresh stopped-state backup/isolated restore and actual-timer baseline adoption, then no-op/same-catalogue verification and restoration of temporary controls. Reserve a 40-minute maintenance window; committed/uncertain failure can require longer forward-fix downtime. The plan is NOT approved; all Task-44 AC remain unchecked. Raw evidence stays private.
+
+Owner explicitly approved the linked exact one-time rollout, then requested continuation. Proceed only under its reviewed source/tree/operator/pins, temporary owned timer/publishing fence, preserving state upgrade, fresh verified recovery and actual-timer adoption. Rehearse the transition locally before live writes and stop on any changed identity or failed gate.
+
+Approved rollout began after exact read-only revalidation. The immutable 9b6574b operator bundle was staged without selecting it; local cross-file transition rehearsal passed success, interruption/resume and refusal cases. Paused only the enabled owned timer while its service was idle; application services and old ledger/policy/operator stayed unchanged. PR #22 merged through native protection with explicit expectedHeadOid and Gmail author as df13eb6acb60816ac833252117e0d597afe7866f; merge tree exactly equals tested tree 17cc201f96892bc81ce2446fb7a947e7cacc1968 and protection readback is unchanged. Awaiting normal main publication before operator/database changes. Timer pause remains intentionally active; publishing not fenced yet.
+
+Rollout stopped safely at backup_started for signed df13eb6/order [78,1], artifact c731b6de7e296ab03cbfebc911ca49f709c3d5b52032498f8e4ebeaf3f91d87b. The timer reached manual_recovery with no verified recovery receipt; child migration outcome was blocked, not committed. A real native local fixture reproduced cold-WAL read-only-mount inspection failure. Private production diagnostics proved all known writers stopped, WAL/SHM/rollback-journal files absent, exact approved legacy schema/inode/ownership retained, quick_check OK and no migration journal. An immutable read-only URI was used only for this proved-quiescent, sidecar-free diagnostic; no user rows were exposed or data restored.
+Used the approved single compatible prior-service fallback: restarted only the exact original backend and backup containers once, after durable private recovery intent and independent compatibility proof. Both are healthy again; frontend/Caddy/Alloy/Watchtower identities and all mounts remain preserved. No journal adoption occurred. The ledger was NOT reset/edited to clear recovery: it remains schema 2/manual_recovery, active prior fe21dc7/order [70,1], high-water [78,1], failed artifact fenced. Operator 9b6574b/policy v2 remain installed.
+INTENTIONAL HOLDS: owned timer paused but enabled; PRODUCTION_PUBLISHING_ENABLED=false. No owned tooling/scratch remains. Need a regression-tested cold-WAL fix and separately reviewed new operator/policy/failed-attempt resolution before any retry. Do not replay the approved 9b rollout, delete history/fences, invoke once or force old-image rollback again. AC2–6 remain unchecked; activation is not complete.
 <!-- SECTION:NOTES:END -->

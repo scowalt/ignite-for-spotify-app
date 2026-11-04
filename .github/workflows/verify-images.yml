@@ -55,6 +55,10 @@ jobs:
           COMPONENT: ${{ matrix.component }}
         run: docker build --pull -f "docker/Dockerfile.$COMPONENT" -t "$IMAGE_REF" .
 
+      - name: Build isolated backup fixture for stopped-state migration verification
+        if: matrix.component == 'backend'
+        run: docker build -f docker/Dockerfile.backup -t ignite-migration-backup:fixture .
+
       - name: Build isolated migration writer fixture
         if: matrix.component == 'backend'
         run: docker build --build-arg BACKEND_IMAGE="$IMAGE_REF" -f scripts/fixtures/Dockerfile.migration-writer -t ignite-migration-writer:fixture .
@@ -63,6 +67,7 @@ jobs:
         if: matrix.component == 'backend'
         env:
           IGNITE_MIGRATION_WRITER_FIXTURE_IMAGE: ignite-migration-writer:fixture
+          IGNITE_BACKUP_FIXTURE_IMAGE: ignite-migration-backup:fixture
         run: IGNITE_MIGRATION_FIXTURE_IMAGE="$IMAGE_REF" python3 -m unittest discover -s scripts -p test_migration_startup.py -v
 
       - name: Verify security and notice coverage

@@ -1,10 +1,11 @@
 # SQLite migration foundation
 
-The unmerged integration branch includes journaled startup, the packaged migration CLI,
-versioned release/ledger policy and coordinated updater recovery. None is activated in
-production; deployed main still uses the reviewed image-only updater. See
-[the approved staged plan](../plans/database-migration-delivery.md) for offline verification
-and the separately approved adoption/operator transition required before merging.
+Migration-aware delivery was merged, but its first production attempt stopped during
+backup preparation before journal adoption. The original application services were restored
+after independent compatibility proof. Deployment/publishing remain intentionally held for
+the cold-WAL fix and a separately reviewed operator/held-attempt recovery procedure. Do not
+replay the old rollout, clear fences or infer activation from a green build.
+See [the staged plan](../plans/database-migration-delivery.md) and the cold-WAL section below.
 
 ## Ownership and interface
 
@@ -126,8 +127,8 @@ historical SQL on application startup. The publisher binds it to signed schema-v
 and the consumer checks it against the exact immutable backend before downtime.
 
 The separate `Ignite.Migrations` executable has no HTTP host, Hangfire workers or service
-credentials. Prepared commands are `build-manifest`, `describe <manifest>`, `inspect`,
-`apply <manifest>`, `adopt <manifest>` and `settle`. Database operations take bounded strict
+credentials. Commands are `build-manifest`, `describe <manifest>`, `inspect`,
+`inspect-stopped`, `apply <manifest>`, `adopt <manifest>` and `settle`. Database operations take bounded strict
 JSON on stdin and emit only bounded metadata or fixed errors. `apply` requires exact
 image/source metadata and prior state, rejects pending manual steps and stale retries,
 and verifies the target inside the transaction. `adopt` only admits an explicitly reviewed
@@ -168,7 +169,7 @@ startup databases are not supported.
 `MigrationTool` is a container adapter, not release authorization. Its caller must first
 verify the signed release, immutable backend identity, source metadata, approved physical
 volume and durable deployment intent. It accepts only an immutable local image ID and
-fixed `inspect`, `apply`, `adopt` or `settle` commands against `/data/ignite.db`. It passes no
+fixed `inspect`, `inspect-stopped`, `apply`, `adopt` or `settle` commands against `/data/ignite.db`. It passes no
 runtime service credentials, uses no network, runs as UID/GID 999, and confines writes to
 the existing data mount and bounded temporary storage. Inspection mounts data read-only.
 
@@ -180,6 +181,50 @@ before removing it; a new controller instance can perform the same cleanup after
 Unknown ownership or extra mounts stop cleanup rather than touching another container.
 Neither a clean process exit nor a successful cleanup is proof of migration outcome: the
 controller must still inspect durable history before admitting images.
+
+## Stopped WAL databases and read-only mounts
+
+The first attempt exposed a gap in the original fixtures: they used DELETE-mode data or a
+live WAL connection that kept sidecars available. A cleanly closed WAL database can have
+no `-wal`/`-shm` files, while still requiring them for an ordinary SQLite read-only open.
+On a filesystem-read-only mount those files cannot be created. Both stopped-state backup
+and post-settlement inspection consequently failed; no baseline journal was adopted.
+
+`DatabaseMigrations.inspectStopped` / CLI `inspect-stopped` is a separate interface with a
+strong caller precondition: all writers stopped, approved mount identity, and the global
+deployment lock held. `DockerRuntime.inspect_stopped_database` enforces quiescence before
+calling it. Migration/recovery/prior-image admission use this operation; live preflight,
+ordinary application readiness and healthy-image verification keep ordinary `inspect`.
+Both inspection containers still mount application data read-only.
+
+Only when **all** WAL, SHM and rollback-journal entries are absent may stopped inspection
+open the properly escaped file URI with `mode=ro&immutable=1`. Any sidecar retains the
+ordinary SQLite path, so committed WAL is included and hot journals still refuse inspection
+until explicit native settlement. Sidecar symlinks are rejected, including dangling links;
+sidecars appearing during a cold read also fail. This is not a catch-all retry after an
+arbitrary SQLite error and is never a reason to delete or ignore sidecars.
+
+`BackupTool(quiesced=True)` applies the same conditional source selection only for the
+already-quiesced v2 path. Default/online backup is unchanged. The source remains mounted
+read-only, and the cold path checks for new sidecars again before upload. Snapshot/restore,
+checksum/integrity checks, storage budgets and freshness requirements are not relaxed.
+
+SQLite documents [read-only WAL conditions](https://sqlite.org/wal.html#readonly) and warns
+that [`immutable=1`](https://sqlite.org/uri.html#uriimmutable) skips locking/change detection.
+Therefore sidecar absence alone is **not proof of quiescence**. The caller must exclude
+writers for the entire read/snapshot; foreign privileged mutation remains outside that
+contract. Never use immutable reads against live or uncheckpointed data as a fallback.
+
+Native regressions cover the exact cold file/read-only mount combination, no source-file
+change or new sidecars, URI escaping, dangling aliases, committed uncheckpointed WAL held
+by a read-only reader, and hot rollback journals. A joined real-container fixture performs
+cold WAL backup, isolated encrypted restore, stopped inspection, adoption and API readiness.
+No production records or failure injection are used.
+
+The held attempt's original sidecar, active release, high-water and failed digest fence must
+remain auditable. The single prior-service restart already performed is not permission for
+another rollback. Resolve the held attempt and approve an exact new operator/contract in a
+separate procedure before resuming delivery; this fix does not clear or retry it.
 
 ## Signed dependency compatibility (not activated)
 
@@ -280,10 +325,9 @@ manual handling. No database restore or SQL replay is a recovery fallback. A rea
 
 The installer accepts an explicit private `--migration-policy` file only when its host hash
 and already upgraded ledger match the immutable bundle. It still refuses replacement of a
-different policy/operator/unit and never starts/enables services. The publisher in this
-branch requests schema-v2 records. Therefore merging before the separately approved
-operator/ledger/adoption procedure is ready would block the existing v1 updater; keep this
-draft unmerged until that transition is reviewed.
+different policy/operator/unit and never starts/enables services. The publisher requests schema-v2 records. Changed application/CLI safety code changes the
+reviewed contract; do not publish or resume the held operator until the separately approved
+operator/policy/held-attempt transition is ready.
 
 ## Verification
 
