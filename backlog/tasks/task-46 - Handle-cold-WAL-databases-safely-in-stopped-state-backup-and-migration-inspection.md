@@ -7,7 +7,7 @@ status: In Progress
 assignee:
   - '@pi'
 created_date: '2026-11-04 22:01'
-updated_date: '2026-11-04 22:58'
+updated_date: '2026-11-04 23:04'
 labels:
   - database
   - deployment
@@ -30,9 +30,9 @@ Production migration-aware activation reached backup_started but stopped before 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Real native fixtures cover a checkpointed cold WAL database after all writers stop, with fresh encrypted snapshot/isolated restore and schema/history inspection succeeding without weakening budgets or data isolation.
-- [ ] #2 Live or uncheckpointed WAL and hot rollback-journal cases are not bypassed with unconditional immutable reads; recovery proves writer shutdown and preserves committed data.
-- [ ] #3 Read-only preflight, production startup and all existing migration failure/commit/concurrency/secret/identity gates remain enforced, with regression tests that fail on the observed cold-WAL case.
+- [x] #1 Real native fixtures cover a checkpointed cold WAL database after all writers stop, with fresh encrypted snapshot/isolated restore and schema/history inspection succeeding without weakening budgets or data isolation.
+- [x] #2 Live or uncheckpointed WAL and hot rollback-journal cases are not bypassed with unconditional immutable reads; recovery proves writer shutdown and preserves committed data.
+- [x] #3 Read-only preflight, production startup and all existing migration failure/commit/concurrency/secret/identity gates remain enforced, with regression tests that fail on the observed cold-WAL case.
 - [ ] #4 A separately reviewed exact operator/policy and held-attempt recovery plan preserves active/high-water/failed fences and audits the already completed one-time prior-service restart; no live retry, ledger reset, data restore or second blind rollback is performed during development.
 <!-- AC:END -->
 
@@ -54,4 +54,6 @@ Native green evidence now includes unchanged main-file/no-new-sidecar inspection
 Full local verification: 190 backend tests pass with no skips. Python suite: 171 run, 170 executed successfully with real backend/writer/backup/Cosign fixtures, one pre-existing source-map CLI fixture deferred to its hosted job. Six actual backup tests pass, including cold WAL and retained uncheckpointed WAL; the joined backup/restore/adoption/health fixture passes. Hot-journal and sidecar-alias guards, caller quiescence, read-only mounts and source checksums are covered. Backend image security/secret/notice gates pass unchanged after tagging the local image in the verifier’s required namespace. Actionlint, formatting/diff checks and 344-file comment scan pass. Preparing draft fix/CI and an exact revised recovery proposal; production remains untouched.
 
 Hosted CI at 8a135b8 exposed a fixture-only rootful-Docker cleanup failure: the joined test body passed, but its host-bound synthetic Restic repository contained root-owned private directories the unprivileged runner could not delete. The existing standalone backup job uses sudo; instead of broadening privileges, the joined fixture now owns a separately labelled Docker volume for its local repository and removes it after all owned containers stop. The local joined test passes with this topology; full exact-head CI will be rerun. No gates were bypassed and no production action occurred.
+
+Corrected exact head 81d5a787babaad3afa69f452dfecddcd1771ef21 passed full hosted CI 41929825425: all ten validation/image jobs succeeded and PR publishing was skipped. Actual joined cold-WAL backup/restore/adoption/API-health and no-sidecar inspection cases ran and passed on rootful hosted Docker. Native standalone backup/restart/transport/metadata cases and security/notice gates passed too. AC1–3 are complete; AC4 awaits separate review of the exact revised recovery/operator proposal. No production changes or merge were performed.
 <!-- SECTION:NOTES:END -->
