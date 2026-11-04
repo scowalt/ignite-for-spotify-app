@@ -74,7 +74,7 @@ def _bounded_manifest(docker, reference, env, depth=0):
         raise ReleaseRejected('Artifact download exceeds its bound.')
 
 
-def load_release(expected_contract, *, docker, verifier, workflow_reader=public_workflow, known_artifact=None):
+def load_release(expected_contract, *, docker, verifier, workflow_reader=public_workflow, known_artifact=None, migration_dependencies=None):
     env = {key: os.environ[key] for key in ['PATH', 'HOME', 'DOCKER_HOST', 'DOCKER_CONFIG', 'XDG_RUNTIME_DIR'] if key in os.environ}
     descriptor = json.loads(run([*docker, 'buildx', 'imagetools', 'inspect', RELEASE_IMAGE + ':latest',
                                  '--format', '{{json .Manifest}}'], env=env, limit=32768))
@@ -97,7 +97,7 @@ def load_release(expected_contract, *, docker, verifier, workflow_reader=public_
     if type(identifier) is not int or not 0 < identifier < 2**63:
         raise ReleaseRejected('Invalid workflow identity.')
     proof = verifier.verify(digest, source)
-    return validate_release(payload, proof, workflow_reader(identifier), expected_contract)
+    return validate_release(payload, proof, workflow_reader(identifier), expected_contract, migration_dependencies=migration_dependencies)
 
 
 def _tar_members(raw, bound):

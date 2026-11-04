@@ -47,12 +47,13 @@ class SqliteRuntime:
         self.database = self.workspace / 'application.db'
         self.mode = mode
 
-    def initialize(self):
+    def initialize(self, journal=True):
         with closing(sqlite3.connect(self.database)) as connection, connection:
             connection.execute(BASELINE)
-            connection.execute(JOURNAL)
             connection.execute("INSERT INTO sample VALUES (1, 'original')")
-            connection.execute('INSERT INTO __ignite_migrations VALUES (1, ?, ?, ?)', ('0001_initial.sql', '1' * 64, STAMP))
+            if journal:
+                connection.execute(JOURNAL)
+                connection.execute('INSERT INTO __ignite_migrations VALUES (1, ?, ?, ?)', ('0001_initial.sql', '1' * 64, STAMP))
 
     def record(self, name):
         with (self.workspace / 'events').open('a') as stream:
@@ -87,23 +88,28 @@ class SqliteRuntime:
         self.record('inspect')
         connection = sqlite3.connect(self.database.as_uri() + '?mode=ro', uri=True, timeout=1)
         try:
-            history = [{'id': identifier, 'sha256': checksum, 'applied_at': stamp} for identifier, checksum, stamp in
-                       connection.execute('SELECT id,sha256,applied_at FROM __ignite_migrations ORDER BY position')]
+            exists = connection.execute("SELECT COUNT(*) FROM sqlite_schema WHERE name = '__ignite_migrations'").fetchone()[0]
+            history = ([{'id': identifier, 'sha256': checksum, 'applied_at': stamp} for identifier, checksum, stamp in
+                        connection.execute('SELECT id,sha256,applied_at FROM __ignite_migrations ORDER BY position')] if exists else None)
             return {'schema': 1, 'schema_sha256': schema_hash(connection), 'history': history}
         finally:
             connection.close()
 
     def migrate_database(self, plan, workspace):
         self.record('migrate')
-        assert plan['mode'] == 'apply'
+        assert plan['mode'] in ['apply', 'adopt']
         connection = sqlite3.connect(self.database.as_uri() + '?mode=rw', uri=True, timeout=1)
         pid_path = self.workspace / 'writer.pid'
         pid_path.write_text(str(os.getpid()))
         try:
             connection.execute('BEGIN IMMEDIATE')
-            connection.execute(EXPANSION)
-            connection.execute('INSERT INTO extra VALUES (zeroblob(6000000))')
-            connection.execute('INSERT INTO __ignite_migrations VALUES (2, ?, ?, ?)', ('0002_extra.sql', '2' * 64, STAMP))
+            if plan['mode'] == 'adopt':
+                connection.execute(JOURNAL)
+                connection.execute('INSERT INTO __ignite_migrations VALUES (1, ?, ?, ?)', ('0001_initial.sql', '1' * 64, STAMP))
+            else:
+                connection.execute(EXPANSION)
+                connection.execute('INSERT INTO extra VALUES (zeroblob(6000000))')
+                connection.execute('INSERT INTO __ignite_migrations VALUES (2, ?, ?, ?)', ('0002_extra.sql', '2' * 64, STAMP))
             if self.mode == 'rollback':
                 raise RuntimeError('fixture-private-value')
             if self.mode == 'hold-before-commit':

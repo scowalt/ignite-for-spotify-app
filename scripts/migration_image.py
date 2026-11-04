@@ -6,7 +6,7 @@ import tarfile
 from deployment_process import OperationFailed, run
 
 
-def read_image_metadata(reference, revision, operation, *, docker, env):
+def read_image_metadata(reference, revision, operation, *, docker, env, legacy=False):
     if (not isinstance(reference, str) or not re.fullmatch(r'(?:ghcr\.io/scowalt/ignite-for-spotify-app/backend@)?sha256:[a-f0-9]{64}', reference) or
             not re.fullmatch(r'[a-f0-9]{40}', revision) or not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}', operation)):
         raise OperationFailed('migration_image_identity_invalid')
@@ -42,6 +42,9 @@ def read_image_metadata(reference, revision, operation, *, docker, env):
         for name, directory, maximum in [('migration-catalogue.json', '/app/', 1024**2),
                                           ('Ignite.Api.deps.json', '/app/', 2 * 1024**2),
                                           ('Ignite.Migrations.deps.json', '/app/migrations/', 2 * 1024**2)]:
+            if legacy and name != 'Ignite.Api.deps.json':
+                values.append(None)
+                continue
             payload = execute(['cp', identifier + ':' + directory + name, '-'], maximum + 65536)
             values.append(metadata_file(payload, name, maximum))
         return tuple(values)

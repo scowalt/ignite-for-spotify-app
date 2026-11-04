@@ -1,4 +1,6 @@
 from contextlib import contextmanager
+import base64
+from dataclasses import replace
 import hashlib
 import json
 import os
@@ -10,7 +12,12 @@ import unittest
 
 from deployment_runtime import DockerRuntime, IMAGE_FORMAT
 from deployment_process import OperationFailed
-from release_record import ReleaseRecord, deployment_contract
+from migration_transition import MigrationTransition
+from fixtures.migration_transition import recovery_receipt
+from release_record import ReleaseRecord, deployment_contract, runtime_contract
+from migration_record import descriptor_summary
+from fixtures.migration_transition import catalogue
+from test_migration_record import ENGINE_IDENTITY, HANGFIRE_IDENTITY, engine_dependencies
 from test_production_config import render
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,7 +38,7 @@ class RuntimeGuardTests(unittest.TestCase):
                 runtime.preflight(release, prior, root)
 
     @contextmanager
-    def runtime_case(self):
+    def runtime_case(self, migration=False):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             workspace = root / ('d' * 64)
@@ -63,6 +70,15 @@ class RuntimeGuardTests(unittest.TestCase):
                                     'logging': service.get('labels', {}).get('logging'), 'mounts': mounts}
             state = {'containers': containers, 'templates': containers, 'environments': {name: service.get('environment', {}) for name, service in config['services'].items()},
                      'prior_source': 'c' * 40, 'candidate_source': 'e' * 40, 'candidate': next_images, 'pulled': [], 'updated': [], 'inspector': None}
+            policy = None
+            if migration:
+                policy = {'runtime_contract_sha256': runtime_contract(ROOT), 'engine_sha256': ENGINE_IDENTITY,
+                          'hangfire_sha256': HANGFIRE_IDENTITY, 'legacy_schema_sha256': catalogue(1)['baseline_schema_sha256']}
+                names = ['Hangfire.AspNetCore', 'Hangfire.Core', 'Hangfire.NetCore', 'Hangfire.Storage.SQLite', 'sqlite-net-pcl']
+                api_deps = {'libraries': {name + '/1.0.0': {'type': 'package', 'sha512': 'sha512-' + base64.b64encode(b'a' * 64).decode()} for name in names}}
+                state['metadata'] = {'migration-catalogue.json': catalogue(1), 'Ignite.Api.deps.json': api_deps,
+                                     'Ignite.Migrations.deps.json': engine_dependencies()}
+                state['database_inspection'] = {'schema': 1, 'schema_sha256': catalogue(1)['baseline_schema_sha256'], 'history': None}
             (root / 'compose.json').write_text(json.dumps(config))
             state_path = root / 'docker-state.json'
             state_path.write_text(json.dumps(state))
@@ -72,10 +88,79 @@ class RuntimeGuardTests(unittest.TestCase):
             environment = {**os.environ, 'PATH': str(root) + ':' + os.environ['PATH'], 'RESTIC_PASSWORD': 'fixture', 'RESTIC_REPOSITORY': 'fixture',
                            'R2_ACCESS_KEY_ID': 'fixture', 'R2_SECRET_ACCESS_KEY': 'fixture'}
             docker = [sys.executable, str(ROOT / 'scripts/fixtures/deployment_docker.py'), str(root)]
-            runtime = DockerRuntime(ROOT, anchor, deployment_contract(ROOT), 'f' * 64, docker=docker, environment=environment)
-            release = ReleaseRecord('e' * 40, 2, 1, 2, deployment_contract(ROOT), tuple(next_images.items()), 'sha256:' + 'd' * 64)
+            contract = deployment_contract(ROOT, migration_protocol=migration)
+            runtime = DockerRuntime(ROOT, anchor, contract, 'f' * 64, docker=docker, environment=environment, migration_policy=policy)
+            release = ReleaseRecord('e' * 40, 2, 1, 2, contract, tuple(next_images.items()), 'sha256:' + 'd' * 64)
+            if migration:
+                release = replace(release, migrations=descriptor_summary(catalogue(1)), migration_engine_sha256=ENGINE_IDENTITY, hangfire_sha256=HANGFIRE_IDENTITY)
             prior = {'images': prior_images, 'source_sha': 'c' * 40, 'order': [1, 1], 'artifact_digest': None}
             yield runtime, release, prior, workspace, state_path, docker
+
+    def test_migration_preflight_binds_metadata_and_quiesces_only_owned_writers(self):
+        with self.runtime_case(migration=True) as (runtime, release, prior, workspace, state_path, docker):
+            plan = runtime.preflight(release, prior, workspace)
+            self.assertEqual(plan['mode'], 'adopt')
+            before = json.loads(state_path.read_text())
+            self.assertTrue(before['containers']['backend']['running'])
+            self.assertTrue(before['containers']['backup']['running'])
+            runtime.quiesce(workspace)
+            runtime.require_quiesced(workspace)
+            after = json.loads(state_path.read_text())
+            self.assertFalse(after['containers']['backend']['running'])
+            self.assertFalse(after['containers']['backup']['running'])
+            for name in ['frontend', 'caddy', 'alloy', 'watchtower']:
+                self.assertEqual(after['containers'][name], before['containers'][name])
+            runtime.cleanup(workspace)
+
+    def test_migration_runtime_admits_verified_target_but_refuses_incompatible_rollback(self):
+        with self.runtime_case(migration=True) as (runtime, release, prior, workspace, state_path, docker):
+            plan = runtime.preflight(release, prior, workspace)
+            transition = MigrationTransition(workspace)
+            transition.prepare(release, plan)
+            runtime.quiesce(workspace)
+            self.assertEqual(transition.migrate(runtime, recovery_receipt()), 'verified')
+            runtime.switch_backend(release, workspace)
+            runtime.switch_dependents(release, workspace)
+            runtime.verify(dict(release.images), workspace)
+            self.assertEqual(transition.recover(runtime), 'committed')
+            before = json.loads(state_path.read_text())['updated']
+            with self.assertRaises(OperationFailed):
+                runtime.rollback(prior, workspace)
+            self.assertEqual(json.loads(state_path.read_text())['updated'], before)
+            runtime.cleanup(workspace)
+
+    def test_unexpected_stopped_writable_consumer_blocks_quiescence(self):
+        with self.runtime_case(migration=True) as (runtime, release, prior, workspace, state_path, docker):
+            runtime.preflight(release, prior, workspace)
+            state = json.loads(state_path.read_text())
+            state['containers']['foreign'] = {**state['containers']['frontend'], 'id': 'foreign', 'running': False,
+                'mounts': [{'Type': 'bind', 'Source': '/volumes/ignite-for-spotify_ignite-data/nested', 'Destination': '/foreign', 'RW': True}]}
+            state_path.write_text(json.dumps(state))
+            with self.assertRaises(OperationFailed):
+                runtime.quiesce(workspace)
+            after = json.loads(state_path.read_text())
+            self.assertTrue(after['containers']['backend']['running'] and after['containers']['backup']['running'])
+            self.assertEqual(after['updated'], [])
+            alias = workspace.parent / 'data-alias'
+            alias.symlink_to('/volumes/ignite-for-spotify_ignite-data')
+            after['containers']['foreign']['mounts'][0]['Source'] = str(alias)
+            state_path.write_text(json.dumps(after))
+            with self.assertRaises(OperationFailed):
+                runtime.quiesce(workspace)
+            self.assertTrue(json.loads(state_path.read_text())['containers']['backend']['running'])
+            runtime.cleanup(workspace)
+
+    def test_actual_image_dependency_mismatch_is_rejected_before_downtime(self):
+        with self.runtime_case(migration=True) as (runtime, release, prior, workspace, state_path, docker):
+            state = json.loads(state_path.read_text())
+            state['metadata']['Ignite.Migrations.deps.json']['libraries']['dbup-core/1.0.0']['sha512'] = 'sha512-' + base64.b64encode(b'b' * 64).decode()
+            state_path.write_text(json.dumps(state))
+            with self.assertRaises(OperationFailed):
+                runtime.preflight(release, prior, workspace)
+            after = json.loads(state_path.read_text())
+            self.assertTrue(after['containers']['backend']['running'] and after['containers']['backup']['running'])
+            self.assertEqual(after['updated'], [])
+            runtime.cleanup(workspace)
 
     def test_runtime_adapter_preserves_configuration_during_update_and_image_only_rollback(self):
         with self.runtime_case() as (runtime, release, prior, workspace, state_path, docker):

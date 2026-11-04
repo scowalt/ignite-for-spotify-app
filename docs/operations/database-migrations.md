@@ -1,9 +1,10 @@
 # SQLite migration foundation
 
-The unmerged integration branch prepares journaled startup, a packaged migration CLI and
-container execution; none is activated in production. Deployed main still uses the reviewed
-image-only updater. See [the approved staged plan](../plans/database-migration-delivery.md)
-for the remaining signed-release/updater integration and separately approved adoption.
+The unmerged integration branch includes journaled startup, the packaged migration CLI,
+versioned release/ledger policy and coordinated updater recovery. None is activated in
+production; deployed main still uses the reviewed image-only updater. See
+[the approved staged plan](../plans/database-migration-delivery.md) for offline verification
+and the separately approved adoption/operator transition required before merging.
 
 ## Ownership and interface
 
@@ -121,8 +122,8 @@ SHA-256 of UTF-8 `ignite-database-catalogue-v1\n` followed by one
 `id<TAB>sql-sha256<TAB>delivery<LF>` row per script. SQL checksums include original LF bytes.
 The generated descriptor contains protocol, catalogue/baseline/target schema hashes and
 script identities, not SQL or row data. Generate it once at build time, not by replaying
-historical SQL on application startup. Its binding into signed releases is still being
-integrated.
+historical SQL on application startup. The publisher binds it to signed schema-v2 releases
+and the consumer checks it against the exact immutable backend before downtime.
 
 The separate `Ignite.Migrations` executable has no HTTP host, Hangfire workers or service
 credentials. Prepared commands are `build-manifest`, `describe <manifest>`, `inspect`,
@@ -140,9 +141,9 @@ process-kill fixture forces a hot rollback journal: `inspect` refuses it, and on
 `settle` restores readable committed state. The controller must never hide this operation
 inside a read-only check or race it against an orphaned writer.
 
-These prepared interfaces are not an authorization to run against production. Signed-release
-activation, durable updater decisions and the approved operator/database transition must
-still be completed and verified.
+These prepared interfaces are not authorization to run against production. Offline
+integration verification and the exact approved operator/database transition must precede
+publication of the new protocol on main.
 
 ## Packaged startup and contained execution
 
@@ -200,9 +201,11 @@ a declaration that arbitrary runtime or package upgrades are compatible.
 `MigrationDependencyPolicy` containing independently reviewed engine and Hangfire pins.
 A boolean opt-in alone is insufficient. A changed identity or a schema-v1 downgrade is
 refused; never derive the policy pins from the incoming release to make it pass. The
-per-attempt transition journal retains both identities. Default transport still supplies
-no migration policy and therefore cannot enable schema-v2 releases. Host policy/installer
-and coordinated runtime integration remain unfinished.
+per-attempt transition journal retains both identities. A schema-v1 operator still supplies
+no migration policy and refuses schema-v2 releases. The reviewed schema-v2 operator supplies
+the pinned identities explicitly, requires a matching versioned ledger and separately
+verifies the pinned host configuration contract. No policy or ledger upgrades happen on
+ordinary polls, status or candidate checks.
 
 ## Durable database-transition journal (not activated)
 
@@ -240,7 +243,47 @@ Committed, uncertain and blocked recovery outcomes latch rather than repeatedly 
 on polls. An unchanged observation is rechecked if recovery is requested again. The journal
 neither switches images nor restores a database. The existing image-only driver refuses
 any attempt containing this journal instead of accidentally applying its old rollback path.
-Versioned outer-ledger/runtime/policy integration remains required before activation.
+The schema-v2 outer ledger dispatches explicitly to this path; schema-v1 state never does.
+
+## Coordinated updater path (not activated)
+
+Schema-v2 ledger state preserves active release, replay high-water order and failed-digest
+fences, adding reviewed migration policy and the last committed catalogue summary.
+`Deployment.upgrade_migrations` is an explicit idle-ledger, exact-state-fingerprint operation
+for the separately reviewed activation procedure; it is never invoked by polling or the
+installer. It rejects pending work, stale evidence, repeated conversion and invalid pins.
+The fingerprint is SHA-256 of sorted, compact JSON from `status()`, not an authorization
+in itself. Save private pre-transition evidence in the approved procedure.
+
+Normal execution verifies/pulls first, binds actual immutable catalogue and both dependency
+graphs, records quiescing intent, stops the known backup daemon and backend, then verifies
+fresh encrypted backup and isolated restore of the stopped state. Data-consumer checks
+reject unexpected writable volume/overlapping bind consumers, including stopped containers.
+Unknown bind aliases must resolve within a bounded probe; unresolvable writable binds and
+unknown nonlocal/option-backed volumes fail closed rather than assuming isolation.
+Only existing inspected physical paths are bound into migration and backup tooling; no
+new data/state volumes are created. Host configuration, auxiliary identities, UID/mode/inode,
+space budgets and retained bind anchors remain guarded.
+
+The backup helper is stopped before owned plaintext cleanup, including recovery from an
+interrupted attached command. Migration intent is durable before CLI execution. Database
+state and backup freshness are checked again before backend and dependent image admission.
+Only complete image health, runtime preservation and matching database evidence can commit
+the new active release/catalogue. A committed ledger retries cleanup without re-migrating.
+
+Any post-quiescence interruption first stops known writers and classifies the database.
+Only exact unchanged history/schema with compatible prior catalogue may enter one durable
+image-only rollback. Committed adoption/expansion followed by health failure leaves writers
+stopped for a forward fix; uncertain/blocked outcomes and interrupted rollback latch for
+manual handling. No database restore or SQL replay is a recovery fallback. A read-only
+`Deployment.check` holds the same global deployment lock and never calls recovery.
+
+The installer accepts an explicit private `--migration-policy` file only when its host hash
+and already upgraded ledger match the immutable bundle. It still refuses replacement of a
+different policy/operator/unit and never starts/enables services. The publisher in this
+branch requests schema-v2 records. Therefore merging before the separately approved
+operator/ledger/adoption procedure is ready would block the existing v1 updater; keep this
+draft unmerged until that transition is reviewed.
 
 ## Verification
 
@@ -279,7 +322,13 @@ killed uncommitted and committed writers, no replay after restart, concurrent ex
 unknown history, failed writer shutdown, backup bounds/expiry and failed durable writes.
 Their synthetic backup receipts test admission policy, not actual encrypted backup I/O.
 
-These tests do not establish live R2 recovery, complete outer deployment transaction
-recovery, image rollback compatibility or activation. Those require the remaining
-migration-aware release/controller work and an approved production procedure. Keep existing signing,
+Outer-ledger tests cover explicit upgrade/fence preservation, baseline adoption, committed
+schema plus health failure, compatible no-op rollback, killed migration, cleanup restart,
+policy mismatch and interrupted rollback. External Docker-seam tests cover the actual
+runtime orchestration, metadata binding, unexpected writer refusal, admission and rejection
+of incompatible rollback. Installer tests use the real checksum-pinned signer binary but
+fixture system commands, proving installation does not enable/start units.
+
+These offline tests do not establish live R2 access, the current production baseline,
+real schema-v2 publication or activation. Those require the approved production procedure. Keep existing signing,
 image/security/notice gates, backup credentials/retention/budgets and deployment fences.

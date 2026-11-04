@@ -31,7 +31,7 @@ class ReleaseWorkflowTests(unittest.TestCase):
     def test_record_packaging_uses_one_platform_without_buildkit_attestations(self):
         workflow = (ROOT / '.github/workflows/deploy.yml').read_text()
         record = workflow.split('      - name: Create coherent release record\n', 1)[1].split('\n      - name:', 1)[0]
-        for option in ['docker buildx build', '--load', '--platform linux/amd64', '--provenance=false', '--sbom=false']:
+        for option in ['--migration-protocol', 'docker buildx build', '--load', '--platform linux/amd64', '--provenance=false', '--sbom=false']:
             self.assertIn(option, record)
 
 

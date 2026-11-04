@@ -1,7 +1,9 @@
 # Guarded deployment implementation
 
-This implementation is verified and in use. The protected publisher, record transport,
-transaction core and sole updater passed controlled and automatic deployment checks.
+The schema-v1 implementation is verified and in use. This unmerged branch also contains
+migration-aware schema-v2 release, ledger, runtime and installer support; that path is not
+activated. The deployed protected publisher, record transport, transaction core and sole
+updater passed controlled and automatic image-only deployment checks.
 Current operations and ledger paths are in the
 [guarded delivery runbook](../../docs/operations/guarded-continuous-delivery.md).
 The installer deliberately installs disabled units; any new installation still requires
@@ -63,6 +65,38 @@ Preflight refusal or interruption only abandons/cleans that attempt. It cannot
 "roll back" over an unrecognized live runtime. Once backup/mutation may have begun,
 recovery is recorded durably before the single recovery attempt. If rollback or cleanup
 cannot be proven safe, stop and report the fixed outcome; do not weaken the guards.
+
+## Prepared schema-v2 migration path
+
+See [database migration operations](../../docs/operations/database-migrations.md) for the
+full policy, native interface and transition journal. Schema-v1 state and policy continue
+to use only the image-only path; neither is silently converted.
+
+Schema-v2 state adds a reviewed host-contract/engine/Hangfire/legacy-baseline policy and
+last committed catalogue summary. An explicit exact-idle-state upgrade preserves active,
+high-water and failed-release fences. Candidate preflight verifies actual immutable image
+metadata and dependency content before quiescing. The outer ledger persists intent before
+stopping backup/backend and obtaining a fresh stopped-state backup/isolated restore.
+`MigrationTransition` then owns durable SQL intent and unchanged/committed/uncertain outcome
+evidence. It cannot admit images or commit a deployment on its own.
+
+The migration runtime additionally supplies `quiesce`, `require_quiesced`,
+`inspect_database`, `migrate_database`, `stop_migration_writer`,
+`stop_database_writers` and `settle_database`. All use reviewed existing mounts and bounded
+owned tooling. It inventories writable Docker data consumers, preserves auxiliaries and
+configuration, and stops the owned backup tool before deleting plaintext. Backend and
+dependent admission independently recheck database evidence and backup freshness.
+
+Only unchanged, compatible database state allows one prior-image rollback. Committed or
+uncertain outcomes never start an incompatible image; failed rollback and manual holds
+latch. `check` holds the global deployment lock and cannot invoke recovery. Schema-v2
+status/polling require the operator policy and ledger to agree exactly.
+
+`install-deployer.py --migration-policy <private-reviewed-file>` validates the already
+upgraded ledger and the immutable bundle/retained host configuration. It neither upgrades
+state nor replaces a different operator, policy or unit, and never enables services.
+The file contains only the four reviewed migration-policy hashes. The branch publisher
+uses v2 records; do not merge before the separate activation procedure is approved/ready.
 
 ## Recovery and signature adapters
 
