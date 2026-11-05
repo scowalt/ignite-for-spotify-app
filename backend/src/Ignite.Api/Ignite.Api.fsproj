@@ -32,6 +32,7 @@
     <Compile Include="OAuthCallbackFailure.fs" />
     <Compile Include="RequestCancellationMiddleware.fs" />
     <Compile Include="DatabaseReadiness.fs" />
+    <Compile Include="GitHubStars.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

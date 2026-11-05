@@ -5,6 +5,7 @@ namespace Ignite.Api
 open System
 open System.Collections.Generic
 open System.Linq
+open System.Net.Http
 open System.Text.Json
 open System.Threading
 open System.Threading.Tasks
@@ -291,6 +292,22 @@ module Program =
             builder.Services.AddSingleton<IHubNotificationService, HubNotificationService>()
             |> ignore
 
+            builder.Services.AddHttpClient(
+                "github-stars",
+                fun (client: HttpClient) -> client.Timeout <- TimeSpan.FromSeconds 5.0
+            )
+            |> ignore
+
+            builder.Services.AddSingleton<GitHubStarsCache>(fun services ->
+                let clients = services.GetRequiredService<IHttpClientFactory>()
+
+                GitHubStarsCache(
+                    (fun ct -> GitHubStars.fetchFromGitHub (clients.CreateClient "github-stars") ct),
+                    TimeProvider.System,
+                    services.GetRequiredService<ILogger<GitHubStarsCache>>()
+                ))
+            |> ignore
+
             let app = builder.Build()
 
             app.UseSerilogRequestLogging() |> ignore
@@ -368,6 +385,25 @@ module Program =
             )
                 .WithName("DatabaseReadiness")
                 .WithTags("Health")
+            |> ignore
+
+            app.MapGet(
+                "/api/github/stars",
+                Func<GitHubStarsCache, HttpContext, CancellationToken, Task<IResult>>(fun cache context ct ->
+                    task {
+                        let! stars = cache.GetAsync(ct)
+                        context.Response.Headers.CacheControl <- "public, max-age=300"
+
+                        let count =
+                            match stars with
+                            | Some count -> Nullable count
+                            | None -> Nullable()
+
+                        return Results.Ok({| stars = count |})
+                    })
+            )
+                .WithName("GetGitHubStars")
+                .WithTags("GitHub")
             |> ignore
 
             app.MapGet(

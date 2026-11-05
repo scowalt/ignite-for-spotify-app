@@ -3,6 +3,7 @@ import { useLocation } from "@solidjs/router";
 import { AlertDialog } from "@kobalte/core/alert-dialog";
 import { createEffect, createSignal, Suspense, Show } from "solid-js";
 import { authStore } from "./stores/authStore";
+import GitHubStarButton from "./components/GitHubStarButton";
 import { HeaderAuthSkeleton, PageSkeleton } from "./components/Skeleton";
 import { applyPageMetadata } from "./lib/pageMetadata";
 
@@ -41,6 +42,8 @@ function App(props: RouteSectionProps) {
             >
               Discover & Export
             </a>
+
+            <GitHubStarButton />
 
             { }
             <Show

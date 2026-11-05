@@ -152,6 +152,10 @@ export interface AuthSession {
   expiresAt: string;
 }
 
+export interface GitHubStars {
+  stars: number | null;
+}
+
 export interface DatabaseStats {
   totalSongs: number;
   songsWithSpotifyId: number;
