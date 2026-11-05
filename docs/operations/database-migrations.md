@@ -1,11 +1,12 @@
 # SQLite migration foundation
 
-Migration-aware delivery was merged, but its first production attempt stopped during
-backup preparation before journal adoption. The original application services were restored
-after independent compatibility proof. Deployment/publishing remain intentionally held for
-the cold-WAL fix and a separately reviewed operator/held-attempt recovery procedure. Do not
-replay the old rollout, clear fences or infer activation from a green build.
-See [the staged plan](../plans/database-migration-delivery.md) and the cold-WAL section below.
+Migration-aware delivery is active following the separately approved 2026-11-05 cold-WAL
+recovery and timer-driven baseline adoption. Fresh encrypted backup/isolated restore,
+exact journal history, unchanged application schema and healthy images were independently
+verified. Normal publishing and polling are restored; the earlier failed artifact remains
+fenced with its original blocked evidence and separate manual-resolution receipt.
+See [current operations and verification](guarded-continuous-delivery.md), the
+[historical staged plan](../plans/database-migration-delivery.md) and the cold-WAL section below.
 
 ## Ownership and interface
 
@@ -92,7 +93,7 @@ terminated process alone does not establish whether commit happened: recovery mu
 durable history before selecting a prior image or a forward fix. No down-migration, live
 restore, repository initialization/pruning or automatic operator upgrade is provided.
 
-## Prepared migration-aware interface (not activated)
+## Migration-aware interface
 
 The integration branch adds `AutomaticUpgrade` for rehearsals and `VerifiedUpgrade`
 for a release-bound target. Both require the exact prior schema/history and an explicit
@@ -142,9 +143,9 @@ process-kill fixture forces a hot rollback journal: `inspect` refuses it, and on
 `settle` restores readable committed state. The controller must never hide this operation
 inside a read-only check or race it against an orphaned writer.
 
-These prepared interfaces are not authorization to run against production. Offline
-integration verification and the exact approved operator/database transition must precede
-publication of the new protocol on main.
+These interfaces are not blanket authorization for direct production commands. The reviewed
+operator owns routine eligible transitions; a changed operator, safety contract or manual
+migration still requires its own scoped procedure and verification.
 
 ## Packaged startup and contained execution
 
@@ -221,12 +222,14 @@ by a read-only reader, and hot rollback journals. A joined real-container fixtur
 cold WAL backup, isolated encrypted restore, stopped inspection, adoption and API readiness.
 No production records or failure injection are used.
 
-The held attempt's original sidecar, active release, high-water and failed digest fence must
-remain auditable. The single prior-service restart already performed is not permission for
-another rollback. Resolve the held attempt and approve an exact new operator/contract in a
-separate procedure before resuming delivery; this fix does not clear or retry it.
+The separately approved recovery preserved the original blocked sidecar, prior release,
+high-water and failed digest fence in private audit evidence. It recorded the already
+completed prior-service restart without repeating it, then closed only the held pointer
+and selected the reviewed fixed operator. A new signed artifact performed successful
+adoption. Preserve that history; neither the old failed artifact nor the one-time recovery
+helpers are retry mechanisms. New manual holds require a new scoped recovery decision.
 
-## Signed dependency compatibility (not activated)
+## Signed dependency compatibility
 
 Schema-v2 records require both `hangfire_sha256` and `migration_engine_sha256`. The
 publisher copies three bounded regular metadata files from the exact unstarted backend
@@ -252,7 +255,7 @@ the pinned identities explicitly, requires a matching versioned ledger and separ
 verifies the pinned host configuration contract. No policy or ledger upgrades happen on
 ordinary polls, status or candidate checks.
 
-## Durable database-transition journal (not activated)
+## Durable database-transition journal
 
 `migration_plan.py` validates complete prior history/schema and the immutable candidate
 catalogue before forming a transition. Applied identifiers, checksums and delivery classes
@@ -290,7 +293,7 @@ neither switches images nor restores a database. The existing image-only driver 
 any attempt containing this journal instead of accidentally applying its old rollback path.
 The schema-v2 outer ledger dispatches explicitly to this path; schema-v1 state never does.
 
-## Coordinated updater path (not activated)
+## Coordinated updater path
 
 Schema-v2 ledger state preserves active release, replay high-water order and failed-digest
 fences, adding reviewed migration policy and the last committed catalogue summary.
@@ -373,6 +376,8 @@ runtime orchestration, metadata binding, unexpected writer refusal, admission an
 of incompatible rollback. Installer tests use the real checksum-pinned signer binary but
 fixture system commands, proving installation does not enable/start units.
 
-These offline tests do not establish live R2 access, the current production baseline,
-real schema-v2 publication or activation. Those require the approved production procedure. Keep existing signing,
-image/security/notice gates, backup credentials/retention/budgets and deployment fences.
+Offline tests alone do not establish live R2 access, the current production baseline or
+real schema-v2 publication. The [activation record](guarded-continuous-delivery.md#verification-record)
+documents the separate approved live verification. Repeat appropriate verification for future
+changes; preserve signing/image/security/notice gates, backup credentials/retention/budgets
+and replay/failed-release fences.

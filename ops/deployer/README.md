@@ -1,10 +1,10 @@
 # Guarded deployment implementation
 
-The schema-v1 image-only path passed controlled and automatic deployment checks.
-The merged schema-v2 path's first adoption attempt stopped during cold-WAL backup
-preparation, before journal adoption. Original services were restored with verified prior
-compatibility; automatic delivery is held pending the cold-WAL fix and reviewed recovery.
-Do not interpret historical verification as permission to clear the current fence.
+The schema-v2 path is active after the separately approved cold-WAL recovery, fresh
+verified backup/restore and actual-timer baseline adoption. Automatic publishing/polling
+are restored. The earlier failed artifact and original blocked evidence remain fenced
+and audited; the already-used prior-service restart was not repeated. Historical success
+is not permission to replay recovery helpers, reset history or clear failed-release fences.
 Current operations and ledger paths are in the
 [guarded delivery runbook](../../docs/operations/guarded-continuous-delivery.md).
 The installer deliberately installs disabled units; any new installation still requires
@@ -67,7 +67,7 @@ Preflight refusal or interruption only abandons/cleans that attempt. It cannot
 recovery is recorded durably before the single recovery attempt. If rollback or cleanup
 cannot be proven safe, stop and report the fixed outcome; do not weaken the guards.
 
-## Prepared schema-v2 migration path
+## Active schema-v2 migration path
 
 See [database migration operations](../../docs/operations/database-migrations.md) for the
 full policy, native interface and transition journal. Schema-v1 state and policy continue
@@ -101,8 +101,9 @@ status/polling require the operator policy and ledger to agree exactly.
 `install-deployer.py --migration-policy <private-reviewed-file>` validates the already
 upgraded ledger and the immutable bundle/retained host configuration. It neither upgrades
 state nor replaces a different operator, policy or unit, and never enables services.
-The file contains only the four reviewed migration-policy hashes. The branch publisher
-uses v2 records; do not merge before the separate activation procedure is approved/ready.
+The file contains only the four reviewed migration-policy hashes. The maintained publisher
+uses v2 records. Changed operator/safety/dependency contracts still require separately reviewed
+activation; routine eligible migrations use the installed policy without a new approval click.
 
 ## Recovery and signature adapters
 

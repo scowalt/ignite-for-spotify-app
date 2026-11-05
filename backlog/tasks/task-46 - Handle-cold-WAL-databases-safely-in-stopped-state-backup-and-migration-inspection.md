@@ -3,11 +3,11 @@ id: TASK-46
 title: >-
   Handle cold WAL databases safely in stopped-state backup and migration
   inspection
-status: In Progress
+status: Done
 assignee:
   - '@pi'
 created_date: '2026-11-04 22:01'
-updated_date: '2026-11-04 23:04'
+updated_date: '2026-11-05 04:11'
 labels:
   - database
   - deployment
@@ -33,7 +33,7 @@ Production migration-aware activation reached backup_started but stopped before 
 - [x] #1 Real native fixtures cover a checkpointed cold WAL database after all writers stop, with fresh encrypted snapshot/isolated restore and schema/history inspection succeeding without weakening budgets or data isolation.
 - [x] #2 Live or uncheckpointed WAL and hot rollback-journal cases are not bypassed with unconditional immutable reads; recovery proves writer shutdown and preserves committed data.
 - [x] #3 Read-only preflight, production startup and all existing migration failure/commit/concurrency/secret/identity gates remain enforced, with regression tests that fail on the observed cold-WAL case.
-- [ ] #4 A separately reviewed exact operator/policy and held-attempt recovery plan preserves active/high-water/failed fences and audits the already completed one-time prior-service restart; no live retry, ledger reset, data restore or second blind rollback is performed during development.
+- [x] #4 A separately reviewed exact operator/policy and held-attempt recovery plan preserves active/high-water/failed fences and audits the already completed one-time prior-service restart; no live retry, ledger reset, data restore or second blind rollback is performed during development.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -56,4 +56,18 @@ Full local verification: 190 backend tests pass with no skips. Python suite: 171
 Hosted CI at 8a135b8 exposed a fixture-only rootful-Docker cleanup failure: the joined test body passed, but its host-bound synthetic Restic repository contained root-owned private directories the unprivileged runner could not delete. The existing standalone backup job uses sudo; instead of broadening privileges, the joined fixture now owns a separately labelled Docker volume for its local repository and removes it after all owned containers stop. The local joined test passes with this topology; full exact-head CI will be rerun. No gates were bypassed and no production action occurred.
 
 Corrected exact head 81d5a787babaad3afa69f452dfecddcd1771ef21 passed full hosted CI 41929825425: all ten validation/image jobs succeeded and PR publishing was skipped. Actual joined cold-WAL backup/restore/adoption/API-health and no-sidecar inspection cases ran and passed on rootful hosted Docker. Native standalone backup/restart/transport/metadata cases and security/notice gates passed too. AC1–3 are complete; AC4 awaits separate review of the exact revised recovery/operator proposal. No production changes or merge were performed.
+
+Owner explicitly approved the revised recovery plan pinned to e3b6bd2 via the Recovery question. Approval covers fresh checks, local reconciliation rehearsal, audited held-attempt closure preserving active/high-water/failed evidence, protected publication, fixed operator/contract, fresh verified recovery and a new timer-driven adoption attempt. No repeat of the prior-service restart or automatic live restore is authorized. Beginning revalidation; stop on changed identities or failed gates.
+
+Final tested head e3b6bd2 passed CI 41930747075; protected PR #27 merged with identical tree as 2fb52ca. The separately approved TASK-44 recovery selected the fixed immutable operator without repeating the previous prior-service restart. Actual timer deployment of signed order [88,1] verified fresh encrypted recovery, adopted exactly the baseline journal and became healthy; the original blocked attempt/fence remains preserved. This operational activation is recorded in TASK-44, not retroactive authorization for development changes.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Fixed stopped-state cold-WAL inspection and backup without weakening live WAL or recovery semantics. Explicit stopped entry points require writer exclusion and absence of all sidecars before using immutable read-only access.
+
+Verification: 190 backend tests, native encrypted snapshot/restore and joined adoption/API fixture, full exact-head hosted CI and unchanged security/notice gates. Rootful hosted fixture cleanup uses an owned Docker volume rather than broader privileges.
+
+The owner separately reviewed and approved the exact recovery/operator procedure; TASK-44 tracks production activation and preservation evidence.
+<!-- SECTION:FINAL_SUMMARY:END -->
