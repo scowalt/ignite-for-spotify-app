@@ -212,41 +212,8 @@ module Program =
                     |> ignore))
             |> ignore
 
-            let mutable connectionString = builder.Configuration.GetConnectionString("Database")
-
-            if String.IsNullOrEmpty(connectionString) then
-                connectionString <- "Data Source=/app/data/ignite.db;Default Timeout=60"
-
-            let requireExistingDatabase =
-                let configuredValue = builder.Configuration.["Database:RequireExisting"]
-
-                if String.IsNullOrEmpty(configuredValue) then
-                    builder.Environment.IsProduction()
-                else
-                    match Boolean.TryParse(configuredValue) with
-                    | true, value -> value
-                    | false, _ ->
-                        invalidArg
-                            "Database:RequireExisting"
-                            "Database:RequireExisting must be true or false."
-
-            if builder.Environment.IsProduction() && not requireExistingDatabase then
-                invalidArg "Database:RequireExisting" "Production cannot initialize a missing database."
-
-            let migrationPlan = ApplicationMigrations.deliveryPlan ()
-
-            let migrationDescriptor =
-                if requireExistingDatabase then
-                    Some(
-                        MigrationCatalogue.readFile
-                            migrationPlan
-                            (IO.Path.Combine(AppContext.BaseDirectory, "migration-catalogue.json"))
-                    )
-                else
-                    None
-
-            connectionString <-
-                DatabaseStartup.initialize connectionString requireExistingDatabase migrationPlan migrationDescriptor
+            let connectionString, requireExistingDatabase =
+                DatabaseBootstrap.initialize builder.Configuration builder.Environment
 
             builder.Services.AddInfrastructure(
                 builder.Configuration,

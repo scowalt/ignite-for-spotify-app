@@ -18,7 +18,7 @@ CONTRACT_PATHS = (
     'docker/backup/entrypoint.sh',
     'docker/backup/healthcheck.sh',
     'docker/backup/crontab',
-    'backend/src/Ignite.Api/Program.fs',
+    'backend/src/Ignite.Api/DatabaseBootstrap.fs',
     'backend/src/Ignite.Api/DatabaseReadiness.fs',
     'backend/src/Ignite.Infrastructure/DependencyInjection.fs',
     'backend/src/Ignite.Infrastructure/Data/DatabaseConfiguration.fs',
