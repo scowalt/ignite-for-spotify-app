@@ -21,14 +21,16 @@ class MigrationToolTests(unittest.TestCase):
         return MigrationTool(self.docker, 'sha256:' + 'a' * 64, 'fixture', '/fixture/data', environment=self.environment, **changes)
 
     def test_inspection_mount_is_read_only_and_owned_container_is_removed(self):
-        result = self.tool().invoke('inspect', {'database_path': '/data/ignite.db'})
-        self.assertEqual(result, {'schema': 1, 'schema_sha256': 'b' * 64, 'history': None})
-        self.assertFalse((self.root / 'container.json').exists())
+        for action in ['inspect', 'inspect-stopped']:
+            with self.subTest(action=action):
+                result = self.tool().invoke(action, {'database_path': '/data/ignite.db'})
+                self.assertEqual(result, {'schema': 1, 'schema_sha256': 'b' * 64, 'history': None})
+                self.assertFalse((self.root / 'container.json').exists())
         commands = [json.loads(line) for line in (self.root / 'commands.jsonl').read_text().splitlines()]
-        create = next(row for row in commands if row[0] == 'create')
-        self.assertIn('readonly', create[create.index('--mount') + 1])
-        self.assertEqual(create[create.index('--network') + 1], 'none')
-        self.assertEqual(create[create.index('--user') + 1], '999:999')
+        for create in [row for row in commands if row[0] == 'create']:
+            self.assertIn('readonly', create[create.index('--mount') + 1])
+            self.assertEqual(create[create.index('--network') + 1], 'none')
+            self.assertEqual(create[create.index('--user') + 1], '999:999')
 
     def interrupted_writer(self):
         self.tool().invoke('inspect', {'database_path': '/data/ignite.db'})

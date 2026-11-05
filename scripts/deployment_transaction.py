@@ -410,7 +410,7 @@ class Deployment:
         try:
             runtime.cleanup(workspace)
             runtime.require_quiesced(workspace)
-            observed = parse_inspection(json.dumps(runtime.inspect_database(workspace)).encode())
+            observed = parse_inspection(json.dumps(runtime.inspect_stopped_database(workspace)).encode())
             if classify_transition(transition.status()['plan'], observed) != 'unchanged':
                 raise StateRejected('Prior database compatibility changed before rollback.')
             runtime.rollback(transaction['prior'], workspace)

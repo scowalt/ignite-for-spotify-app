@@ -1,4 +1,5 @@
 from contextlib import closing
+import hashlib
 import json
 import multiprocessing
 import os
@@ -10,6 +11,7 @@ import unittest
 import uuid
 
 from deployment_process import OperationFailed, run
+from deployment_backup import BackupTool
 from migration_image import metadata_file
 from migration_record import verify_source_descriptor, migration_engine_identity
 from migration_tool import MigrationTool
@@ -18,6 +20,7 @@ from migration_tool import MigrationTool
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE = os.environ.get('IGNITE_MIGRATION_FIXTURE_IMAGE')
 WRITER_IMAGE = os.environ.get('IGNITE_MIGRATION_WRITER_FIXTURE_IMAGE')
+BACKUP_IMAGE = os.environ.get('IGNITE_BACKUP_FIXTURE_IMAGE')
 
 
 def hold_container_writer(image, operation, source, environment, phase):
@@ -36,6 +39,7 @@ class MigrationStartupNativeTests(unittest.TestCase):
         self.source = None
         self.tool = None
         self.created_volume = False
+        self.extra_volumes = []
         self.addCleanup(self.cleanup)
         self.image = self.docker(['image', 'inspect', IMAGE, '--format', '{{.Id}}']).decode().strip()
         self.assertFalse(json.loads(self.docker(['image', 'inspect', self.image, '--format', '{{json .Config.Volumes}}'])))
@@ -71,6 +75,8 @@ class MigrationStartupNativeTests(unittest.TestCase):
             self.docker(['stop', '--time', '0', identifier])
             if identifier in self.owned():
                 self.docker(['rm', identifier])
+        for name in self.extra_volumes:
+            self.remove_fixture_volume(name)
         if self.created_volume:
             owner = self.docker(['volume', 'inspect', '--format', '{{index .Labels "ignite.test-migration"}}', self.volume]).decode().strip()
             self.assertEqual(owner, self.operation)
@@ -102,6 +108,81 @@ class MigrationStartupNativeTests(unittest.TestCase):
 
     def app_state(self, identifier):
         return json.loads(self.docker(['inspect', '--format', '{"running":{{json .State.Running}},"exit":{{json .State.ExitCode}},"health":{{with index .State "Health"}}{{json .Status}}{{else}}null{{end}}}', identifier]))
+
+    def seed_cold_wal(self):
+        path = Path(self.temporary.name) / 'cold-wal.db'
+        with closing(sqlite3.connect(path)) as connection:
+            connection.execute('PRAGMA journal_mode=WAL')
+            connection.executescript((ROOT / 'backend/tests/Ignite.Infrastructure.Tests/Fixtures/legacy-schema-v1.sql').read_text())
+            connection.executescript((ROOT / 'backend/tests/Ignite.Infrastructure.Tests/Fixtures/legacy-rows-v1.sql').read_text())
+            connection.commit()
+        self.assertFalse(path.with_name(path.name + '-wal').exists())
+        self.docker(['run', '--rm', '--interactive', '--pull', 'never', '--network', 'none', '--read-only', '--user', '0:0',
+                     '--label', 'ignite.test-migration=' + self.operation,
+                     '--mount', 'type=bind,src=' + self.source + ',dst=/data', '--entrypoint', '/bin/sh', self.image,
+                     '-ec', 'cat > /data/ignite.db; chown 999:999 /data/ignite.db; chmod 600 /data/ignite.db'], input=path.read_bytes())
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    def test_stopped_cold_wal_inspection_preserves_main_file_and_creates_no_sidecars(self):
+        checksum = self.seed_cold_wal()
+        with self.assertRaises(OperationFailed):
+            self.tool.invoke('inspect', {'database_path': '/data/ignite.db'})
+        observed = self.tool.invoke('inspect-stopped', {'database_path': '/data/ignite.db'})
+        self.assertIsNone(observed['history'])
+        self.assertEqual(observed['schema_sha256'], self.descriptor['baseline_schema_sha256'])
+        digest = self.docker(['run', '--rm', '--pull', 'never', '--network', 'none', '--read-only',
+                             '--label', 'ignite.test-migration=' + self.operation,
+                             '--mount', 'type=bind,src=' + self.source + ',dst=/data,readonly', '--entrypoint', '/bin/sh', self.image,
+                             '-ec', 'test ! -e /data/ignite.db-wal; test ! -e /data/ignite.db-shm; test ! -e /data/ignite.db-journal; sha256sum /data/ignite.db'])
+        self.assertEqual(digest.decode().split()[0], checksum)
+
+    def remove_fixture_volume(self, name):
+        owner = self.docker(['volume', 'inspect', '--format', '{{index .Labels "ignite.test-migration"}}', name]).decode().strip()
+        self.assertEqual(owner, self.operation)
+        self.docker(['volume', 'rm', name])
+
+    @unittest.skipUnless(BACKUP_IMAGE, 'Set IGNITE_BACKUP_FIXTURE_IMAGE for combined cold-WAL recovery verification.')
+    def test_cold_wal_backup_restore_adoption_and_real_startup_form_one_working_path(self):
+        self.seed_cold_wal()
+        before = self.tool.invoke('inspect-stopped', {'database_path': '/data/ignite.db'})
+        repository = self.volume + '-repository'
+        self.assertFalse(self.docker(['volume', 'ls', '--filter', 'name=^' + repository + '$', '--format', '{{.Name}}']).strip())
+        self.docker(['volume', 'create', '--label', 'ignite.test-migration=' + self.operation, repository])
+        self.extra_volumes.append(repository)
+        scratch = Path(self.temporary.name) / 'scratch'
+        scratch.mkdir(mode=0o700)
+        repository_mount = 'type=volume,src=' + repository + ',dst=/repository'
+        env = {**self.env, 'RESTIC_REPOSITORY': '/repository', 'RESTIC_PASSWORD': 'fixture-only'}
+        run(['docker', 'run', '--rm', '--network', 'none', '--label', 'ignite.test-migration=' + self.operation, '--mount', repository_mount,
+             '--env', 'RESTIC_REPOSITORY', '--env', 'RESTIC_PASSWORD', '--entrypoint', 'restic', BACKUP_IMAGE, '--no-cache', 'init'], env=env, timeout=60)
+        backup = BackupTool(['docker'], BACKUP_IMAGE, scratch, env, self.operation + '-backup',
+                            'type=bind,src=' + self.source + ',dst=/data,readonly', network='none', quiesced=True,
+                            extra_mounts=[repository_mount])
+        self.addCleanup(backup.close)
+        try:
+            backup.start()
+            receipt = backup.snapshot_restore()
+            self.assertTrue(receipt['restore_verified'] and receipt['integrity_ok'])
+            counts = backup.exec(['sqlite3', '-readonly', '/scratch/restore/ignite.db',
+                                  'SELECT count(*) FROM songs; SELECT count(*) FROM user_sessions; SELECT count(*) FROM scraping_jobs; SELECT count(*) FROM playlist_search_snapshots;'])
+            self.assertEqual(counts.splitlines(), ['1', '1', '1', '1'])
+        finally:
+            backup.close()
+        self.assertFalse(scratch.exists())
+        self.assertEqual(self.tool.invoke('inspect-stopped', {'database_path': '/data/ignite.db'}), before)
+        adopted = self.tool.invoke('adopt', {'database_path': '/data/ignite.db', 'before': before,
+                                          'catalogue_sha256': self.descriptor['catalogue_sha256'], 'schema_sha256': self.descriptor['schema_sha256']})
+        self.assertEqual(adopted['outcome'], 'adopted')
+        self.assertEqual(self.tool.invoke('inspect-stopped', {'database_path': '/data/ignite.db'}), adopted['inspection'])
+        identifier = self.start_app()
+        deadline = time.monotonic() + 75
+        value = self.app_state(identifier)
+        while time.monotonic() < deadline and value['running'] and value['health'] != 'healthy':
+            time.sleep(1)
+            value = self.app_state(identifier)
+        self.assertTrue(value['running'])
+        self.assertEqual(value['health'], 'healthy')
+        self.assertEqual(self.tool.invoke('inspect', {'database_path': '/data/ignite.db'}), adopted['inspection'])
 
     def test_unadopted_database_cannot_start_http_or_initialize_hangfire(self):
         before = self.tool.invoke('inspect', {'database_path': '/data/ignite.db'})
@@ -161,6 +242,8 @@ class MigrationStartupNativeTests(unittest.TestCase):
                      '-ec', 'test -s /data/fixture-ready'])
         with self.assertRaises(OperationFailed):
             self.tool.invoke('inspect', {'database_path': '/data/ignite.db'})
+        with self.assertRaises(OperationFailed):
+            self.tool.invoke('inspect-stopped', {'database_path': '/data/ignite.db'})
         settled = self.tool.invoke('settle', {'database_path': '/data/ignite.db'})
         self.assertEqual(settled['inspection'], before)
 

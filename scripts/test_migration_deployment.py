@@ -53,6 +53,10 @@ class MigrationRuntimeFixture(RuntimeFixture):
     def inspect_database(self, workspace):
         return self.sql.inspect_database(workspace)
 
+    def inspect_stopped_database(self, workspace):
+        self.require_quiesced(workspace)
+        return self.sql.inspect_stopped_database(workspace)
+
     def migrate_database(self, plan, workspace):
         self.require_quiesced(workspace)
         return self.sql.migrate_database(plan, workspace)

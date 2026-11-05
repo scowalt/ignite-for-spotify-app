@@ -471,6 +471,10 @@ class DockerRuntime:
     def inspect_database(self, workspace):
         return self._migration_tool(workspace).invoke('inspect', {'database_path': '/data/ignite.db'})
 
+    def inspect_stopped_database(self, workspace):
+        self.require_quiesced(workspace)
+        return self._migration_tool(workspace).invoke('inspect-stopped', {'database_path': '/data/ignite.db'})
+
     def stop_migration_writer(self, workspace):
         self._migration_tool(workspace).close()
 
@@ -499,7 +503,7 @@ class DockerRuntime:
             source_mount = 'type=bind,src=' + self._migration_source(data) + ',dst=/data,readonly'
             state_mount = 'type=bind,src=' + self._migration_source(data, 'ignite-for-spotify_backup-state') + ',dst=/state'
         return BackupTool(self.docker, data['prior']['images']['backup'], workspace / 'scratch',
-                          env, 'deploy-' + workspace.name, source_mount, state_mount)
+                          env, 'deploy-' + workspace.name, source_mount, state_mount, quiesced=self.migration_policy is not None)
 
     def backup(self, workspace):
         if self.migration_policy is None:
@@ -551,7 +555,7 @@ class DockerRuntime:
                 not current['running'] or current['health'] != 'healthy' or invariant(current) != invariant(data['baseline'][name])):
             raise OperationFailed('application_identity_or_health_changed')
 
-    def _database_admission(self, workspace, prior=False, fresh=False):
+    def _database_admission(self, workspace, prior=False, fresh=False, stopped=False):
         if self.migration_policy is None:
             return
         evidence = MigrationTransition(workspace).status()
@@ -560,7 +564,7 @@ class DockerRuntime:
                 evidence['migration_engine_sha256'] != self.migration_policy['engine_sha256'] or
                 evidence['hangfire_sha256'] != self.migration_policy['hangfire_sha256']):
             raise OperationFailed('migration_admission_identity_changed')
-        observed = self.inspect_database(workspace)
+        observed = self.inspect_stopped_database(workspace) if stopped else self.inspect_database(workspace)
         if prior:
             if evidence['phase'] != 'unchanged' or classify_transition(evidence['plan'], observed) != 'unchanged':
                 raise OperationFailed('prior_database_incompatible')
@@ -575,7 +579,7 @@ class DockerRuntime:
             raise OperationFailed('candidate_changed_before_backend_admission')
         if self.migration_policy is not None:
             self.require_quiesced(workspace)
-        self._database_admission(workspace, fresh=True)
+        self._database_admission(workspace, fresh=True, stopped=True)
         self._up(['backend'], workspace)
         self._verify_app('backend', dict(release.images)['backend'], data)
         self._same_database(data)
@@ -617,7 +621,7 @@ class DockerRuntime:
         data = self._load(workspace)
         if self.migration_policy is not None:
             self.require_quiesced(workspace)
-            self._database_admission(workspace, prior=True)
+            self._database_admission(workspace, prior=True, stopped=True)
         if prior != data['prior'] or self._configuration(workspace, rollback=True, compare_live=False) != data['configuration_digest']:
             raise OperationFailed('rollback_configuration_changed')
         self._unchanged_auxiliary(self._snapshot(('caddy', 'alloy', 'watchtower')), data['baseline'])

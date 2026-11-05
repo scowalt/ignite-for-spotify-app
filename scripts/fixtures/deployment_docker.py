@@ -135,7 +135,7 @@ elif args[0] == 'start' and '--attach' in args:
     assert request['database_path'] == '/data/ignite.db'
     action = state['tool']['action']
     state['tool']['running'] = False
-    if action == 'inspect':
+    if action in ['inspect', 'inspect-stopped']:
         output(state['database_inspection'])
     elif action == 'settle':
         output({'schema': 1, 'outcome': 'settled', 'inspection': state['database_inspection']})

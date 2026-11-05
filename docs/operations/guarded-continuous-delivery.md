@@ -1,5 +1,12 @@
 # Guarded continuous delivery
 
+> The first schema-v2 adoption attempt is held after a cold-WAL read-only-mount failure,
+> before journal adoption. Original services are healthy after the single verified prior
+> restart. The timer/publishing pause is intentional pending a reviewed fix and held-attempt
+> recovery. Do not resume them, clear failure fences or apply IaC that silently removes the
+> publishing fence. See [database migrations](database-migrations.md); inspect the live ledger
+> and private operational evidence rather than treating historical success below as current.
+
 The public repository is the sole maintained source and publisher. Its protected
 main workflow publishes automatically after successful validation and all actual image,
 source-map, secret and notice gates, without a separate production approval click.

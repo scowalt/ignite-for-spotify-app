@@ -1,9 +1,10 @@
 # Guarded deployment implementation
 
-The schema-v1 implementation is verified and in use. This unmerged branch also contains
-migration-aware schema-v2 release, ledger, runtime and installer support; that path is not
-activated. The deployed protected publisher, record transport, transaction core and sole
-updater passed controlled and automatic image-only deployment checks.
+The schema-v1 image-only path passed controlled and automatic deployment checks.
+The merged schema-v2 path's first adoption attempt stopped during cold-WAL backup
+preparation, before journal adoption. Original services were restored with verified prior
+compatibility; automatic delivery is held pending the cold-WAL fix and reviewed recovery.
+Do not interpret historical verification as permission to clear the current fence.
 Current operations and ledger paths are in the
 [guarded delivery runbook](../../docs/operations/guarded-continuous-delivery.md).
 The installer deliberately installs disabled units; any new installation still requires
@@ -81,11 +82,16 @@ stopping backup/backend and obtaining a fresh stopped-state backup/isolated rest
 evidence. It cannot admit images or commit a deployment on its own.
 
 The migration runtime additionally supplies `quiesce`, `require_quiesced`,
-`inspect_database`, `migrate_database`, `stop_migration_writer`,
+`inspect_database`, `inspect_stopped_database`, `migrate_database`, `stop_migration_writer`,
 `stop_database_writers` and `settle_database`. All use reviewed existing mounts and bounded
 owned tooling. It inventories writable Docker data consumers, preserves auxiliaries and
 configuration, and stops the owned backup tool before deleting plaintext. Backend and
 dependent admission independently recheck database evidence and backup freshness.
+
+Stopped inspections and quiesced backups explicitly handle sidecar-free WAL files without
+relaxing read-only mounts. They may select an immutable URI only after proven writer
+quiescence and absence of all SQLite sidecars; live readers retain normal WAL semantics.
+See the database migration runbook for the conditions and native regression coverage.
 
 Only unchanged, compatible database state allows one prior-image rollback. Committed or
 uncertain outcomes never start an incompatible image; failed rollback and manual holds

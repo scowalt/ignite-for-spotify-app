@@ -352,12 +352,32 @@ module private MigrationStorage =
 
 [<RequireQualifiedAccess>]
 module DatabaseMigrations =
-    let private inspectExisting (path: string) sqliteMode : MigrationInspection =
+    let private sidecarsPresent path =
+        [ "-wal"; "-shm"; "-journal" ]
+        |> List.map (fun suffix ->
+            try
+                let attributes = File.GetAttributes(path + suffix)
+
+                if attributes.HasFlag(FileAttributes.ReparsePoint) then
+                    raise (MigrationRejected("migration_sidecar_invalid"))
+
+                true
+            with
+            | :? FileNotFoundException -> false
+            | :? DirectoryNotFoundException -> false)
+        |> List.exists id
+
+    let private inspectExisting (path: string) sqliteMode stopped : MigrationInspection =
         try
             MigrationStorage.validatePath path
 
             let builder =
                 SqliteConnectionStringBuilder(DataSource = path, Mode = sqliteMode, Pooling = false, DefaultTimeout = 1)
+
+            let immutable = stopped && not (sidecarsPresent path)
+
+            if immutable then
+                builder.DataSource <- Uri(path).AbsoluteUri + "?mode=ro&immutable=1"
 
             use connection = new SqliteConnection(builder.ConnectionString)
             connection.Open()
@@ -374,26 +394,35 @@ module DatabaseMigrations =
                 if integrity.ExecuteScalar() <> box "ok" then
                     raise (MigrationRejected("migration_database_integrity_failed"))
 
-            { SchemaSha256 = MigrationStorage.schemaHash factory
-              History =
-                if MigrationStorage.hasJournal factory then
-                    let entries = MigrationStorage.history factory
+            let inspection =
+                { SchemaSha256 = MigrationStorage.schemaHash factory
+                  History =
+                    if MigrationStorage.hasJournal factory then
+                        let entries = MigrationStorage.history factory
 
-                    if entries.IsEmpty then
-                        raise (MigrationRejected("migration_journal_invalid"))
+                        if entries.IsEmpty then
+                            raise (MigrationRejected("migration_journal_invalid"))
 
-                    Some entries
-                else
-                    None }
+                        Some entries
+                    else
+                        None }
+
+            if immutable && sidecarsPresent path then
+                raise (MigrationRejected("stopped_database_changed"))
+
+            inspection
         with
         | :? MigrationRejected -> reraise ()
         | _ -> raise (MigrationRejected("migration_inspection_failed"))
 
     let inspect path =
-        inspectExisting path SqliteOpenMode.ReadOnly
+        inspectExisting path SqliteOpenMode.ReadOnly false
+
+    let inspectStopped path =
+        inspectExisting path SqliteOpenMode.ReadOnly true
 
     let settleAndInspect path =
-        inspectExisting path SqliteOpenMode.ReadWrite
+        inspectExisting path SqliteOpenMode.ReadWrite false
 
     let runObserved
         (path: string)

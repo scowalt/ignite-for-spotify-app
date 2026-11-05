@@ -30,7 +30,7 @@ class MigrationTool:
         template = '{"owner":{{json (index .Config.Labels "ignite.deployer-migration")}},"action":{{json (index .Config.Labels "ignite.migration-action")}},"image_id":{{json .Image}},"running":{{json .State.Running}},"exit_code":{{json .State.ExitCode}},"mounts":{{json .Mounts}},"entrypoint":{{json .Config.Entrypoint}},"command":{{json .Config.Cmd}},"user":{{json .Config.User}},"network":{{json .HostConfig.NetworkMode}},"root_readonly":{{json .HostConfig.ReadonlyRootfs}},"privileged":{{json .HostConfig.Privileged}}}'
         value = json.loads(self._docker(['inspect', '--format', template, identifier]))
         action = value.get('action')
-        if action not in ['inspect', 'apply', 'adopt', 'settle']:
+        if action not in ['inspect', 'inspect-stopped', 'apply', 'adopt', 'settle']:
             raise OperationFailed('migration_tool_ownership_changed')
         expected_command = ['/app/migrations/Ignite.Migrations.dll', action]
         if action in ['apply', 'adopt']:
@@ -47,7 +47,7 @@ class MigrationTool:
         data = [mount for mount in mounts if mount.get('Destination') == '/data']
         other = [mount for mount in mounts if mount.get('Destination') != '/data']
         if (len(data) != 1 or data[0].get('Type') != 'bind' or data[0].get('Source') != self.source or
-                data[0].get('RW') is not (action != 'inspect') or
+                data[0].get('RW') is not (action not in ['inspect', 'inspect-stopped']) or
                 any(mount.get('Type') != 'tmpfs' or mount.get('Destination') != '/tmp' for mount in other) or len(other) > 1):
             raise OperationFailed('migration_tool_ownership_changed')
         if self.identifier is not None and identifier != self.identifier:
@@ -67,7 +67,7 @@ class MigrationTool:
         self.identifier = None
 
     def invoke(self, action, request):
-        if action not in ['inspect', 'apply', 'adopt', 'settle'] or not isinstance(request, dict) or request.get('database_path') != '/data/ignite.db':
+        if action not in ['inspect', 'inspect-stopped', 'apply', 'adopt', 'settle'] or not isinstance(request, dict) or request.get('database_path') != '/data/ignite.db':
             raise OperationFailed('migration_request_invalid')
         payload = json.dumps(request, sort_keys=True, separators=(',', ':')).encode()
         if len(payload) > HISTORY_LIMIT:
@@ -76,7 +76,7 @@ class MigrationTool:
             raise OperationFailed('migration_tool_already_exists')
         if json.loads(self._docker(['image', 'inspect', self.image_id, '--format', '{{json .Config.Volumes}}'])):
             raise OperationFailed('migration_image_declares_volumes')
-        mount = 'type=bind,src=' + self.source + ',dst=/data' + (',readonly' if action == 'inspect' else '')
+        mount = 'type=bind,src=' + self.source + ',dst=/data' + (',readonly' if action in ['inspect', 'inspect-stopped'] else '')
         args = ['create', '--pull', 'never', '--interactive', '--network', 'none', '--read-only', '--cap-drop', 'ALL',
                 '--security-opt', 'no-new-privileges', '--user', '999:999', '--memory', '512m', '--memory-swap', '512m',
                 '--cpus', '1', '--pids-limit', '64', '--ulimit', 'fsize=268435456:268435456',
@@ -95,7 +95,7 @@ class MigrationTool:
             completed = self._inspect(self.identifier)
             if completed['running'] or completed['exit_code'] != 0:
                 raise OperationFailed('migration_command_not_finished')
-            if action == 'inspect':
+            if action in ['inspect', 'inspect-stopped']:
                 return parse_inspection(output)
             value = decode(output, HISTORY_LIMIT)
             outcomes = {'apply': ['migrated', 'unchanged'], 'adopt': ['adopted'], 'settle': ['settled']}

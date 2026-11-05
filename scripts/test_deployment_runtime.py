@@ -103,8 +103,13 @@ class RuntimeGuardTests(unittest.TestCase):
             before = json.loads(state_path.read_text())
             self.assertTrue(before['containers']['backend']['running'])
             self.assertTrue(before['containers']['backup']['running'])
+            with self.assertRaises(OperationFailed):
+                runtime.inspect_stopped_database(workspace)
+            commands = json.loads(state_path.read_text())['commands']
+            self.assertFalse(any('inspect-stopped' in row for row in commands))
             runtime.quiesce(workspace)
             runtime.require_quiesced(workspace)
+            self.assertEqual(runtime.inspect_stopped_database(workspace), plan['before'])
             after = json.loads(state_path.read_text())
             self.assertFalse(after['containers']['backend']['running'])
             self.assertFalse(after['containers']['backup']['running'])
