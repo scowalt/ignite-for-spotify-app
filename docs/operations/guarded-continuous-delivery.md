@@ -150,6 +150,22 @@ missing, reordered or changed applied SQL is not silently repaired. SQLite page/
 are not aggregate WAL, temporary-file or filesystem quotas. Backup covers only `ignite.db`,
 not provider-owned Hangfire storage or cookies.
 
+The database-startup safety wiring lives in `backend/src/Ignite.Api/DatabaseBootstrap.fs`,
+which is fingerprinted instead of `Program.fs`. Ordinary endpoint and UI changes therefore
+no longer change the contract. Edits to `DatabaseBootstrap.fs`, the other fingerprinted
+inputs or the operator still need a reviewed contract transition.
+
+Reviewed contract transition (operator bundle change, idle ledger only):
+
+1. Extract the merged commit with `git archive` into
+   `~/.local/lib/ignite-deployer/<40-hex source SHA>` and make it read-only.
+2. Run `scripts/upgrade-operator.py --expected-state-sha256 <fingerprint>` from that bundle.
+   Without `--apply` it only reports the old/new contract and the live ledger fingerprint.
+3. Re-run with `--apply`. Under the poll lock it saves before-state evidence, moves the
+   ledger contract, the policy contract/operator SHA and the `current` link together, and
+   refuses stale fingerprints, a running transaction, a changed runtime pin or changed units.
+4. Confirm with `ignite-deploy.py status` and a read-only `check`.
+
 The existing scheduled-backup retention policy is preserved. The guarded deployment
 path never invokes the legacy wrapper's init fallback or Sunday prune behavior.
 Infrastructure state credentials in `mission-control/dev` are separate from application
