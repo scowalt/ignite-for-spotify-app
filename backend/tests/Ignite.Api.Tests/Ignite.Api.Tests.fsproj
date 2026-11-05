@@ -20,6 +20,7 @@
   <ItemGroup>
     <Compile Include="AccountDataDeletionTests.fs" />
     <Compile Include="DatabaseReadinessTests.fs" />
+    <Compile Include="GitHubStarsTests.fs" />
     <Compile Include="OAuthCallbackFailureTests.fs" />
     <Compile Include="PlaylistSearchJobTests.fs" />
     <Compile Include="RequestCancellationMiddlewareTests.fs" />

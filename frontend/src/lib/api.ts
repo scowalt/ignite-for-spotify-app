@@ -3,6 +3,7 @@ import type {
   DatabaseStats,
   ExportToPlaylistRequest,
   ExportToPlaylistResponse,
+  GitHubStars,
   CdlcSearchRequest,
   CdlcSong,
   JobStatus,
@@ -136,6 +137,10 @@ export const exportApi = {
 
 export const songs = {
   getStats: () => request<DatabaseStats>("/songs/stats"),
+};
+
+export const github = {
+  getStars: () => request<GitHubStars>("/github/stars"),
 };
 
 export const jobs = {

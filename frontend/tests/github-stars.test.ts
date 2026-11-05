@@ -1,5 +1,9 @@
-import { describe, expect, test } from "bun:test";
-import { formatStarCount, shouldShowStarCount } from "../src/lib/githubStars";
+import { afterEach, describe, expect, test } from "bun:test";
+import {
+  fetchStarCount,
+  formatStarCount,
+  shouldShowStarCount,
+} from "../src/lib/githubStars";
 
 describe("formatStarCount", () => {
   test("leaves counts under a thousand as-is", () => {
@@ -28,36 +32,39 @@ describe("shouldShowStarCount", () => {
 });
 
 describe("fetchStarCount", () => {
-  test("reads stargazers_count from the repo's GitHub API response", async () => {
-    const { fetchStarCount } = await import("../src/lib/githubStars");
-    const originalFetch = globalThis.fetch;
+  const originalFetch = globalThis.fetch;
+
+  function respondWith(response: Response) {
     const requested: string[] = [];
     globalThis.fetch = (async (url: string) => {
       requested.push(url);
-      return new Response(JSON.stringify({ stargazers_count: 23_250 }));
+      return response;
     }) as unknown as typeof fetch;
-    try {
-      expect(await fetchStarCount()).toBe(23_250);
-      expect(requested).toEqual([
-        "https://api.github.com/repos/scowalt/ignite-for-spotify-app",
-      ]);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    return requested;
+  }
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
   });
 
-  test("returns undefined when GitHub errors or the body is unexpected", async () => {
-    const { fetchStarCount } = await import("../src/lib/githubStars");
-    const originalFetch = globalThis.fetch;
-    try {
-      globalThis.fetch = (async () =>
-        new Response("{}", { status: 403 })) as unknown as typeof fetch;
-      expect(await fetchStarCount()).toBeUndefined();
-      globalThis.fetch = (async () =>
-        new Response(JSON.stringify({ stargazers_count: "many" }))) as unknown as typeof fetch;
-      expect(await fetchStarCount()).toBeUndefined();
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+  test("reads the star count from the app's own API, not GitHub", async () => {
+    const requested = respondWith(
+      new Response(JSON.stringify({ stars: 23_250 })),
+    );
+
+    expect(await fetchStarCount()).toBe(23_250);
+    expect(requested).toEqual(["/api/github/stars"]);
+  });
+
+  test("returns undefined when the backend has no count yet", async () => {
+    respondWith(new Response(JSON.stringify({ stars: null })));
+
+    expect(await fetchStarCount()).toBeUndefined();
+  });
+
+  test("returns undefined when the request fails", async () => {
+    respondWith(new Response("{}", { status: 500 }));
+
+    expect(await fetchStarCount()).toBeUndefined();
   });
 });
