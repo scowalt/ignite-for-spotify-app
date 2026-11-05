@@ -1,11 +1,10 @@
 # Guarded continuous delivery
 
-> The first schema-v2 adoption attempt is held after a cold-WAL read-only-mount failure,
-> before journal adoption. Original services are healthy after the single verified prior
-> restart. The timer/publishing pause is intentional pending a reviewed fix and held-attempt
-> recovery. Do not resume them, clear failure fences or apply IaC that silently removes the
-> publishing fence. See [database migrations](database-migrations.md); inspect the live ledger
-> and private operational evidence rather than treating historical success below as current.
+> Migration-aware schema-v2 delivery is active after the separately approved cold-WAL
+> recovery and baseline adoption on 2026-11-05. The timer and automatic publishing are
+> enabled again. The original failed artifact remains fenced, with its blocked evidence
+> and audited manual-resolution receipt preserved. Never replay that attempt or its prior
+> restart helper. The live ledger, not a historical source SHA below, selects current images.
 
 The public repository is the sole maintained source and publisher. Its protected
 main workflow publishes automatically after successful validation and all actual image,
@@ -28,7 +27,8 @@ On SSH host `ignite-for-spotify-2`, as user `scowalt`:
 | Installed operator version/contract/repository identity | `~/.local/state/ignite-deployer/policy.json` |
 | Reviewed operator bundle | `~/.local/lib/ignite-deployer/current` → immutable source-SHA directory |
 | Current attempt/active image override | `~/.local/state/ignite-deployer/<artifact digest without sha256:>/candidate.compose.json` |
-| Prior image override and non-secret preflight evidence | Same attempt directory: `prior.compose.json`, `runtime.json`, `result.json` |
+| Prior image override and bounded private preflight evidence | Same attempt directory: `prior.compose.json`, `runtime.json`, `result.json` |
+| Database transition and exceptional manual-resolution evidence | Same attempt directory: `migration.json`; separately reviewed `manual-resolution.json` where applicable |
 | Sole polling unit | `ignite-deployer.timer` / `ignite-deployer.service` in the user manager |
 
 Use the ledger's artifact digest to find the matching override; do not guess a path
@@ -63,8 +63,11 @@ executable operator code or upgrade that bundle.
    A new artifact receives full trust/source/run/contract validation.
 5. Before image mutation, the updater verifies current identities/configuration,
    existing volumes/data, source/platform/UID compatibility and storage headroom. It
-   pauses only the existing backup daemon, creates a new encrypted snapshot and verifies
-   its exact isolated restore. Owned plaintext/tooling is removed before image changes.
+   quiesces backup and backend writers, creates a new encrypted snapshot and verifies
+   its exact isolated restore. The v2 transition validates the applied catalogue prefix,
+   executes only eligible pending SQL, then independently verifies history/schema before
+   image admission. An unchanged catalogue executes no migration. Owned plaintext/tooling
+   is removed before image changes; planned downtime includes these stopped-state steps.
 6. Backend updates and passes bounded readiness/identity checks before backup/frontend.
    Only the three app services change, using explicit digests and no builds, tag pulls
    or dependency recreation. Commit the active set only after complete verification.
@@ -73,8 +76,10 @@ The owner approved removal of the extra environment-review step after the migrat
 TASK-41 records the narrow IaC change and its live verification. No workflow, signing
 identity, scoped secret or branch protection is removed. Passing CI is not proof of
 business correctness; without the extra pause, a green merged regression can reach
-production. Database/compatibility-contract changes, infrastructure operations and
-operator upgrades still require their separate reviewed procedures.
+production. Reviewed, bounded automatic structural expansions can use this same delivery
+path without another production approval click. Destructive/manual migrations, unbounded
+backfills, engine/Hangfire or safety-contract changes, infrastructure operations and operator
+upgrades still require separately reviewed procedures. See [migration policy](database-migrations.md).
 
 Inspect status without loading runtime secrets:
 
@@ -104,6 +109,9 @@ CI-status bypass. Routine idle polls do not repeat workflow API requests.
   artifact stays fenced; polling does not retry it. The replay high-water order remains.
 - `manual_recovery`: stop and inspect. A rollback already started cannot be retried
   automatically. Current containers may differ from the last committed ledger set.
+  Committed or uncertain database changes require a forward fix, never an incompatible
+  old image or automatic live restore. A child's `verified` phase is database evidence,
+  not proof that the outer image deployment committed.
 - `cleanup_required`: the transaction remains durable. Cleanup may be retried without
   repeating a committed deployment or backup. Preserve evidence and unknown files.
 - `verification_or_operation_failed`: no raw provider/secret-bearing output is emitted.
@@ -137,7 +145,10 @@ Do not increase budgets or prune recovery material automatically.
 Known Compose/database-startup compatibility inputs are fingerprinted. A changed
 contract blocks automatic deployment for manual migration review. This is a guard,
 not proof that arbitrary application business-data changes are backward-compatible;
-source review still owns that promise. No new schema migration is part of this handover.
+source review still owns that promise. Production startup requires complete exact history;
+missing, reordered or changed applied SQL is not silently repaired. SQLite page/file limits
+are not aggregate WAL, temporary-file or filesystem quotas. Backup covers only `ignite.db`,
+not provider-owned Hangfire storage or cookies.
 
 The existing scheduled-backup retention policy is preserved. The guarded deployment
 path never invokes the legacy wrapper's init fallback or Sunday prune behavior.
@@ -146,6 +157,24 @@ backup credentials in `ignite-for-spotify/prd`; both remain scoped to their exis
 buckets. Authentication values never belong in source, service units, logs or state.
 
 ## Verification record
+
+The first v2 attempt stopped before adoption on a checkpointed, sidecar-free WAL file
+mounted read-only. The compatible original services were restored once; no live data was
+restored. TASK-46 added explicit stopped-state handling and native joined regression tests.
+Under a separately approved TASK-44 procedure, a rehearsed metadata-only reconciliation
+recorded the already-restored prior state and preserved its blocked sidecar, failed digest
+and replay high-water. It did not repeat that restart or fabricate automated success.
+
+Protected PR #27 merged the exact tested tree as `2fb52ca37f1266212584f643fc07afa32ab4425f`.
+Full [CI 41963026186](https://github.com/scowalt/ignite-for-spotify-app/actions/runs/41963026186)
+published the new signed release, order `[88,1]`; the reviewed `e3b6bd2` operator deployed
+it through the actual timer. A fresh encrypted snapshot and exact isolated restore passed
+all existing budgets before baseline-only adoption. Independent checks verified one immutable
+baseline entry, unchanged application schema/file identities/mounts and auxiliaries, healthy
+exact images and removed owned tooling/plaintext. No rollback was used for this attempt.
+A subsequent actual no-op tick preserved the ledger and every container start time. The
+intentional publishing/timer holds were then lifted. Raw operational evidence stays private;
+these completed procedures are not reusable recovery commands.
 
 The first guarded signed deployment used successful CI run `41569719775` at source
 `883b869e3f512e97e368707dc2d8cc3ac118faf9`. Independent readback proved healthy exact
