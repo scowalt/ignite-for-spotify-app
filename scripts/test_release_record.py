@@ -162,6 +162,11 @@ class ReleaseRecordTests(unittest.TestCase):
             self.assertEqual(deployment_contract(root), legacy)
             (root / CONTRACT_PATHS[0]).write_text('changed runtime config')
             self.assertNotEqual(runtime_contract(root), host)
+            host = runtime_contract(root)
+            telemetry = root / 'docker/alloy/config.alloy'
+            telemetry.parent.mkdir(parents=True, exist_ok=True)
+            telemetry.write_text('changed telemetry pipeline')
+            self.assertNotEqual(runtime_contract(root), host)
 
     def test_publisher_record_is_bounded_to_trusted_ci_metadata(self):
         with tempfile.TemporaryDirectory() as directory:

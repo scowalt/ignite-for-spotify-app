@@ -13,6 +13,7 @@ PUBLISHER_IDENTITY = 'https://github.com/' + REPOSITORY + '/.github/workflows/de
 OIDC_ISSUER = 'https://token.actions.githubusercontent.com'
 CONTRACT_PATHS = (
     'docker/docker-compose.prod.yml',
+    'docker/alloy/config.alloy',
     'docker/backup/backup.sh',
     'docker/backup/restore.sh',
     'docker/backup/entrypoint.sh',
