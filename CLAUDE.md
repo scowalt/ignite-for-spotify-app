@@ -42,7 +42,7 @@ Secrets are managed in **Doppler** (project: `ignite-for-spotify`, configuration
 
 Container logs are shipped to Grafana Cloud Loki via Alloy agent. Alloy config: `docker/alloy/config.alloy`.
 
-**Log labels:** Containers with Docker label `logging: "true"` are collected. The `service_name` label is the container name:
+**Log labels:** Containers with Docker label `logging: "true"` are collected. Every stream carries `project="ignite-for-spotify"`, and the `service_name` label is the container name:
 - `ignite-backend` — .NET API
 - `ignite-frontend` — Static SPA
 - `ignite-caddy` — Reverse proxy
@@ -50,7 +50,7 @@ Container logs are shipped to Grafana Cloud Loki via Alloy agent. Alloy config: 
 **Querying logs in Grafana Cloud Explore:**
 ```
 {service_name="ignite-backend"}
-{service_name=~"ignite-.*"}
+{project="ignite-for-spotify"}
 ```
 
 **Querying via CLI** (Doppler secrets in `ignite-for-spotify/prd`):
@@ -60,7 +60,7 @@ doppler run --project ignite-for-spotify --config prd -- \
   "$LOKI_URL?query=\{service_name=\"ignite-backend\"\}&limit=50"
 ```
 
-**Metrics:** Alloy scrapes Prometheus metrics from the backend at `127.0.0.1:5050/metrics` every 30s.
+**Metrics:** Alloy scrapes Prometheus metrics from the backend at `127.0.0.1:5050/metrics` every 30s and labels them `project="ignite-for-spotify"`.
 
 ### Production Errors (GlitchTip)
 

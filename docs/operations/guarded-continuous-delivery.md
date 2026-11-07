@@ -36,11 +36,15 @@ from current Git main or reuse the old cutover override. `active` means the last
 successfully committed image set. During failed/interrupted work, inspect the transaction
 and actual runtime before assuming containers match that set.
 
-The production Compose checkout remains intentionally pinned at the reviewed
-`4ef6b03` configuration under `~/Code/ignite-for-spotify-app`. Application image versions
+The production Compose checkout under `~/Code/ignite-for-spotify-app` stays pinned at a
+reviewed configuration whose runtime contract matches the ledger's `runtime_contract_sha256`.
+It moves only in a reviewed contract transition. Application image versions
 come from the signed release and ledger, not this checkout's Git HEAD. The old
 `~/Code/ignite-for-spotify-2/docker` remains only the explicit Compose project-directory
 and bind-path anchor. Preserve it, the Caddyfile/Alloy sources and physical volumes.
+The updater requires exactly these physical volumes and refuses any container volume
+mount outside them: `ignite-data`, `backup-state`, `caddy-data`, `caddy-config` and
+`alloy-data` (Alloy log positions), each prefixed `ignite-for-spotify_`.
 The installed operator version is reviewed separately; release records never deliver
 executable operator code or upgrade that bundle.
 
@@ -159,12 +163,17 @@ Reviewed contract transition (operator bundle change, idle ledger only):
 
 1. Extract the merged commit with `git archive` into
    `~/.local/lib/ignite-deployer/<40-hex source SHA>` and make it read-only.
-2. Run `scripts/upgrade-operator.py --expected-state-sha256 <fingerprint>` from that bundle.
-   Without `--apply` it only reports the old/new contract and the live ledger fingerprint.
-3. Re-run with `--apply`. Under the poll lock it saves before-state evidence, moves the
-   ledger contract, the policy contract/operator SHA and the `current` link together, and
-   refuses stale fingerprints, a running transaction, a changed runtime pin or changed units.
-4. Confirm with `ignite-deploy.py status` and a read-only `check`.
+2. If the transition changes runtime inputs (`docker/docker-compose.prod.yml`, the backup
+   scripts or `scripts/verify-production-config.py`), check out the same source SHA in the
+   production Compose checkout. The installed operator refuses to run until step 4 completes.
+3. Run `scripts/upgrade-operator.py --expected-state-sha256 <fingerprint>` from that bundle.
+   Without `--apply` it only reports the old/new contract, old/new runtime contract and
+   the live ledger fingerprint.
+4. Re-run with `--apply`. Under the poll lock it saves before-state evidence, moves the
+   ledger contract and runtime pin, the policy contract/runtime pin/operator SHA and the
+   `current` link together. It refuses stale fingerprints, a running transaction, a checkout
+   whose runtime contract differs from the bundle's, or changed units.
+5. Confirm with `ignite-deploy.py status` and a read-only `check`.
 
 The existing scheduled-backup retention policy is preserved. The guarded deployment
 path never invokes the legacy wrapper's init fallback or Sunday prune behavior.

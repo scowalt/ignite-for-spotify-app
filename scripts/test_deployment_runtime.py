@@ -184,6 +184,20 @@ class RuntimeGuardTests(unittest.TestCase):
             self.assertIsNone(final['inspector'])
             self.assertNotIn('RESTIC_PASSWORD', (workspace / 'runtime.json').read_text())
 
+    def test_alloy_positions_volume_is_admitted_but_unlisted_volumes_are_refused(self):
+        with self.runtime_case() as (runtime, release, prior, workspace, state_path, docker):
+            state = json.loads(state_path.read_text())
+            self.assertIn('ignite-for-spotify_alloy-data', {m['Name'] for m in state['containers']['alloy']['mounts']})
+            runtime.preflight(release, prior, workspace)
+            runtime.cleanup(workspace)
+            state['containers']['alloy']['mounts'].append({'Type': 'volume', 'Name': 'ignite-for-spotify_unlisted', 'RW': True,
+                                                           'Source': '/volumes/ignite-for-spotify_unlisted', 'Destination': '/unlisted'})
+            state_path.write_text(json.dumps(state))
+            with self.assertRaisesRegex(OperationFailed, 'physical_volume_mount_mismatch'):
+                runtime.preflight(release, prior, workspace)
+            self.assertEqual(json.loads(state_path.read_text())['updated'], [])
+            runtime.cleanup(workspace)
+
     def test_changed_digest_override_is_refused_before_service_mutation(self):
         with self.runtime_case() as (runtime, release, prior, workspace, state_path, docker):
             runtime.preflight(release, prior, workspace)

@@ -109,6 +109,33 @@ class OperatorUpgradeTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual(after, json.loads(result.stdout))
 
+    def test_apply_moves_the_runtime_pin_to_the_host_configuration_matching_the_bundle(self):
+        for base in [self.library / NEW, self.checkout]:
+            (base / 'docker/docker-compose.prod.yml').write_text('reviewed host configuration')
+        before = self.deployment.status()
+        code, report = self.run_upgrade('--apply')
+        self.assertEqual(0, code)
+        pins = self.pins | {'runtime_contract_sha256': runtime_contract(self.checkout)}
+        self.assertEqual((self.pins['runtime_contract_sha256'], pins['runtime_contract_sha256']),
+                         (report['previous_runtime_contract'], report['new_runtime_contract']))
+        self.assertNotEqual(report['previous_runtime_contract'], report['new_runtime_contract'])
+        after = self.deployment.status()
+        self.assertEqual(before | {'contract_sha256': report['new_contract'], 'migration_policy': pins}, after)
+        self.assertEqual(pins, json.loads((self.state_root / 'policy.json').read_text())['migration_policy'])
+        result = subprocess.run(['python3', str(self.library / NEW / 'scripts/ignite-deploy.py'), 'status'],
+                                env={'PATH': os.environ['PATH'], 'HOME': str(self.home)}, capture_output=True, text=True)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual(after, json.loads(result.stdout))
+
+    def test_runtime_change_without_the_matching_host_configuration_is_refused_without_mutation(self):
+        (self.library / NEW / 'docker/docker-compose.prod.yml').write_text('reviewed host configuration')
+        before = self.deployment.status()
+        code, _ = self.run_upgrade('--apply')
+        self.assertEqual(1, code)
+        self.assertEqual(before, self.deployment.status())
+        self.assertEqual(self.policy, json.loads((self.state_root / 'policy.json').read_text()))
+        self.assertEqual(self.library / OLD, (self.library / 'current').resolve())
+
     def test_stale_fingerprint_unchanged_contract_and_unexpected_operator_are_refused_without_mutation(self):
         before = self.deployment.status()
         code, _ = self.run_upgrade('--apply', state_sha='0' * 64)
