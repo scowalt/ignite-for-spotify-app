@@ -6,7 +6,7 @@ import sys
 PROJECT = "ignite-for-spotify"
 IMAGE_PREFIX = "ghcr.io/scowalt/ignite-for-spotify-app/"
 LEGACY_PREFIX = "ghcr.io/scowalt/ignite-for-spotify-2/"
-VOLUMES = ("ignite-data", "backup-state", "caddy-data", "caddy-config")
+VOLUMES = ("ignite-data", "backup-state", "caddy-data", "caddy-config", "alloy-data")
 
 
 def validate(config, require_digests=False, rollback=False):

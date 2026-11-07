@@ -53,8 +53,9 @@ def main():
         current = library / 'current'
         if not current.is_symlink() or current.resolve() != previous.resolve() or previous == bundle:
             raise ValueError('Installed operator is not the expected previous bundle.')
-        if runtime_contract(checkout) != pins['runtime_contract_sha256'] or runtime_contract(bundle) != pins['runtime_contract_sha256']:
-            raise ValueError('Host or bundle runtime configuration differs from the reviewed pin.')
+        runtime = runtime_contract(bundle)
+        if runtime_contract(checkout) != runtime:
+            raise ValueError('Host runtime configuration differs from the bundle.')
         for name in ['ignite-deployer.service', 'ignite-deployer.timer']:
             if (bundle / 'ops/deployer' / name).read_bytes() != (previous / 'ops/deployer' / name).read_bytes():
                 raise ValueError('Unit definitions differ; no automatic replacement.')
@@ -66,7 +67,8 @@ def main():
         deployment = Deployment(state_root)
         state = deployment.status()
         report = {'previous_operator': previous.name, 'new_operator': bundle.name, 'previous_contract': policy['contract_sha256'],
-                  'new_contract': contract, 'state_fingerprint': fingerprint(state), 'applied': False}
+                  'new_contract': contract, 'previous_runtime_contract': pins['runtime_contract_sha256'],
+                  'new_runtime_contract': runtime, 'state_fingerprint': fingerprint(state), 'applied': False}
         if state['migration_policy'] != pins or state['contract_sha256'] != policy['contract_sha256'] or state['transaction'] is not None:
             raise ValueError('Ledger and policy are not an idle matching pair.')
         if report['state_fingerprint'] != args.expected_state_sha256:
@@ -81,8 +83,9 @@ def main():
                 evidence.mkdir(mode=0o700)
                 save_metadata(evidence / 'before-state.json', state)
                 save_metadata(evidence / 'before-policy.json', policy)
-                deployment.upgrade_contract(contract, expected_state_sha256=args.expected_state_sha256)
-                save_metadata(policy_path, policy | {'contract_sha256': contract, 'operator_sha': bundle.name})
+                deployment.upgrade_contract(contract, runtime, expected_state_sha256=args.expected_state_sha256)
+                save_metadata(policy_path, policy | {'contract_sha256': contract, 'operator_sha': bundle.name,
+                                                     'migration_policy': pins | {'runtime_contract_sha256': runtime}})
                 replace_link(current, bundle)
             finally:
                 os.close(lock)

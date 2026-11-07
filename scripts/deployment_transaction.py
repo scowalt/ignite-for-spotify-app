@@ -216,7 +216,7 @@ class Deployment:
             state.update(schema=2, contract_sha256=contract_sha256, migration_policy=validate_migration_policy(policy), active_migrations=None)
             self._save(state)
 
-    def upgrade_contract(self, contract_sha256, *, expected_state_sha256):
+    def upgrade_contract(self, contract_sha256, runtime_contract_sha256, *, expected_state_sha256):
         with self._lock():
             state = self.status()
             fingerprint = hashlib.sha256(json.dumps(state, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
@@ -224,6 +224,7 @@ class Deployment:
                     contract_sha256 == state['contract_sha256'] or fingerprint != expected_state_sha256):
                 raise StateRejected('Explicit idle exact-state contract upgrade required.')
             state['contract_sha256'] = contract_sha256
+            state['migration_policy'] = validate_migration_policy(state['migration_policy'] | {'runtime_contract_sha256': runtime_contract_sha256})
             self._save(state)
 
     def status(self):

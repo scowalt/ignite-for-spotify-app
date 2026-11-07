@@ -154,7 +154,7 @@ class DockerRuntime:
     def _volumes(self):
         result = {}
         template = '{"name":{{json .Name}},"mountpoint":{{json .Mountpoint}},"driver":{{json .Driver}},"options":{{json .Options}}}'
-        for name in ['ignite-data', 'backup-state', 'caddy-data', 'caddy-config']:
+        for name in ['ignite-data', 'backup-state', 'caddy-data', 'caddy-config', 'alloy-data']:
             physical = 'ignite-for-spotify_' + name
             value = json.loads(self._docker(['volume', 'inspect', '--format', template, physical]))
             if value['name'] != physical or value['driver'] != 'local' or value['options'] or not value['mountpoint']:

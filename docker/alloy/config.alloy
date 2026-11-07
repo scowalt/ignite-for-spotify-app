@@ -26,6 +26,12 @@ loki.source.docker "containers" {
 
 loki.process "containers" {
   stage.docker {}
+
+  stage.drop {
+    older_than          = "1h"
+    drop_counter_reason = "too_old"
+  }
+
   forward_to = [loki.write.grafana_cloud.receiver]
 }
 
@@ -38,6 +44,10 @@ loki.write "grafana_cloud" {
       username = sys.env("LOKI_USERNAME")
       password = sys.env("LOKI_API_KEY")
     }
+  }
+
+  external_labels = {
+    "project" = "ignite-for-spotify",
   }
 }
 
@@ -61,5 +71,9 @@ prometheus.remote_write "grafana_cloud" {
       username = sys.env("PROMETHEUS_USERNAME")
       password = sys.env("PROMETHEUS_API_KEY")
     }
+  }
+
+  external_labels = {
+    "project" = "ignite-for-spotify",
   }
 }

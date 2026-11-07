@@ -111,7 +111,7 @@ services:
     command: ignite-backend ignite-backup ignite-frontend
 
   alloy:
-    image: grafana/alloy:latest
+    image: grafana/alloy:v1.20.0
     container_name: ignite-alloy
     restart: unless-stopped
     network_mode: host
@@ -120,6 +120,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy/data
     environment:
       - LOKI_URL=${LOKI_URL}
       - LOKI_USERNAME=${LOKI_USERNAME}
@@ -130,9 +131,11 @@ services:
     command:
       - run
       - /etc/alloy/config.alloy
+      - --storage.path=/var/lib/alloy/data
       - --stability.level=generally-available
 
 volumes:
+  alloy-data:
   ignite-data:
   backup-state:
   caddy-data:
