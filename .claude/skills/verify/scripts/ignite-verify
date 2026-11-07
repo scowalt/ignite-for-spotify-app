@@ -1,0 +1,460 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)"
+STATE="$REPO/.verify"
+TOOLS="$STATE/tools"
+PLAYWRIGHT_VERSION="1.65.0"
+SEEDED_SONGS=6
+PORTLESS_CA="$HOME/.portless/ca.pem"
+
+die() {
+  printf 'ignite-verify: %s\n' "$*" >&2
+  exit 1
+}
+
+say() {
+  printf 'ignite-verify: %s\n' "$*" >&2
+}
+
+usage() {
+  cat <<'EOF'
+Usage: ignite-verify <command> [args]
+
+  up                         Build, launch an isolated API + web + headless Chrome, seed fixtures
+  doctor                     Read-only health check of the selected run (exit 1 if unhealthy)
+  env                        Print the selected run's variables (RUN_ID, WEB_URL, EVIDENCE_DIR, ...)
+  browser <action> [args]    Drive the headless browser (see `ignite-verify browser help`)
+  api <METHOD> <path> [json] Call the API through the web origin's /api proxy; prints status + body
+  sql <query>                Read-only SQLite query against the run's database (JSON output)
+  down [--all]               Stop what this run started, delete scratch state, keep evidence
+
+The selected run is $IGNITE_VERIFY_RUN, else the last run `up` started in this worktree.
+EOF
+}
+
+curl_web() {
+  if [[ -f "$PORTLESS_CA" ]]; then
+    curl --cacert "$PORTLESS_CA" "$@"
+  else
+    curl -k "$@"
+  fi
+}
+
+resolve_dotnet() {
+  if [[ -n "${IGNITE_VERIFY_DOTNET:-}" ]]; then
+    printf '%s\n' "$IGNITE_VERIFY_DOTNET"
+    return
+  fi
+  if (cd "$REPO" && dotnet --list-sdks 2>/dev/null | grep -q '^10\.'); then
+    command -v dotnet
+    return
+  fi
+  local candidate best="" best_version=""
+  for candidate in "$HOME/.dotnet/dotnet" "$HOME"/.local/share/mise/installs/*/10.0.*/dotnet; do
+    [[ -x "$candidate" ]] || continue
+    local version
+    version="$("$candidate" --version 2>/dev/null)" || continue
+    [[ "$version" == 10.* ]] || continue
+    if [[ -z "$best_version" ]] || [[ "$(printf '%s\n%s\n' "$best_version" "$version" | sort -V | tail -1)" == "$version" ]]; then
+      best="$candidate"
+      best_version="$version"
+    fi
+  done
+  [[ -n "$best" ]] || die "no .NET 10 SDK found; set IGNITE_VERIFY_DOTNET=/path/to/dotnet"
+  printf '%s\n' "$best"
+}
+
+resolve_chrome() {
+  if [[ -n "${IGNITE_VERIFY_CHROME:-}" ]]; then
+    printf '%s\n' "$IGNITE_VERIFY_CHROME"
+    return
+  fi
+  local candidate
+  candidate="$(ls -d "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome 2>/dev/null | sort -V | tail -1 || true)"
+  if [[ -n "$candidate" && -x "$candidate" ]]; then
+    printf '%s\n' "$candidate"
+    return
+  fi
+  for candidate in google-chrome chromium chromium-browser; do
+    if command -v "$candidate" >/dev/null; then
+      command -v "$candidate"
+      return
+    fi
+  done
+  die "no Chrome found; run 'bunx playwright-core@$PLAYWRIGHT_VERSION install chromium' or set IGNITE_VERIFY_CHROME"
+}
+
+ensure_tools() {
+  if [[ ! -f "$TOOLS/node_modules/playwright-core/package.json" ]]; then
+    say "installing playwright-core@$PLAYWRIGHT_VERSION into $TOOLS"
+    mkdir -p "$TOOLS"
+    [[ -f "$TOOLS/package.json" ]] || printf '{"name":"ignite-verify-tools","private":true}\n' >"$TOOLS/package.json"
+    (cd "$TOOLS" && bun add --exact "playwright-core@$PLAYWRIGHT_VERSION" >/dev/null)
+  fi
+  if [[ ! -x "$REPO/frontend/node_modules/.bin/vite" ]]; then
+    say "installing frontend dependencies"
+    (cd "$REPO/frontend" && bun install --frozen-lockfile >/dev/null)
+  fi
+}
+
+valid_run_id() {
+  [[ "${1:-}" =~ ^[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$ ]] || die "malformed run id '${1:-}'"
+}
+
+selected_run_id() {
+  local id
+  if [[ -n "${IGNITE_VERIFY_RUN:-}" ]]; then
+    id="$IGNITE_VERIFY_RUN"
+  elif [[ -f "$STATE/current" ]]; then
+    id="$(cat "$STATE/current")"
+  else
+    die "no run selected; start one with 'ignite-verify up' or set IGNITE_VERIFY_RUN"
+  fi
+  valid_run_id "$id"
+  printf '%s\n' "$id"
+}
+
+load_run() {
+  local run_id
+  run_id="$(selected_run_id)"
+  RUN_ID="$run_id"
+  RUN_DIR="$STATE/runs/$RUN_ID"
+  [[ -f "$RUN_DIR/run.env" ]] || die "run $RUN_ID has no $RUN_DIR/run.env (already torn down?)"
+  set -a
+  source "$RUN_DIR/run.env"
+  set +a
+}
+
+alive() {
+  [[ -n "${1:-}" ]] && kill -0 "$1" 2>/dev/null
+}
+
+wait_for() {
+  local description="$1" seconds="$2"
+  shift 2
+  local deadline=$((SECONDS + seconds))
+  until "$@"; do
+    ((SECONDS < deadline)) || return 1
+    sleep 1
+  done
+  say "$description: ready"
+}
+
+api_ready() {
+  [[ -s "$RUN_DIR/api.port" ]] || return 1
+  alive "$API_PID" || die "API exited during startup; see $RUN_DIR/api.log"
+  curl -fsS "http://127.0.0.1:$(cat "$RUN_DIR/api.port")/health/ready" >/dev/null 2>&1
+}
+
+web_ready() {
+  alive "$WEB_PID" || die "web server exited during startup; see $RUN_DIR/web.log"
+  curl_web -fsS "$WEB_URL/api/songs/stats" 2>/dev/null | grep -q "\"totalSongs\":$SEEDED_SONGS"
+}
+
+cdp_ready() {
+  [[ -s "$RUN_DIR/chrome/DevToolsActivePort" ]]
+}
+
+cmd_up() {
+  command -v portless >/dev/null || die "portless is not installed"
+  command -v sqlite3 >/dev/null || die "sqlite3 is not installed"
+  command -v bun >/dev/null || die "bun is not installed"
+  command -v node >/dev/null || die "node is not installed"
+  local dotnet chrome
+  dotnet="$(resolve_dotnet)"
+  chrome="$(resolve_chrome)"
+  ensure_tools
+
+  DOTNET_ROOT="$(dirname "$dotnet")"
+  export DOTNET_ROOT
+  export DOTNET_CLI_TELEMETRY_OPTOUT=1
+  export DOTNET_NOLOGO=1
+  say "building backend with $dotnet ($("$dotnet" --version))"
+  "$dotnet" build "$REPO/backend/src/Ignite.Api" --nologo -v quiet -clp:ErrorsOnly >"$STATE/last-build.log" 2>&1 ||
+    die "backend build failed; see $STATE/last-build.log"
+
+  RUN_ID="$(date +%Y%m%d-%H%M%S)-$(head -c2 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+  RUN_DIR="$STATE/runs/$RUN_ID"
+  EVIDENCE_DIR="$STATE/evidence/$RUN_ID"
+  mkdir -p "$RUN_DIR/chrome" "$EVIDENCE_DIR"
+  printf '%s\n' "$RUN_ID" >"$STATE/current"
+  trap abort_up EXIT
+  local api_name="ivfy-$RUN_ID-api" web_name="ivfy-$RUN_ID-web"
+  WEB_URL="https://$web_name.localhost"
+  API_URL="https://$api_name.localhost"
+
+  say "starting API as $api_name"
+  (
+    cd "$REPO"
+    export ASPNETCORE_ENVIRONMENT=Development
+    export ConnectionStrings__Database="Data Source=$RUN_DIR/ignite.db;Default Timeout=60"
+    export ConnectionStrings__Hangfire="Data Source=$RUN_DIR/hangfire.db"
+    export Database__RequireExisting=false
+    export Sentry__Dsn=""
+    export Cors__Origins="$WEB_URL"
+    export IGNITE_VERIFY_RUN_DIR="$RUN_DIR"
+    exec setsid portless "$api_name" --tailscale sh -c \
+      'printf %s "$PORT" > "$IGNITE_VERIFY_RUN_DIR/api.port"; exec "$0" run --no-build --no-launch-profile --project backend/src/Ignite.Api --urls "http://127.0.0.1:$PORT"' \
+      "$dotnet" >"$RUN_DIR/api.log" 2>&1 </dev/null
+  ) &
+  API_PID=$!
+  write_env
+  wait_for "API" 180 api_ready || die "API not ready after 180s"
+  API_PORT="$(cat "$RUN_DIR/api.port")"
+
+  sqlite3 "$RUN_DIR/ignite.db" <"$SCRIPT_DIR/seed.sql"
+  say "seeded $SEEDED_SONGS fixture songs"
+
+  say "starting web as $web_name"
+  (
+    cd "$REPO/frontend"
+    export PATH="$REPO/frontend/node_modules/.bin:$PATH"
+    export IGNITE_API_PROXY_TARGET="http://127.0.0.1:$API_PORT"
+    exec setsid portless "$web_name" --tailscale vite >"$RUN_DIR/web.log" 2>&1 </dev/null
+  ) &
+  WEB_PID=$!
+  write_env
+  wait_for "web" 120 web_ready || die "web not ready after 120s"
+
+  say "starting headless Chrome"
+  (
+    exec setsid "$chrome" --headless=new --remote-debugging-port=0 --remote-debugging-address=127.0.0.1 \
+      --user-data-dir="$RUN_DIR/chrome" --no-sandbox --no-first-run --no-default-browser-check \
+      --ignore-certificate-errors --window-size=1280,900 about:blank >"$RUN_DIR/chrome.log" 2>&1 </dev/null
+  ) &
+  CHROME_PID=$!
+  write_env
+  wait_for "Chrome" 30 cdp_ready || die "Chrome DevTools port never appeared; see $RUN_DIR/chrome.log"
+  CDP_PORT="$(head -1 "$RUN_DIR/chrome/DevToolsActivePort")"
+  write_env
+
+  trap - EXIT
+  cmd_env
+}
+
+abort_up() {
+  local status=$?
+  ((status == 0)) && return 0
+  say "up failed; tearing down run $RUN_ID (its logs land in $EVIDENCE_DIR/logs)"
+  down_run "$RUN_ID" >&2 || true
+  exit "$status"
+}
+
+write_env() {
+  cat >"$RUN_DIR/run.env" <<EOF
+RUN_ID=$RUN_ID
+RUN_DIR=$RUN_DIR
+EVIDENCE_DIR=$EVIDENCE_DIR
+WEB_URL=$WEB_URL
+API_URL=$API_URL
+API_PORT=${API_PORT:-}
+CDP_PORT=${CDP_PORT:-}
+API_PID=${API_PID:-}
+WEB_PID=${WEB_PID:-}
+CHROME_PID=${CHROME_PID:-}
+GIT_HEAD=$(git -C "$REPO" rev-parse HEAD)
+STARTED_AT=$(date -Iseconds)
+EOF
+}
+
+cmd_env() {
+  load_run
+  cat "$RUN_DIR/run.env"
+}
+
+check() {
+  local label="$1"
+  shift
+  if "$@"; then
+    printf 'ok    %s\n' "$label"
+  else
+    printf 'FAIL  %s\n' "$label"
+    DOCTOR_FAILED=1
+  fi
+}
+
+group_alive() {
+  alive "$1" && [[ "$(ps -o pgid= -p "$1" | tr -d ' ')" == "$1" ]]
+}
+
+tree_pids() {
+  local root="$1"
+  alive "$root" || return 0
+  ps -eo pid=,ppid= | awk -v root="$root" '
+    { parent[$1] = $2 }
+    END {
+      for (pid in parent) {
+        for (p = pid; p != "" && p != 0 && p != 1; p = parent[p]) {
+          if (p == root) { print pid; break }
+        }
+      }
+    }'
+}
+
+api_port_owned() {
+  local listener
+  listener="$(ss -ltnpH "sport = :$API_PORT" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2)"
+  [[ -n "$listener" ]] && tree_pids "$API_PID" | grep -qx "$listener"
+}
+
+api_uses_run_db() {
+  local listener
+  listener="$(ss -ltnpH "sport = :$API_PORT" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2)"
+  [[ -n "$listener" ]] && tr '\0' '\n' <"/proc/$listener/environ" | grep -qxF "ConnectionStrings__Database=Data Source=$RUN_DIR/ignite.db;Default Timeout=60"
+}
+
+api_health() {
+  curl -fsS "http://127.0.0.1:$API_PORT/health/ready" >/dev/null
+}
+
+web_serves_app() {
+  curl_web -fsS "$WEB_URL/" | grep -q '<title>.*Ignite for Spotify'
+}
+
+web_proxies_run_api() {
+  curl_web -fsS "$WEB_URL/api/songs/stats" | grep -q "\"totalSongs\":$SEEDED_SONGS"
+}
+
+routes_registered() {
+  local routes
+  routes="$(portless list 2>/dev/null)"
+  grep -qF "$WEB_URL" <<<"$routes" && grep -qF "$API_URL" <<<"$routes"
+}
+
+cdp_up() {
+  curl -fsS "http://127.0.0.1:$CDP_PORT/json/version" >/dev/null
+}
+
+backend_build_current() {
+  local dll="$REPO/backend/src/Ignite.Api/bin/Debug/net10.0/Ignite.Api.dll"
+  [[ -f "$dll" ]] && [[ -z "$(find "$REPO/backend/src" -name '*.fs' -newer "$dll" -print -quit)" ]]
+}
+
+head_unchanged() {
+  [[ "$(git -C "$REPO" rev-parse HEAD)" == "$GIT_HEAD" ]]
+}
+
+cmd_doctor() {
+  load_run
+  DOCTOR_FAILED=0
+  printf 'run %s  web %s\n' "$RUN_ID" "$WEB_URL"
+  check "API process group $API_PID alive" group_alive "$API_PID"
+  check "web process group $WEB_PID alive" group_alive "$WEB_PID"
+  check "Chrome process group $CHROME_PID alive" group_alive "$CHROME_PID"
+  check "port $API_PORT is held by a process under this run's API" api_port_owned
+  check "API reads this run's database" api_uses_run_db
+  check "API /health/ready" api_health
+  check "web serves the Ignite app" web_serves_app
+  check "web /api proxy reaches this run's seeded API" web_proxies_run_api
+  check "portless routes registered" routes_registered
+  check "Chrome DevTools on 127.0.0.1:$CDP_PORT" cdp_up
+  check "backend build is newer than backend sources (else: down + up)" backend_build_current
+  check "HEAD unchanged since launch ($GIT_HEAD)" head_unchanged
+  return "$DOCTOR_FAILED"
+}
+
+cmd_browser() {
+  load_run
+  [[ -f "$TOOLS/node_modules/playwright-core/package.json" ]] || die "playwright-core missing; run 'ignite-verify up'"
+  IGNITE_VERIFY_TOOLS="$TOOLS" node --no-warnings "$SCRIPT_DIR/browser.ts" "$@"
+}
+
+cmd_api() {
+  load_run
+  local method="${1:?METHOD required}" path="${2:?path required}" body="${3:-}"
+  local args=(-sS -X "$method" -w '\nHTTP %{http_code}\n')
+  if [[ -n "$body" ]]; then
+    args+=(-H 'Content-Type: application/json' --data "$body")
+  fi
+  curl_web "${args[@]}" "$WEB_URL$path"
+}
+
+cmd_sql() {
+  load_run
+  sqlite3 -readonly -json "$RUN_DIR/ignite.db" "${1:?query required}"
+}
+
+stop_tree() {
+  local label="$1" pid="$2"
+  alive "$pid" || return 0
+  if [[ "$(ps -o pgid= -p "$pid" | tr -d ' ')" != "$pid" ]]; then
+    say "$label pid $pid is not a group leader this run started; leaving it alone"
+    return 0
+  fi
+  local pids remaining
+  mapfile -t pids < <(tree_pids "$pid")
+  kill -TERM -- "-$pid" 2>/dev/null || true
+  local deadline=$((SECONDS + 15))
+  while ((SECONDS < deadline)); do
+    remaining="$(ps -o pid= -p "$(IFS=,; printf '%s' "${pids[*]}")" 2>/dev/null || true)"
+    [[ -z "$remaining" ]] && break
+    sleep 1
+  done
+  if [[ -n "$remaining" ]]; then
+    say "$label still running after TERM; sending KILL to $(tr '\n' ' ' <<<"$remaining")"
+    kill -KILL $remaining 2>/dev/null || true
+  fi
+  say "stopped $label (${#pids[@]} processes under pid $pid)"
+}
+
+down_run() {
+  valid_run_id "${1:-}"
+  RUN_ID="$1"
+  RUN_DIR="$STATE/runs/$RUN_ID"
+  EVIDENCE_DIR="$STATE/evidence/$RUN_ID"
+  if [[ -f "$RUN_DIR/run.env" ]]; then
+    set -a
+    source "$RUN_DIR/run.env"
+    set +a
+  fi
+  stop_tree Chrome "${CHROME_PID:-}"
+  stop_tree web "${WEB_PID:-}"
+  stop_tree API "${API_PID:-}"
+  mkdir -p "$EVIDENCE_DIR/logs"
+  local log
+  for log in api.log web.log chrome.log run.env; do
+    [[ -f "$RUN_DIR/$log" ]] && cp "$RUN_DIR/$log" "$EVIDENCE_DIR/logs/"
+  done
+  rm -rf "$RUN_DIR"
+  if [[ -f "$STATE/current" && "$(cat "$STATE/current")" == "$RUN_ID" ]]; then
+    rm -f "$STATE/current"
+  fi
+  if [[ -n "${WEB_URL:-}" ]] && portless list 2>/dev/null | grep -qF "$WEB_URL"; then
+    say "warning: portless still lists $WEB_URL"
+  fi
+  say "run $RUN_ID torn down; evidence kept in $EVIDENCE_DIR"
+  ls -1 "$EVIDENCE_DIR"
+}
+
+cmd_down() {
+  if [[ "${1:-}" == "--all" ]]; then
+    local dir
+    for dir in "$STATE"/runs/*/; do
+      [[ -d "$dir" ]] && down_run "$(basename "$dir")"
+    done
+    return 0
+  fi
+  local run_id
+  run_id="$(selected_run_id)"
+  down_run "$run_id"
+}
+
+main() {
+  local command="${1:-help}"
+  shift || true
+  case "$command" in
+    up) cmd_up "$@" ;;
+    doctor) cmd_doctor "$@" ;;
+    env) cmd_env "$@" ;;
+    browser) cmd_browser "$@" ;;
+    api) cmd_api "$@" ;;
+    sql) cmd_sql "$@" ;;
+    down) cmd_down "$@" ;;
+    help | -h | --help) usage ;;
+    *) usage >&2; exit 2 ;;
+  esac
+}
+
+main "$@"

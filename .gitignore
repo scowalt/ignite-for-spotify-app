@@ -63,3 +63,5 @@ __pycache__/
 
 automation/glitchtip-paseo-controller/config/controller.toml
 automation/glitchtip-paseo-controller/legacy-state/
+
+.verify/
