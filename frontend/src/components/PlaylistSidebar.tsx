@@ -95,22 +95,21 @@ export function PlaylistSidebar(props: PlaylistSidebarProps) {
     opts?: { onClear?: () => void }
   ) => (
     <div
-      class={`relative rounded-lg transition-colors ${
+      class={
         props.selectedPlaylist?.id === playlist.id
-          ? "bg-gray-700 border-l-2 border-spotify-green"
-          : "hover:bg-gray-700/50"
-      }`}
+          ? "playlist-item playlist-item-selected"
+          : "playlist-item playlist-item-selectable"
+      }
     >
       <button
         onClick={() => props.onSelectPlaylist(playlist)}
-        class="w-full flex items-center gap-3 p-2 text-left"
+        class="playlist-item-button"
       >
         <Show
           when={playlist.imageUrl}
           fallback={
-            <div class="w-10 h-10 bg-gray-700 rounded flex items-center justify-center shrink-0">
+            <div class="playlist-art-fallback">
               <svg
-                class="w-5 h-5 text-gray-500"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -122,12 +121,12 @@ export function PlaylistSidebar(props: PlaylistSidebarProps) {
           <img
             src={playlist.imageUrl!}
             alt={playlist.name}
-            class="w-10 h-10 rounded shrink-0"
+            class="playlist-art"
           />
         </Show>
-        <div class="flex-1 min-w-0">
-          <p class="font-medium truncate text-sm">{playlist.name}</p>
-          <p class="text-xs text-gray-400">{playlist.totalTracks} tracks</p>
+        <div class="playlist-item-text">
+          <p class="playlist-item-name">{playlist.name}</p>
+          <p class="playlist-item-count">{playlist.totalTracks} tracks</p>
         </div>
       </button>
       <Show when={opts?.onClear}>
@@ -136,10 +135,10 @@ export function PlaylistSidebar(props: PlaylistSidebarProps) {
             e.stopPropagation();
             opts!.onClear!();
           }}
-          class="absolute top-1 right-1 p-1 text-gray-400 hover:text-white rounded"
+          class="playlist-item-clear"
           aria-label="Clear pasted playlist"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -148,18 +147,18 @@ export function PlaylistSidebar(props: PlaylistSidebarProps) {
   );
 
   return (
-    <div class="flex flex-col">
+    <div class="playlist-sidebar">
       { }
-      <div class="p-2">
-        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider px-2 py-2">
+      <div class="playlist-sidebar-inner">
+        <h3 class="playlist-sidebar-title">
           Your Playlists
         </h3>
 
         { }
-        <div class="px-2 pb-2">
-          <div class="relative">
+        <div class="playlist-sidebar-field">
+          <div class="playlist-search">
             <svg
-              class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              class="playlist-search-icon"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -176,16 +175,16 @@ export function PlaylistSidebar(props: PlaylistSidebarProps) {
               placeholder="Filter playlists..."
               value={searchQuery()}
               onInput={(e) => setSearchQuery(e.currentTarget.value)}
-              class="w-full bg-gray-700 text-white text-sm rounded-lg pl-9 pr-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-spotify-green"
+              class="playlist-search-input"
             />
           </div>
         </div>
 
         { }
-        <div class="px-2 pb-2">
-          <div class="relative">
+        <div class="playlist-sidebar-field">
+          <div class="playlist-search">
             <svg
-              class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              class="playlist-search-icon"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -211,23 +210,23 @@ export function PlaylistSidebar(props: PlaylistSidebarProps) {
                   submitPlaylistLink();
                 }
               }}
-              class="w-full bg-gray-700 text-white text-sm rounded-lg pl-9 pr-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-spotify-green"
+              class="playlist-search-input"
             />
           </div>
-          <p class="text-xs text-gray-500 mt-1 px-1">
+          <p class="playlist-link-hint">
             Match any playlist — not just your own. Press Enter to load it.
           </p>
 
           <Show when={linkError()}>
-            <p class="text-red-400 text-xs mt-1 px-1">{linkError()}</p>
+            <p class="playlist-link-error">{linkError()}</p>
           </Show>
 
           <Show when={linkedPlaylistQuery.isFetching}>
-            <p class="text-gray-400 text-xs mt-1 px-1">Loading playlist…</p>
+            <p class="playlist-link-status">Loading playlist…</p>
           </Show>
 
           <Show when={linkedPlaylist()}>
-            <div class="mt-1">
+            <div class="playlist-linked">
               {renderPlaylistButton(linkedPlaylist()!, { onClear: clearPlaylistLink })}
             </div>
           </Show>
@@ -238,18 +237,18 @@ export function PlaylistSidebar(props: PlaylistSidebarProps) {
         </Show>
 
         <Show when={props.error}>
-          <p class="text-red-500 text-sm px-2">
+          <p class="playlist-load-error">
             Failed to load playlists: {props.error?.message}
           </p>
         </Show>
 
         <Show when={!props.isLoading && !props.error && props.playlists}>
           <Show when={filteredPlaylists()?.length === 0 && searchQuery()}>
-            <p class="text-gray-400 text-sm px-2 py-4 text-center">
+            <p class="playlist-empty">
               No playlists match "{searchQuery()}"
             </p>
           </Show>
-          <div class="space-y-1">
+          <div class="playlist-list">
             <For each={filteredPlaylists()}>
               {(playlist) => renderPlaylistButton(playlist)}
             </For>

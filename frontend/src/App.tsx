@@ -17,28 +17,28 @@ function App(props: RouteSectionProps) {
   });
 
   return (
-    <div class="min-h-screen bg-gray-900 text-white">
-      <header class="bg-spotify-black border-b border-gray-800 p-4">
-        <div class="container mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="app-shell">
+      <header class="site-header">
+        <div class="container site-header-inner">
           <a
             href="/"
-            class="whitespace-nowrap text-xl font-bold text-spotify-green hover:text-green-400"
+            class="site-brand"
           >
             Ignite for Spotify
           </a>
-          <nav class="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm sm:w-auto sm:justify-end sm:gap-6">
-            <a href="/" class="whitespace-nowrap hover:text-spotify-green">
+          <nav class="site-nav">
+            <a href="/" class="site-nav-link">
               Home
             </a>
             <a
               href="/match"
-              class="whitespace-nowrap hover:text-spotify-green"
+              class="site-nav-link"
             >
               Match My Music
             </a>
             <a
               href="/discover"
-              class="whitespace-nowrap hover:text-spotify-green"
+              class="site-nav-link"
             >
               Discover & Export
             </a>
@@ -55,21 +55,21 @@ function App(props: RouteSectionProps) {
                 fallback={
                   <button
                     onClick={authStore.login}
-                    class="bg-spotify-green hover:bg-green-500 text-black text-sm font-semibold py-1.5 px-4 rounded-full"
+                    class="header-login"
                   >
                     Login
                   </button>
                 }
               >
-                <div class="flex items-center gap-2">
+                <div class="header-account">
                   <Show when={authStore.user()?.imageUrl}>
                     <img
                       src={authStore.user()!.imageUrl!}
                       alt="Profile"
-                      class="w-8 h-8 rounded-full"
+                      class="header-avatar"
                     />
                   </Show>
-                  <span class="hidden text-sm text-gray-300 lg:inline">
+                  <span class="header-user-name">
                     {authStore.user()?.displayName}
                   </span>
                   <AlertDialog
@@ -80,25 +80,25 @@ function App(props: RouteSectionProps) {
                     <AlertDialog.Trigger
                       aria-label="Log out"
                       disabled={authStore.isLoggingOut()}
-                      class="rounded-sm text-sm text-gray-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green focus-visible:ring-offset-2 focus-visible:ring-offset-spotify-black disabled:cursor-wait disabled:opacity-60"
+                      class="header-logout focus-ring"
                     >
                       Logout
                     </AlertDialog.Trigger>
 
                     <AlertDialog.Portal>
-                      <AlertDialog.Overlay class="fixed inset-0 z-40 bg-black/70" />
-                      <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                      <AlertDialog.Overlay class="dialog-overlay" />
+                      <div class="dialog-positioner">
                         <AlertDialog.Content
                           onOpenAutoFocus={(event) => {
                             event.preventDefault();
                             cancelLogoutButton?.focus();
                           }}
-                          class="w-full max-w-md rounded-xl bg-gray-800 p-6 shadow-2xl shadow-black/40 focus:outline-none"
+                          class="dialog"
                         >
-                          <AlertDialog.Title class="text-xl font-semibold text-white">
+                          <AlertDialog.Title class="dialog-title">
                             Disconnect Spotify?
                           </AlertDialog.Title>
-                          <AlertDialog.Description class="mt-3 text-sm leading-6 text-gray-300">
+                          <AlertDialog.Description class="dialog-description">
                             This signs you out, deletes your saved Match My Music
                             results from the live service, and removes Ignite's
                             stored Spotify tokens. Playlists already created in
@@ -108,20 +108,20 @@ function App(props: RouteSectionProps) {
                           <Show when={authStore.error()}>
                             <p
                               role="alert"
-                              class="mt-4 rounded-lg bg-red-950/70 px-3 py-2 text-sm text-red-200"
+                              class="dialog-error"
                             >
                               {authStore.error()} Your Spotify connection and
                               saved results are still intact. Try again.
                             </p>
                           </Show>
 
-                          <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                          <div class="dialog-actions">
                             <AlertDialog.CloseButton
                               ref={(element) => {
                                 cancelLogoutButton = element;
                               }}
                               disabled={authStore.isLoggingOut()}
-                              class="rounded-full px-5 py-2.5 text-sm font-semibold text-gray-200 transition-colors hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green disabled:cursor-wait disabled:opacity-60"
+                              class="dialog-cancel focus-ring"
                             >
                               Cancel
                             </AlertDialog.CloseButton>
@@ -130,7 +130,7 @@ function App(props: RouteSectionProps) {
                               onClick={authStore.logout}
                               disabled={authStore.isLoggingOut()}
                               aria-busy={authStore.isLoggingOut()}
-                              class="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 disabled:cursor-wait disabled:opacity-60"
+                              class="dialog-confirm focus-ring"
                             >
                               {authStore.isLoggingOut()
                                 ? "Disconnecting…"
@@ -152,34 +152,34 @@ function App(props: RouteSectionProps) {
         <div
           role="alert"
           aria-live="assertive"
-          class="container mx-auto mt-4 rounded-lg border border-red-700 bg-red-950/70 px-4 py-3 text-sm text-red-200"
+          class="container app-alert"
         >
           {authStore.error()}
         </div>
       </Show>
 
-      <main class="container mx-auto p-4">
+      <main class="container site-main">
         <Suspense fallback={<PageSkeleton />}>
           {props.children}
         </Suspense>
       </main>
 
-      <footer class="mt-8 border-t border-gray-800 px-4 py-6">
-        <div class="container mx-auto flex flex-col items-center gap-3 text-center text-sm text-gray-400 sm:flex-row sm:justify-between sm:text-left">
+      <footer class="site-footer">
+        <div class="container site-footer-inner">
           <p>Ignite for Spotify — Spotify playlists meet Rocksmith CDLC</p>
           <nav
             aria-label="Support and legal"
-            class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-end"
+            class="site-footer-nav"
           >
             <a
               href="/privacy"
-              class="rounded-sm text-gray-400 transition-colors hover:text-spotify-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green"
+              class="site-footer-link focus-ring"
             >
               Privacy
             </a>
             <a
               href="mailto:privacy@igniteforspotify.com?subject=Ignite%20for%20Spotify%20support%20or%20issue"
-              class="rounded-sm text-gray-400 transition-colors hover:text-spotify-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green"
+              class="site-footer-link focus-ring"
             >
               Contact / report an issue
             </a>

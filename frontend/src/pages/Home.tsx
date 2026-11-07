@@ -13,33 +13,33 @@ export default function Home() {
   const formatNumber = (n: number) => n.toLocaleString();
 
   return (
-    <div class="space-y-16 py-8">
+    <div class="home">
       { }
-      <section class="text-center max-w-3xl mx-auto">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <section class="home-hero">
+        <h1 class="home-title">
           Find Your Spotify Music in Rocksmith
         </h1>
-        <p class="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
+        <p class="home-lede">
           Connect your Spotify account and instantly discover which songs in your
           playlists have community-created Rocksmith content ready to download.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div class="home-actions">
           <Show when={!authStore.isLoading()}>
             <Show
               when={authStore.isAuthenticated()}
               fallback={
-                <div class="flex max-w-sm flex-col items-center gap-2">
+                <div class="home-get-started">
                   <button
                     onClick={authStore.login}
-                    class="rounded-full bg-spotify-green px-8 py-3 text-lg font-semibold text-black transition hover:bg-green-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+                    class="button-hero home-get-started-button focus-ring"
                   >
                     Get Started with Spotify
                   </button>
-                  <p class="text-xs leading-5 text-gray-400">
+                  <p class="home-privacy-note">
                     Before connecting, see how Ignite handles your data in the{" "}
                     <a
                       href="/privacy"
-                      class="text-gray-300 underline decoration-gray-600 underline-offset-4 transition-colors hover:text-spotify-green focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green"
+                      class="home-privacy-link focus-ring"
                     >
                       Privacy notice
                     </a>
@@ -50,7 +50,7 @@ export default function Home() {
             >
               <a
                 href="/match"
-                class="bg-spotify-green hover:bg-green-400 text-black font-semibold px-8 py-3 rounded-full text-lg transition"
+                class="button-hero"
               >
                 Match My Music
               </a>
@@ -58,7 +58,7 @@ export default function Home() {
           </Show>
           <a
             href="/discover"
-            class="text-gray-400 hover:text-white transition underline underline-offset-4"
+            class="home-browse-link"
           >
             Browse CDLC Database
           </a>
@@ -66,50 +66,50 @@ export default function Home() {
       </section>
 
       { }
-      <section class="max-w-3xl mx-auto">
-        <div class="bg-gray-800 rounded-lg p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+      <section class="home-section">
+        <div class="panel home-stats">
           <div>
-            <div class="text-2xl font-bold text-white">
+            <div class="home-stat-value">
               <Show
                 when={statsQuery.data}
-                fallback={<SkeletonText class="h-7 w-20 mx-auto" />}
+                fallback={<SkeletonText class="skeleton-home-stat" />}
               >
                 {formatNumber(statsQuery.data!.totalSongs)}
               </Show>
             </div>
-            <div class="text-sm text-gray-400 mt-1">CDLC Songs</div>
+            <div class="home-stat-label">CDLC Songs</div>
           </div>
         </div>
       </section>
 
       { }
-      <section class="max-w-3xl mx-auto">
-        <h2 class="text-2xl font-bold text-center mb-8">How It Works</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="text-center">
-            <div class="w-10 h-10 rounded-full bg-spotify-green text-black font-bold text-lg flex items-center justify-center mx-auto mb-3">
+      <section class="home-section">
+        <h2 class="home-heading">How It Works</h2>
+        <div class="home-steps">
+          <div class="home-step">
+            <div class="home-step-number">
               1
             </div>
-            <h3 class="font-semibold mb-1">Connect Spotify</h3>
-            <p class="text-sm text-gray-400">
+            <h3 class="home-step-title">Connect Spotify</h3>
+            <p class="home-step-text">
               Log in with your Spotify account
             </p>
           </div>
-          <div class="text-center">
-            <div class="w-10 h-10 rounded-full bg-spotify-green text-black font-bold text-lg flex items-center justify-center mx-auto mb-3">
+          <div class="home-step">
+            <div class="home-step-number">
               2
             </div>
-            <h3 class="font-semibold mb-1">Pick a Playlist</h3>
-            <p class="text-sm text-gray-400">
+            <h3 class="home-step-title">Pick a Playlist</h3>
+            <p class="home-step-text">
               Select any playlist from your library
             </p>
           </div>
-          <div class="text-center">
-            <div class="w-10 h-10 rounded-full bg-spotify-green text-black font-bold text-lg flex items-center justify-center mx-auto mb-3">
+          <div class="home-step">
+            <div class="home-step-number">
               3
             </div>
-            <h3 class="font-semibold mb-1">Download Matches</h3>
-            <p class="text-sm text-gray-400">
+            <h3 class="home-step-title">Download Matches</h3>
+            <p class="home-step-text">
               Get CDLC for songs you already love
             </p>
           </div>
@@ -117,12 +117,12 @@ export default function Home() {
       </section>
 
       { }
-      <section class="max-w-2xl mx-auto">
-        <div class="bg-gray-800/50 rounded-lg p-6 text-left">
-          <h3 class="text-lg font-semibold text-spotify-green mb-2">
+      <section class="home-section-narrow">
+        <div class="home-explainer">
+          <h3 class="home-explainer-title">
             What is CDLC?
           </h3>
-          <p class="text-gray-400 text-sm">
+          <p class="home-explainer-text">
             CDLC (Custom Downloadable Content) are community-created songs for
             Rocksmith, a music video game that helps you learn guitar and bass.
             The CustomsForge community hosts thousands of custom songs you can
@@ -132,16 +132,16 @@ export default function Home() {
       </section>
 
       { }
-      <section class="max-w-4xl mx-auto">
-        <div class="grid md:grid-cols-2 gap-6">
+      <section class="home-section-wide">
+        <div class="home-features">
           <a
             href="/match"
-            class="block p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-700 hover:border-spotify-green"
+            class="home-feature"
           >
-            <h3 class="text-xl font-semibold text-spotify-green mb-2">
+            <h3 class="home-feature-title">
               Match My Music
             </h3>
-            <p class="text-gray-400">
+            <p class="home-feature-text">
               See which of your favorite Spotify songs are available as
               Rocksmith CDLC — no more guessing what's out there.
             </p>
@@ -149,12 +149,12 @@ export default function Home() {
 
           <a
             href="/discover"
-            class="block p-6 bg-gray-800 rounded-lg hover:bg-gray-700 transition border border-gray-700 hover:border-spotify-green"
+            class="home-feature"
           >
-            <h3 class="text-xl font-semibold text-spotify-green mb-2">
+            <h3 class="home-feature-title">
               Discover & Export
             </h3>
-            <p class="text-gray-400">
+            <p class="home-feature-text">
               Browse the full CDLC database and create Spotify playlists to
               preview songs before you download.
             </p>

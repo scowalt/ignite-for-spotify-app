@@ -1,37 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer theme, base, components;
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-}
-
-html,
-.themed-scrollbar {
-  scrollbar-color: #4b5563 #111827;
-  scrollbar-width: thin;
-}
-
-html::-webkit-scrollbar,
-.themed-scrollbar::-webkit-scrollbar {
-  width: 0.75rem;
-  height: 0.75rem;
-}
-
-html::-webkit-scrollbar-track,
-.themed-scrollbar::-webkit-scrollbar-track {
-  background: #111827;
-}
-
-html::-webkit-scrollbar-thumb,
-.themed-scrollbar::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border: 3px solid #111827;
-  border-radius: 9999px;
-}
-
-html::-webkit-scrollbar-thumb:hover,
-.themed-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/layout.css";
+@import "./styles/components.css";
+@import "./styles/skeleton.css";
+@import "./styles/home.css";
+@import "./styles/privacy.css";
+@import "./styles/discover.css";
+@import "./styles/match.css";
+@import "./styles/sidebar.css";

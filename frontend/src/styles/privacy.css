@@ -1,0 +1,118 @@
+@layer components {
+  .privacy-page {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: var(--width-3xl);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+
+  .privacy-header {
+    border-bottom-width: 1px;
+    border-color: var(--color-gray-700);
+    padding-bottom: var(--space-8);
+  }
+
+  .privacy-title {
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl-line);
+    font-weight: var(--font-bold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-white);
+  }
+
+  .privacy-intro {
+    margin-top: var(--space-4);
+    max-width: var(--width-2xl);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-gray-300);
+  }
+
+  .privacy-updated {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line);
+    color: var(--color-gray-400);
+  }
+
+  .privacy-body {
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-gray-300);
+  }
+
+  .privacy-body > :not([hidden]) ~ :not([hidden]) {
+    margin-top: var(--space-12);
+    margin-bottom: 0;
+  }
+
+  .privacy-section {
+    border-top-width: 1px;
+    border-color: var(--color-gray-800);
+    padding-top: var(--space-10);
+  }
+
+  .privacy-heading {
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl-line);
+    font-weight: var(--font-semibold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-white);
+  }
+
+  .privacy-body p {
+    margin-top: var(--space-4);
+  }
+
+  .privacy-list {
+    margin-top: var(--space-4);
+    list-style-type: disc;
+    padding-left: var(--space-6);
+  }
+
+  .privacy-list > :not([hidden]) ~ :not([hidden]) {
+    margin-top: var(--space-3);
+    margin-bottom: 0;
+  }
+
+  .privacy-list ::marker,
+  .privacy-list::marker {
+    color: var(--color-spotify-green);
+  }
+
+  .privacy-link {
+    font-weight: var(--font-medium);
+    color: var(--color-spotify-green);
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-underline-green);
+    text-underline-offset: 4px;
+    transition-property: var(--transition-colors);
+    transition-timing-function: var(--ease-standard);
+    transition-duration: var(--duration-fast);
+    --focus-ring-offset: 2px;
+    --focus-ring-offset-color: var(--color-gray-900);
+  }
+
+  .privacy-link:hover {
+    color: var(--color-green-300);
+  }
+
+  .privacy-link:focus-visible {
+    border-radius: var(--radius-sm);
+  }
+
+  @media (min-width: 640px) {
+    .privacy-page {
+      padding-top: var(--space-12);
+      padding-bottom: var(--space-12);
+    }
+
+    .privacy-title {
+      font-size: var(--text-4xl);
+      line-height: var(--text-4xl-line);
+    }
+  }
+}

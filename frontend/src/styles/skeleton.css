@@ -1,0 +1,223 @@
+@layer components {
+  .skeleton-avatar {
+    width: var(--space-8);
+    height: var(--space-8);
+  }
+
+  .skeleton-line,
+  .skeleton-header-name,
+  .skeleton-cell-artist {
+    height: var(--space-4);
+    width: var(--space-24);
+  }
+
+  .skeleton-header-action,
+  .skeleton-results-clear {
+    height: var(--space-4);
+    width: var(--space-12);
+  }
+
+  .skeleton-results-select {
+    height: var(--space-4);
+    width: var(--space-16);
+  }
+
+  .skeleton-cell-title {
+    height: var(--space-4);
+    width: var(--space-32);
+  }
+
+  .skeleton-cell-album {
+    height: var(--space-4);
+    width: var(--space-28);
+  }
+
+  .skeleton-cell-spotify,
+  .skeleton-cell-checkbox {
+    height: var(--space-4);
+    width: var(--space-4);
+  }
+
+  .skeleton-badge {
+    height: var(--space-5);
+    width: var(--space-5);
+  }
+
+  .skeleton-results-title {
+    height: var(--space-6);
+    width: var(--space-32);
+  }
+
+  .skeleton-stat-label {
+    height: var(--space-3);
+    width: var(--space-16);
+    margin-bottom: var(--space-1);
+  }
+
+  .skeleton-stat-label-wide {
+    height: var(--space-3);
+    width: var(--space-24);
+    margin-bottom: var(--space-1);
+  }
+
+  .skeleton-stat-value {
+    height: var(--space-8);
+    width: var(--space-20);
+  }
+
+  .skeleton-stat-value-narrow {
+    height: var(--space-8);
+    width: var(--space-16);
+  }
+
+  .auth-skeleton {
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .skeleton-auth-text {
+    height: var(--space-4);
+    width: var(--space-64);
+    margin-bottom: var(--space-4);
+  }
+
+  .skeleton-auth-button {
+    height: var(--space-10);
+    width: var(--space-40);
+    border-radius: var(--radius-full);
+  }
+
+  .skeleton-results-row {
+    border-top-width: 1px;
+    border-color: var(--color-gray-700);
+  }
+
+  .playlist-item-skeleton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2);
+  }
+
+  .skeleton-playlist-art {
+    width: var(--space-10);
+    height: var(--space-10);
+    flex-shrink: 0;
+  }
+
+  .skeleton-playlist-text {
+    flex: 1 1 0%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .skeleton-playlist-name {
+    height: var(--space-4);
+    width: 75%;
+  }
+
+  .skeleton-playlist-count {
+    height: var(--space-3);
+    width: var(--space-16);
+  }
+
+  .skeleton-page-title {
+    height: var(--space-8);
+    width: var(--space-48);
+    margin-bottom: var(--space-2);
+  }
+
+  .skeleton-page-lede {
+    height: var(--space-4);
+    width: var(--space-96);
+  }
+
+  .skeleton-page-block {
+    height: var(--space-32);
+    width: 100%;
+  }
+
+  .skeleton-page-block-tall {
+    height: var(--space-64);
+    width: 100%;
+  }
+
+  .user-info-skeleton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  .skeleton-user-avatar {
+    width: var(--space-10);
+    height: var(--space-10);
+  }
+
+  .skeleton-user-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .skeleton-user-name {
+    height: var(--space-4);
+    width: var(--space-32);
+  }
+
+  .skeleton-user-detail {
+    height: var(--space-3);
+    width: var(--space-40);
+  }
+
+  .skeleton-user-action {
+    margin-left: auto;
+    height: var(--space-4);
+    width: var(--space-14);
+  }
+
+  .playlist-card-skeleton {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border-width: 1px;
+    border-color: var(--color-gray-700);
+  }
+
+  .skeleton-playlist-card-art {
+    width: var(--space-12);
+    height: var(--space-12);
+  }
+
+  .playlist-grid-skeleton {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 768px) {
+    .playlist-grid-skeleton {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .playlist-grid-skeleton {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .skeleton-home-stat {
+    height: var(--space-7);
+    width: var(--space-20);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

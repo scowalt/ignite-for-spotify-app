@@ -26,7 +26,7 @@ CDLC (Custom Downloadable Content) are community-created songs for Rocksmith, a 
 ## Tech Stack
 
 - **Backend**: .NET 10 with Hangfire
-- **Frontend**: SolidJS + TypeScript + TailwindCSS
+- **Frontend**: SolidJS + TypeScript + plain layered CSS
 - **Database**: SQLite on the production VPS, with encrypted off-host backups in Cloudflare R2
 - **Secrets**: Doppler
 
@@ -53,6 +53,23 @@ cd frontend
 bun install
 PORTLESS_TAILSCALE=1 portless
 ```
+
+#### Styling
+
+The frontend uses plain CSS with no styling framework. `src/index.css` declares
+the cascade order once, `@layer theme, base, components;`, and imports the files in
+`src/styles/`:
+
+- `tokens.css` (`theme`) defines colors, spacing, type, radii, shadows and motion as
+  custom properties.
+- `base.css` (`base`) holds the element reset, the themed scrollbar and keyframes.
+- The remaining files (`components`) hold semantic classes such as `.site-header`
+  and `.button-primary`, grouped by app frame, shared components and page.
+
+Media queries use the breakpoints recorded as `--breakpoint-*` tokens: 640px,
+768px, 1024px, 1280px and 1536px. Custom properties cannot appear in media
+queries, so the queries repeat these pixel values. Do not use `!important`; leave
+only third-party CSS outside a layer.
 
 ## Deployment
 

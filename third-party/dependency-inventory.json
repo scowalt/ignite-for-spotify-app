@@ -3,16 +3,6 @@
   "packages": [
     {
       "ecosystem": "npm",
-      "name": "@alloc/quick-lru",
-      "version": "5.3.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/@alloc/quick-lru/v/5.3.0",
-      "notice_files": [
-        "license"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "@babel/code-frame",
       "version": "7.29.7",
       "declared_license": "MIT",
@@ -483,36 +473,6 @@
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/@napi-rs/lzma-linux-x64-gnu/v/1.5.1",
       "notice_files": []
-    },
-    {
-      "ecosystem": "npm",
-      "name": "@nodelib/fs.scandir",
-      "version": "2.1.5",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/@nodelib/fs.scandir/v/2.1.5",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "@nodelib/fs.stat",
-      "version": "2.0.5",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/@nodelib/fs.stat/v/2.0.5",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "@nodelib/fs.walk",
-      "version": "1.2.8",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/@nodelib/fs.walk/v/1.2.8",
-      "notice_files": [
-        "LICENSE"
-      ]
     },
     {
       "ecosystem": "npm",
@@ -1020,50 +980,10 @@
     },
     {
       "ecosystem": "npm",
-      "name": "any-promise",
-      "version": "1.3.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/any-promise/v/1.3.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "anymatch",
-      "version": "3.1.3",
-      "declared_license": "ISC",
-      "source": "https://www.npmjs.com/package/anymatch/v/3.1.3",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "arg",
-      "version": "5.0.2",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/arg/v/5.0.2",
-      "notice_files": [
-        "LICENSE.md"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "argparse",
       "version": "2.0.1",
       "declared_license": "Python-2.0",
       "source": "https://www.npmjs.com/package/argparse/v/2.0.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "autoprefixer",
-      "version": "10.6.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/autoprefixer/v/10.6.1",
       "notice_files": [
         "LICENSE"
       ]
@@ -1120,16 +1040,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "binary-extensions",
-      "version": "2.3.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/binary-extensions/v/2.3.0",
-      "notice_files": [
-        "license"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "brace-expansion",
       "version": "1.1.21",
       "declared_license": "MIT",
@@ -1144,16 +1054,6 @@
       "version": "5.0.12",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/brace-expansion/v/5.0.12",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "braces",
-      "version": "3.0.3",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/braces/v/3.0.3",
       "notice_files": [
         "LICENSE"
       ]
@@ -1180,16 +1080,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "camelcase-css",
-      "version": "2.0.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/camelcase-css/v/2.0.1",
-      "notice_files": [
-        "license"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "caniuse-lite",
       "version": "1.0.30001810",
       "declared_license": "CC-BY-4.0",
@@ -1210,16 +1100,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "chokidar",
-      "version": "3.6.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/chokidar/v/3.6.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "color-convert",
       "version": "2.0.1",
       "declared_license": "MIT",
@@ -1234,16 +1114,6 @@
       "version": "1.1.4",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/color-name/v/1.1.4",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "commander",
-      "version": "4.1.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/commander/v/4.1.1",
       "notice_files": [
         "LICENSE"
       ]
@@ -1290,16 +1160,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "cssesc",
-      "version": "3.0.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/cssesc/v/3.0.0",
-      "notice_files": [
-        "LICENSE-MIT.txt"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "csstype",
       "version": "3.2.3",
       "declared_license": "MIT",
@@ -1330,24 +1190,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "didyoumean",
-      "version": "1.2.2",
-      "declared_license": "Apache-2.0",
-      "source": "https://www.npmjs.com/package/didyoumean/v/1.2.2",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "dlv",
-      "version": "1.1.3",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/dlv/v/1.1.3",
-      "notice_files": []
-    },
-    {
-      "ecosystem": "npm",
       "name": "dompurify",
       "version": "3.4.17",
       "declared_license": "(MPL-2.0 OR Apache-2.0)",
@@ -1373,16 +1215,6 @@
       "version": "6.0.1",
       "declared_license": "BSD-2-Clause",
       "source": "https://www.npmjs.com/package/entities/v/6.0.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "es-errors",
-      "version": "1.3.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/es-errors/v/1.3.0",
       "notice_files": [
         "LICENSE"
       ]
@@ -1557,16 +1389,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "fast-glob",
-      "version": "3.3.3",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/fast-glob/v/3.3.3",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "fast-json-stable-stringify",
       "version": "2.1.0",
       "declared_license": "MIT",
@@ -1583,16 +1405,6 @@
       "source": "https://www.npmjs.com/package/fast-levenshtein/v/2.0.6",
       "notice_files": [
         "LICENSE.md"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "fastq",
-      "version": "1.20.3",
-      "declared_license": "ISC",
-      "source": "https://www.npmjs.com/package/fastq/v/1.20.3",
-      "notice_files": [
-        "LICENSE"
       ]
     },
     {
@@ -1635,16 +1447,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "fill-range",
-      "version": "7.1.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/fill-range/v/7.1.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "find-up",
       "version": "5.0.0",
       "declared_license": "MIT",
@@ -1675,40 +1477,10 @@
     },
     {
       "ecosystem": "npm",
-      "name": "fraction.js",
-      "version": "5.3.4",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/fraction.js/v/5.3.4",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "function-bind",
-      "version": "1.1.2",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/function-bind/v/1.1.2",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "gensync",
       "version": "1.0.0-beta.2",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/gensync/v/1.0.0-beta.2",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "glob-parent",
-      "version": "5.1.2",
-      "declared_license": "ISC",
-      "source": "https://www.npmjs.com/package/glob-parent/v/5.1.2",
       "notice_files": [
         "LICENSE"
       ]
@@ -1741,16 +1513,6 @@
       "source": "https://www.npmjs.com/package/has-flag/v/4.0.0",
       "notice_files": [
         "license"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "hasown",
-      "version": "2.0.4",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/hasown/v/2.0.4",
-      "notice_files": [
-        "LICENSE"
       ]
     },
     {
@@ -1823,26 +1585,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "is-binary-path",
-      "version": "2.1.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/is-binary-path/v/2.1.0",
-      "notice_files": [
-        "license"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "is-core-module",
-      "version": "2.17.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/is-core-module/v/2.17.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "is-extglob",
       "version": "2.1.1",
       "declared_license": "MIT",
@@ -1873,16 +1615,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "is-number",
-      "version": "7.0.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/is-number/v/7.0.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "is-what",
       "version": "4.1.16",
       "declared_license": "MIT",
@@ -1897,16 +1629,6 @@
       "version": "2.0.0",
       "declared_license": "ISC",
       "source": "https://www.npmjs.com/package/isexe/v/2.0.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "jiti",
-      "version": "1.21.7",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/jiti/v/1.21.7",
       "notice_files": [
         "LICENSE"
       ]
@@ -2021,26 +1743,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "lilconfig",
-      "version": "3.1.3",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/lilconfig/v/3.1.3",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "lines-and-columns",
-      "version": "1.2.4",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/lines-and-columns/v/1.2.4",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "locate-path",
       "version": "6.0.0",
       "declared_license": "MIT",
@@ -2081,26 +1783,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "merge2",
-      "version": "1.4.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/merge2/v/1.4.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "micromatch",
-      "version": "4.0.8",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/micromatch/v/4.0.8",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "minimatch",
       "version": "10.2.6",
       "declared_license": "BlueOak-1.0.0",
@@ -2127,16 +1809,6 @@
       "source": "https://www.npmjs.com/package/ms/v/2.1.3",
       "notice_files": [
         "license.md"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "mz",
-      "version": "2.7.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/mz/v/2.7.0",
-      "notice_files": [
-        "LICENSE"
       ]
     },
     {
@@ -2173,36 +1845,6 @@
       "version": "2.0.56",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/node-releases/v/2.0.56",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "normalize-path",
-      "version": "3.0.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/normalize-path/v/3.0.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "object-assign",
-      "version": "4.1.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/object-assign/v/4.1.1",
-      "notice_files": [
-        "license"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "object-hash",
-      "version": "3.0.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/object-hash/v/3.0.0",
       "notice_files": [
         "LICENSE"
       ]
@@ -2279,30 +1921,10 @@
     },
     {
       "ecosystem": "npm",
-      "name": "path-parse",
-      "version": "1.0.7",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/path-parse/v/1.0.7",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "picocolors",
       "version": "1.1.1",
       "declared_license": "ISC",
       "source": "https://www.npmjs.com/package/picocolors/v/1.1.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "picomatch",
-      "version": "2.3.2",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/picomatch/v/2.3.2",
       "notice_files": [
         "LICENSE"
       ]
@@ -2319,80 +1941,10 @@
     },
     {
       "ecosystem": "npm",
-      "name": "pirates",
-      "version": "4.0.7",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/pirates/v/4.0.7",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "postcss",
       "version": "8.5.28",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/postcss/v/8.5.28",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "postcss-import",
-      "version": "15.1.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/postcss-import/v/15.1.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "postcss-js",
-      "version": "4.1.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/postcss-js/v/4.1.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "postcss-load-config",
-      "version": "6.0.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/postcss-load-config/v/6.0.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "postcss-nested",
-      "version": "6.2.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/postcss-nested/v/6.2.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "postcss-selector-parser",
-      "version": "6.1.4",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/postcss-selector-parser/v/6.1.4",
-      "notice_files": [
-        "LICENSE-MIT"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "postcss-value-parser",
-      "version": "4.2.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/postcss-value-parser/v/4.2.0",
       "notice_files": [
         "LICENSE"
       ]
@@ -2469,50 +2021,10 @@
     },
     {
       "ecosystem": "npm",
-      "name": "queue-microtask",
-      "version": "1.2.3",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/queue-microtask/v/1.2.3",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "read-cache",
-      "version": "1.0.2",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/read-cache/v/1.0.2",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "readdirp",
-      "version": "3.6.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/readdirp/v/3.6.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "requires-port",
       "version": "1.0.0",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/requires-port/v/1.0.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "resolve",
-      "version": "1.22.12",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/resolve/v/1.22.12",
       "notice_files": [
         "LICENSE"
       ]
@@ -2529,32 +2041,12 @@
     },
     {
       "ecosystem": "npm",
-      "name": "reusify",
-      "version": "1.1.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/reusify/v/1.1.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "rollup",
       "version": "4.63.4",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/rollup/v/4.63.4",
       "notice_files": [
         "LICENSE.md"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "run-parallel",
-      "version": "1.2.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/run-parallel/v/1.2.0",
-      "notice_files": [
-        "LICENSE"
       ]
     },
     {
@@ -2699,16 +2191,6 @@
     },
     {
       "ecosystem": "npm",
-      "name": "sucrase",
-      "version": "3.35.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/sucrase/v/3.35.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "supports-color",
       "version": "7.2.0",
       "declared_license": "MIT",
@@ -2719,60 +2201,10 @@
     },
     {
       "ecosystem": "npm",
-      "name": "supports-preserve-symlinks-flag",
-      "version": "1.0.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/supports-preserve-symlinks-flag/v/1.0.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "tailwindcss",
-      "version": "3.4.19",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/tailwindcss/v/3.4.19",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "thenify",
-      "version": "3.3.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/thenify/v/3.3.1",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "thenify-all",
-      "version": "1.6.0",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/thenify-all/v/1.6.0",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
       "name": "tinyglobby",
       "version": "0.2.17",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/tinyglobby/v/0.2.17",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "to-regex-range",
-      "version": "5.0.1",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/to-regex-range/v/5.0.1",
       "notice_files": [
         "LICENSE"
       ]
@@ -2803,16 +2235,6 @@
       "source": "https://www.npmjs.com/package/ts-api-utils/v/2.5.0",
       "notice_files": [
         "LICENSE.md"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "ts-interface-checker",
-      "version": "0.1.13",
-      "declared_license": "Apache-2.0",
-      "source": "https://www.npmjs.com/package/ts-interface-checker/v/0.1.13",
-      "notice_files": [
-        "LICENSE"
       ]
     },
     {
@@ -2902,16 +2324,6 @@
       "version": "1.5.10",
       "declared_license": "MIT",
       "source": "https://www.npmjs.com/package/url-parse/v/1.5.10",
-      "notice_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "name": "util-deprecate",
-      "version": "1.0.2",
-      "declared_license": "MIT",
-      "source": "https://www.npmjs.com/package/util-deprecate/v/1.0.2",
       "notice_files": [
         "LICENSE"
       ]

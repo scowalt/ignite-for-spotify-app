@@ -5,7 +5,7 @@ interface SkeletonProps {
 export function SkeletonBox(props: SkeletonProps) {
   return (
     <div
-      class={`bg-gray-700 animate-pulse rounded ${props.class ?? ""}`}
+      class={`skeleton ${props.class ?? ""}`}
     />
   );
 }
@@ -13,7 +13,7 @@ export function SkeletonBox(props: SkeletonProps) {
 export function SkeletonText(props: SkeletonProps) {
   return (
     <span
-      class={`inline-block bg-gray-700 animate-pulse rounded ${props.class ?? "h-4 w-24"}`}
+      class={`skeleton skeleton-text ${props.class ?? "skeleton-line"}`}
     />
   );
 }
@@ -21,41 +21,41 @@ export function SkeletonText(props: SkeletonProps) {
 export function SkeletonCircle(props: SkeletonProps) {
   return (
     <div
-      class={`bg-gray-700 animate-pulse rounded-full ${props.class ?? "w-8 h-8"}`}
+      class={`skeleton skeleton-circle ${props.class ?? "skeleton-avatar"}`}
     />
   );
 }
 
 export function HeaderAuthSkeleton() {
   return (
-    <div class="flex items-center gap-2">
-      <SkeletonCircle class="w-8 h-8" />
-      <SkeletonText class="h-4 w-24" />
-      <SkeletonText class="h-4 w-12" />
+    <div class="header-account">
+      <SkeletonCircle class="skeleton-avatar" />
+      <SkeletonText class="skeleton-header-name" />
+      <SkeletonText class="skeleton-header-action" />
     </div>
   );
 }
 
 export function UserInfoSkeleton() {
   return (
-    <div class="flex items-center gap-4 bg-gray-800 rounded-lg p-4">
-      <SkeletonCircle class="w-10 h-10" />
-      <div class="flex flex-col gap-1">
-        <SkeletonText class="h-4 w-32" />
-        <SkeletonText class="h-3 w-40" />
+    <div class="panel user-info-skeleton">
+      <SkeletonCircle class="skeleton-user-avatar" />
+      <div class="skeleton-user-text">
+        <SkeletonText class="skeleton-user-name" />
+        <SkeletonText class="skeleton-user-detail" />
       </div>
-      <SkeletonText class="ml-auto h-4 w-14" />
+      <SkeletonText class="skeleton-user-action" />
     </div>
   );
 }
 
 export function PlaylistCardSkeleton() {
   return (
-    <div class="flex items-center gap-3 p-3 rounded-lg border border-gray-700">
-      <SkeletonBox class="w-12 h-12" />
-      <div class="flex-1 min-w-0 flex flex-col gap-1">
-        <SkeletonText class="h-4 w-3/4" />
-        <SkeletonText class="h-3 w-16" />
+    <div class="playlist-card-skeleton">
+      <SkeletonBox class="skeleton-playlist-card-art" />
+      <div class="skeleton-playlist-text">
+        <SkeletonText class="skeleton-playlist-name" />
+        <SkeletonText class="skeleton-playlist-count" />
       </div>
     </div>
   );
@@ -63,7 +63,7 @@ export function PlaylistCardSkeleton() {
 
 export function PlaylistGridSkeleton() {
   return (
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="playlist-grid-skeleton">
       <PlaylistCardSkeleton />
       <PlaylistCardSkeleton />
       <PlaylistCardSkeleton />
@@ -76,18 +76,18 @@ export function PlaylistGridSkeleton() {
 
 export function StatsSkeleton() {
   return (
-    <div class="bg-gray-800 rounded-lg p-4 flex gap-8">
+    <div class="panel discover-stats">
       <div>
-        <SkeletonText class="h-3 w-16 block mb-1" />
-        <SkeletonText class="h-8 w-20" />
+        <SkeletonText class="skeleton-stat-label" />
+        <SkeletonText class="skeleton-stat-value" />
       </div>
       <div>
-        <SkeletonText class="h-3 w-24 block mb-1" />
-        <SkeletonText class="h-8 w-20" />
+        <SkeletonText class="skeleton-stat-label-wide" />
+        <SkeletonText class="skeleton-stat-value" />
       </div>
       <div>
-        <SkeletonText class="h-3 w-16 block mb-1" />
-        <SkeletonText class="h-8 w-16" />
+        <SkeletonText class="skeleton-stat-label" />
+        <SkeletonText class="skeleton-stat-value-narrow" />
       </div>
     </div>
   );
@@ -95,36 +95,36 @@ export function StatsSkeleton() {
 
 export function AuthSectionSkeleton() {
   return (
-    <div class="bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center">
-      <SkeletonText class="h-4 w-64 mb-4" />
-      <SkeletonBox class="h-10 w-40 rounded-full" />
+    <div class="panel auth-skeleton">
+      <SkeletonText class="skeleton-auth-text" />
+      <SkeletonBox class="skeleton-auth-button" />
     </div>
   );
 }
 
 function TableRowSkeleton() {
   return (
-    <tr class="border-t border-gray-700">
-      <td class="px-4 py-2">
-        <SkeletonBox class="w-4 h-4 rounded" />
+    <tr class="skeleton-results-row">
+      <td>
+        <SkeletonBox class="skeleton-cell-checkbox" />
       </td>
-      <td class="px-4 py-2">
-        <SkeletonText class="h-4 w-24" />
+      <td>
+        <SkeletonText class="skeleton-cell-artist" />
       </td>
-      <td class="px-4 py-2">
-        <SkeletonText class="h-4 w-32" />
+      <td>
+        <SkeletonText class="skeleton-cell-title" />
       </td>
-      <td class="px-4 py-2">
-        <SkeletonText class="h-4 w-28" />
+      <td>
+        <SkeletonText class="skeleton-cell-album" />
       </td>
-      <td class="px-4 py-2">
-        <div class="flex gap-1">
-          <SkeletonBox class="w-5 h-5 rounded" />
-          <SkeletonBox class="w-5 h-5 rounded" />
+      <td>
+        <div class="badge-list">
+          <SkeletonBox class="skeleton-badge" />
+          <SkeletonBox class="skeleton-badge" />
         </div>
       </td>
-      <td class="px-4 py-2">
-        <SkeletonText class="h-4 w-4" />
+      <td>
+        <SkeletonText class="skeleton-cell-spotify" />
       </td>
     </tr>
   );
@@ -132,24 +132,24 @@ function TableRowSkeleton() {
 
 export function SearchResultsTableSkeleton() {
   return (
-    <div class="space-y-4">
-      <div class="flex justify-between items-center">
-        <SkeletonText class="h-6 w-32" />
-        <div class="flex gap-2">
-          <SkeletonText class="h-4 w-16" />
-          <SkeletonText class="h-4 w-12" />
+    <div class="stack-section">
+      <div class="results-header">
+        <SkeletonText class="skeleton-results-title" />
+        <div class="results-actions">
+          <SkeletonText class="skeleton-results-select" />
+          <SkeletonText class="skeleton-results-clear" />
         </div>
       </div>
-      <div class="bg-gray-800 rounded-lg overflow-hidden">
-        <table class="w-full">
-          <thead class="bg-gray-700">
+      <div class="panel results-table-wrap">
+        <table class="results-table">
+          <thead>
             <tr>
-              <th class="w-8 px-4 py-2" />
-              <th class="text-left px-4 py-2">Artist</th>
-              <th class="text-left px-4 py-2">Title</th>
-              <th class="text-left px-4 py-2">Album</th>
-              <th class="text-left px-4 py-2">Parts</th>
-              <th class="text-left px-4 py-2">Spotify</th>
+              <th class="results-select-column" />
+              <th class="results-heading">Artist</th>
+              <th class="results-heading">Title</th>
+              <th class="results-heading">Album</th>
+              <th class="results-heading">Parts</th>
+              <th class="results-heading">Spotify</th>
             </tr>
           </thead>
           <tbody>
@@ -170,11 +170,11 @@ export function SearchResultsTableSkeleton() {
 
 export function PlaylistItemSkeleton() {
   return (
-    <div class="flex items-center gap-3 p-2">
-      <SkeletonBox class="w-10 h-10 rounded shrink-0" />
-      <div class="flex-1 min-w-0 flex flex-col gap-1">
-        <SkeletonText class="h-4 w-3/4" />
-        <SkeletonText class="h-3 w-16" />
+    <div class="playlist-item-skeleton">
+      <SkeletonBox class="skeleton-playlist-art" />
+      <div class="skeleton-playlist-text">
+        <SkeletonText class="skeleton-playlist-name" />
+        <SkeletonText class="skeleton-playlist-count" />
       </div>
     </div>
   );
@@ -182,7 +182,7 @@ export function PlaylistItemSkeleton() {
 
 export function PlaylistSidebarSkeleton() {
   return (
-    <div class="space-y-1">
+    <div class="playlist-list">
       <PlaylistItemSkeleton />
       <PlaylistItemSkeleton />
       <PlaylistItemSkeleton />
@@ -197,15 +197,15 @@ export function PlaylistSidebarSkeleton() {
 
 export function PageSkeleton() {
   return (
-    <div class="space-y-6">
+    <div class="page">
       { }
       <div>
-        <SkeletonText class="h-8 w-48 block mb-2" />
-        <SkeletonText class="h-4 w-96" />
+        <SkeletonText class="skeleton-page-title" />
+        <SkeletonText class="skeleton-page-lede" />
       </div>
       { }
-      <SkeletonBox class="h-32 w-full" />
-      <SkeletonBox class="h-64 w-full" />
+      <SkeletonBox class="skeleton-page-block" />
+      <SkeletonBox class="skeleton-page-block-tall" />
     </div>
   );
 }
