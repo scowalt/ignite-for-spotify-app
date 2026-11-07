@@ -1,0 +1,189 @@
+@layer components {
+  .playlist-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .playlist-sidebar-inner {
+    padding: var(--space-2);
+  }
+
+  .playlist-sidebar-title {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line);
+    font-weight: var(--font-semibold);
+    color: var(--color-gray-400);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wider);
+    padding: var(--space-2);
+  }
+
+  .playlist-sidebar-field {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  .playlist-search {
+    position: relative;
+  }
+
+  .playlist-search-icon {
+    position: absolute;
+    left: var(--space-2-5);
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--space-4);
+    height: var(--space-4);
+    color: var(--color-gray-400);
+  }
+
+  .playlist-search-input {
+    width: 100%;
+    background-color: var(--color-gray-700);
+    color: var(--color-white);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2) var(--space-3) var(--space-2) var(--space-9);
+  }
+
+  .playlist-search-input:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 var(--focus-ring-width) var(--color-spotify-green);
+  }
+
+  .playlist-link-hint,
+  .playlist-link-error,
+  .playlist-link-status {
+    font-size: var(--text-xs);
+    line-height: var(--text-xs-line);
+    margin-top: var(--space-1);
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+  }
+
+  .playlist-link-hint {
+    color: var(--color-gray-500);
+  }
+
+  .playlist-link-error {
+    color: var(--color-red-400);
+  }
+
+  .playlist-link-status {
+    color: var(--color-gray-400);
+  }
+
+  .playlist-linked {
+    margin-top: var(--space-1);
+  }
+
+  .playlist-load-error {
+    color: var(--color-red-500);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line);
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .playlist-empty {
+    color: var(--color-gray-400);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line);
+    padding: var(--space-4) var(--space-2);
+    text-align: center;
+  }
+
+  .playlist-list > :not([hidden]) ~ :not([hidden]) {
+    margin-top: var(--space-1);
+    margin-bottom: 0;
+  }
+
+  .playlist-item {
+    position: relative;
+    border-radius: var(--radius-lg);
+    transition-property: var(--transition-colors);
+    transition-timing-function: var(--ease-standard);
+    transition-duration: var(--duration-fast);
+  }
+
+  .playlist-item-selected {
+    background-color: var(--color-gray-700);
+    border-left-width: 2px;
+    border-color: var(--color-spotify-green);
+  }
+
+  .playlist-item-selectable:hover {
+    background-color: var(--color-surface-hover);
+  }
+
+  .playlist-item-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2);
+    text-align: left;
+  }
+
+  .playlist-art,
+  .playlist-art-fallback {
+    width: var(--space-10);
+    height: var(--space-10);
+    border-radius: var(--radius);
+    flex-shrink: 0;
+  }
+
+  .playlist-art-fallback {
+    background-color: var(--color-gray-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .playlist-art-fallback > svg {
+    width: var(--space-5);
+    height: var(--space-5);
+    color: var(--color-gray-500);
+  }
+
+  .playlist-item-text {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  .playlist-item-name {
+    font-weight: var(--font-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line);
+  }
+
+  .playlist-item-count {
+    font-size: var(--text-xs);
+    line-height: var(--text-xs-line);
+    color: var(--color-gray-400);
+  }
+
+  .playlist-item-clear {
+    position: absolute;
+    top: var(--space-1);
+    right: var(--space-1);
+    padding: var(--space-1);
+    color: var(--color-gray-400);
+    border-radius: var(--radius);
+  }
+
+  .playlist-item-clear:hover {
+    color: var(--color-white);
+  }
+
+  .playlist-item-clear > svg {
+    width: var(--space-3-5);
+    height: var(--space-3-5);
+  }
+}

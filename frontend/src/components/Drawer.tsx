@@ -18,25 +18,24 @@ export function Drawer(props: DrawerProps) {
       modal
     >
       <Dialog.Trigger
-        class="rounded-lg p-2 transition-colors hover:bg-gray-700 md:hidden"
+        class="drawer-trigger"
         aria-label={props.triggerLabel}
       >
         {props.triggerContent}
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Overlay class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden" />
-        <Dialog.Content class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-hidden bg-gray-800 md:hidden">
-          <div class="flex shrink-0 items-center justify-between border-b border-gray-700 p-4">
-            <Dialog.Title class="text-lg font-semibold">
+        <Dialog.Overlay class="drawer-overlay" />
+        <Dialog.Content class="drawer">
+          <div class="drawer-header">
+            <Dialog.Title class="drawer-title">
               {props.title}
             </Dialog.Title>
             <Dialog.CloseButton
-              class="ml-auto rounded-lg p-2 transition-colors hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green"
+              class="drawer-close focus-ring"
               aria-label="Close drawer"
             >
               <svg
-                class="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -51,7 +50,7 @@ export function Drawer(props: DrawerProps) {
             </Dialog.CloseButton>
           </div>
 
-          <div class="themed-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
+          <div class="drawer-body themed-scrollbar">
             {props.children}
           </div>
         </Dialog.Content>

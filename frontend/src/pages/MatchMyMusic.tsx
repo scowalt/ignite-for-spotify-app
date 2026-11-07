@@ -349,10 +349,10 @@ export default function MatchMyMusic() {
     <Show
       when={!authStore.isLoading() && authStore.isAuthenticated()}
       fallback={
-        <div class="space-y-6">
+        <div class="page">
           <div>
-            <h1 class="text-2xl font-bold mb-2">Match My Music</h1>
-            <p class="text-gray-400">
+            <h1 class="page-intro-title">Match My Music</h1>
+            <p class="page-intro-text">
               Select a Spotify playlist to find matching Rocksmith CDLC (custom
               songs).
             </p>
@@ -363,11 +363,11 @@ export default function MatchMyMusic() {
           </Show>
 
           <Show when={!authStore.isLoading() && !authStore.isAuthenticated()}>
-            <div class="bg-gray-800 rounded-lg p-6 text-center">
-              <p class="mb-4">Login with Spotify to access your playlists</p>
+            <div class="panel login-prompt">
+              <p class="login-prompt-text">Login with Spotify to access your playlists</p>
               <button
                 onClick={authStore.login}
-                class="bg-spotify-green hover:bg-green-500 text-black font-bold py-2 px-6 rounded-full"
+                class="button-primary"
               >
                 Login with Spotify
               </button>
@@ -377,10 +377,10 @@ export default function MatchMyMusic() {
       }
     >
       { }
-      <div class="-mx-4 -mt-4 flex">
+      <div class="match-layout">
         { }
         <aside
-          class="hidden w-72 flex-col border-r border-gray-700 bg-gray-800 md:flex"
+          class="match-sidebar"
           aria-label="Spotify playlists"
         >
           <PlaylistSidebar
@@ -394,12 +394,12 @@ export default function MatchMyMusic() {
 
         { }
         <section
-          class="min-w-0 flex-1"
+          class="match-main"
           aria-labelledby="match-my-music-title"
         >
-          <div class="p-6 space-y-6">
+          <div class="match-content">
             { }
-            <div class="flex items-center gap-4">
+            <div class="match-header">
               <Drawer
                 isOpen={drawerOpen()}
                 onOpenChange={setDrawerOpen}
@@ -407,7 +407,6 @@ export default function MatchMyMusic() {
                 triggerLabel="Open playlist menu"
                 triggerContent={
                   <svg
-                    class="h-6 w-6"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -430,10 +429,10 @@ export default function MatchMyMusic() {
                 />
               </Drawer>
               <div>
-                <h1 id="match-my-music-title" class="text-2xl font-bold">
+                <h1 id="match-my-music-title" class="match-title">
                   Match My Music
                 </h1>
-                <p class="text-gray-400">
+                <p class="page-intro-text">
                   Select a playlist to find matching Rocksmith CDLC
                 </p>
               </div>
@@ -441,26 +440,26 @@ export default function MatchMyMusic() {
 
             { }
             <Show when={selectedPlaylist()}>
-              <div class="sticky top-0 bg-gray-900/95 backdrop-blur-sm z-10 p-4 -mx-6 px-6 border-b border-gray-700">
-                <div class="flex items-center gap-4 flex-wrap">
-                  <div class="flex min-w-0 items-center gap-3">
+              <div class="match-toolbar">
+                <div class="match-toolbar-inner">
+                  <div class="match-playlist">
                     <Show when={selectedPlaylist()?.imageUrl}>
                       <img
                         src={selectedPlaylist()!.imageUrl!}
                         alt={selectedPlaylist()!.name}
-                        class="w-10 h-10 rounded"
+                        class="match-playlist-image"
                       />
                     </Show>
-                    <div class="min-w-0">
-                      <p class="truncate font-medium">
+                    <div class="match-playlist-info">
+                      <p class="match-playlist-name">
                         {selectedPlaylist()?.name}
                       </p>
-                      <p class="text-sm text-gray-400">
+                      <p class="match-playlist-tracks">
                         {selectedPlaylist()?.totalTracks} tracks
                       </p>
                       <Show when={generatedAt()}>
                         {(timestamp) => (
-                          <p class="mt-0.5 text-xs text-gray-300">
+                          <p class="match-playlist-saved">
                             Saved {formatSavedSearchTime(timestamp())}
                           </p>
                         )}
@@ -471,7 +470,7 @@ export default function MatchMyMusic() {
                     onClick={startSearch}
                     disabled={isSearching() || savedResultsQuery.isLoading}
                     aria-busy={isSearching()}
-                    class="ml-auto shrink-0 rounded-full bg-spotify-green px-6 py-2 font-bold text-black hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+                    class="button-primary match-search-button focus-ring"
                   >
                     {searchActionLabel()}
                   </button>
@@ -481,18 +480,18 @@ export default function MatchMyMusic() {
 
             <Show when={selectedPlaylist() && savedResultsQuery.isLoading}>
               <div
-                class="flex items-center gap-3 rounded-lg bg-gray-800 px-4 py-3 text-sm text-gray-300"
+                class="panel match-status"
                 role="status"
                 aria-live="polite"
               >
                 <svg
-                  class="h-4 w-4 animate-spin text-spotify-green"
+                  class="spinner"
                   fill="none"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
                   <circle
-                    class="opacity-25"
+                    class="spinner-track"
                     cx="12"
                     cy="12"
                     r="10"
@@ -500,7 +499,7 @@ export default function MatchMyMusic() {
                     stroke-width="4"
                   />
                   <path
-                    class="opacity-75"
+                    class="spinner-head"
                     fill="currentColor"
                     d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                   />
@@ -518,7 +517,7 @@ export default function MatchMyMusic() {
               }
             >
               <div
-                class="rounded-lg border border-amber-600 bg-amber-950/60 px-4 py-3 text-sm text-amber-100"
+                class="match-saved-error"
                 role="alert"
               >
                 Saved results could not be loaded. You can search this playlist
@@ -528,19 +527,19 @@ export default function MatchMyMusic() {
 
             { }
             <Show when={!selectedPlaylist()}>
-              <div class="bg-gray-800 rounded-lg p-8 text-center">
+              <div class="panel empty-state">
                 <svg
-                  class="w-12 h-12 mx-auto mb-4 text-gray-500"
+                  class="empty-state-icon"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
                 </svg>
-                <p class="text-gray-400">
-                  <span class="hidden md:inline">
+                <p class="empty-state-text">
+                  <span class="match-hint-desktop">
                     Select a playlist from the sidebar to get started
                   </span>
-                  <span class="md:hidden">
+                  <span class="match-hint-mobile">
                     Tap the menu button above to select a playlist
                   </span>
                 </p>
@@ -550,18 +549,18 @@ export default function MatchMyMusic() {
             { }
             <Show when={isSearching() && searchProgress()}>
               <div
-                class="rounded-lg bg-gray-800 p-4"
+                class="panel match-progress"
                 role="status"
                 aria-live="polite"
               >
-                <div class="flex justify-between mb-2">
+                <div class="match-progress-header">
                   <span>{searchProgressLabel()}</span>
                   <span>
                     {searchProgress()!.processed} / {searchProgress()!.total}
                   </span>
                 </div>
                 <div
-                  class="h-2 w-full rounded-full bg-gray-700"
+                  class="progress-track"
                   role="progressbar"
                   aria-label={searchProgressLabel()}
                   aria-valuemin="0"
@@ -569,17 +568,17 @@ export default function MatchMyMusic() {
                   aria-valuenow={searchProgress()!.processed}
                 >
                   <div
-                    class="bg-spotify-green h-2 rounded-full transition-all"
+                    class="progress-fill"
                     style={{
                       width: `${(searchProgress()!.processed / searchProgress()!.total) * 100}%`,
                     }}
                   />
                 </div>
-                <p class="text-sm text-gray-400 mt-2">
+                <p class="match-progress-item">
                   {searchProgress()!.currentItem}
                 </p>
                 <Show when={isRefreshing()}>
-                  <p class="mt-2 text-xs text-gray-300">
+                  <p class="match-progress-note">
                     Your saved results stay available until this refresh
                     completes.
                   </p>
@@ -590,10 +589,10 @@ export default function MatchMyMusic() {
             { }
             <Show when={error()}>
               <div
-                class="bg-red-900/50 border border-red-500 rounded-lg p-4"
+                class="alert alert-error"
                 role="alert"
               >
-                <p class="text-red-400">{error()}</p>
+                <p class="alert-error-text">{error()}</p>
               </div>
             </Show>
 
@@ -604,29 +603,23 @@ export default function MatchMyMusic() {
 
                 return (
                   <div
-                    class={`rounded-lg border p-4 ${
+                    class={
                       summary().isComplete
-                        ? "bg-green-900/50 border-green-500"
-                        : "bg-amber-900/50 border-amber-500"
-                    }`}
+                        ? "alert alert-success"
+                        : "alert alert-warning"
+                    }
                     role={summary().isComplete ? "status" : "alert"}
                   >
-                    <h3
-                      class={`font-semibold mb-2 ${
-                        summary().isComplete
-                          ? "text-green-400"
-                          : "text-amber-300"
-                      }`}
-                    >
+                    <h3 class="alert-title">
                       {summary().heading}
                     </h3>
                     <p>{summary().counts}</p>
-                    <p class="mt-1 text-sm text-gray-300">
+                    <p class="match-summary-detail">
                       {summary().detail}
                     </p>
                     <Show when={generatedAt()}>
                       {(timestamp) => (
-                        <p class="mt-3 border-t border-current/20 pt-3 text-sm text-gray-300">
+                        <p class="match-summary-generated">
                           Showing results generated{" "}
                           <time dateTime={timestamp()}>
                             {formatSavedSearchTime(timestamp())}
@@ -642,9 +635,9 @@ export default function MatchMyMusic() {
 
             { }
             <Show when={searchComplete() && searchResults().length === 0}>
-              <div class="bg-gray-800 rounded-lg p-8 text-center">
+              <div class="panel empty-state">
                 <svg
-                  class="w-12 h-12 mx-auto mb-4 text-gray-500"
+                  class="empty-state-icon"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -656,8 +649,8 @@ export default function MatchMyMusic() {
                     d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <h3 class="text-lg font-semibold mb-2">No matches found</h3>
-                <p class="text-gray-400">
+                <h3 class="empty-state-title">No matches found</h3>
+                <p class="empty-state-text">
                   Try a different playlist — larger playlists with popular rock
                   and metal songs tend to have more CDLC matches.
                 </p>
@@ -666,8 +659,8 @@ export default function MatchMyMusic() {
 
             { }
             <Show when={searchResults().length > 0}>
-              <div ref={resultsRef} class="scroll-mt-28 space-y-4">
-                <h3 class="text-lg font-semibold">
+              <div ref={resultsRef} class="match-results stack-section">
+                <h3 class="section-title">
                   Results ({searchResults().length} tracks with matches)
                 </h3>
 
@@ -681,13 +674,13 @@ export default function MatchMyMusic() {
                       `match-versions-${result.spotifyTrack.id}-${index()}`;
 
                     return (
-                      <div class="bg-gray-800 rounded-lg p-4">
-                        <div class="flex justify-between items-start mb-3">
+                      <div class="panel match-result">
+                        <div class="match-result-header">
                           <div>
-                            <p class="font-medium">
+                            <p class="match-track-name">
                               {result.spotifyTrack.name}
                             </p>
-                            <p class="text-sm text-gray-400">
+                            <p class="match-track-meta">
                               {result.spotifyTrack.artists.join(", ")} -{" "}
                               {result.spotifyTrack.album}
                             </p>
@@ -697,53 +690,53 @@ export default function MatchMyMusic() {
                               )}
                             >
                               <span
-                                class="inline-block mt-1 text-xs bg-rose-600 px-1.5 py-0.5 rounded"
+                                class="badge badge-official match-track-official"
                                 title="This track is available as official Rocksmith DLC"
                               >
                                 Official DLC
                               </span>
                             </Show>
                           </div>
-                          <span class="bg-spotify-green text-black text-sm px-2 py-1 rounded">
+                          <span class="match-count">
                             {result.matches.length} match
                             {result.matches.length !== 1 ? "es" : ""}
                           </span>
                         </div>
 
-                        <div id={versionsId()} class="space-y-2">
+                        <div id={versionsId()} class="match-versions">
                           <For each={visibleMatches()}>
                             {(match) => (
-                              <div class="bg-gray-700 rounded p-3 flex justify-between items-center">
+                              <div class="match-version">
                                 <div>
-                                  <p class="text-sm">
+                                  <p class="match-version-title">
                                     {match.artist} - {match.title}
                                   </p>
-                                  <div class="flex gap-2 mt-1">
+                                  <div class="match-version-badges">
                                     <Show when={match.officialDlc}>
                                       <span
-                                        class="text-xs bg-rose-600 px-1.5 py-0.5 rounded"
+                                        class="badge badge-official"
                                         title="Official Rocksmith DLC"
                                       >
                                         Official DLC
                                       </span>
                                     </Show>
                                     <Show when={match.lead}>
-                                      <span class="text-xs bg-blue-600 px-1.5 py-0.5 rounded">
+                                      <span class="badge badge-lead">
                                         Lead
                                       </span>
                                     </Show>
                                     <Show when={match.rhythm}>
-                                      <span class="text-xs bg-purple-600 px-1.5 py-0.5 rounded">
+                                      <span class="badge badge-rhythm">
                                         Rhythm
                                       </span>
                                     </Show>
                                     <Show when={match.bass}>
-                                      <span class="text-xs bg-orange-600 px-1.5 py-0.5 rounded">
+                                      <span class="badge badge-bass">
                                         Bass
                                       </span>
                                     </Show>
                                     <Show when={match.vocals}>
-                                      <span class="text-xs bg-pink-600 px-1.5 py-0.5 rounded">
+                                      <span class="badge badge-vocals">
                                         Vocals
                                       </span>
                                     </Show>
@@ -753,7 +746,7 @@ export default function MatchMyMusic() {
                                   href={match.downloadLink}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  class="bg-spotify-green hover:bg-green-500 text-black font-bold text-sm py-1 px-3 rounded shrink-0"
+                                  class="button-download"
                                   onClick={() =>
                                     analytics.matchDownloaded(
                                       match.id,
@@ -772,7 +765,7 @@ export default function MatchMyMusic() {
                         <Show when={alternateCount > 0}>
                           <button
                             type="button"
-                            class="mt-3 text-sm font-medium text-spotify-green hover:text-green-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 rounded"
+                            class="match-versions-toggle focus-ring"
                             aria-expanded={isExpanded()}
                             aria-controls={versionsId()}
                             onClick={() => toggleResultVersions(result)}

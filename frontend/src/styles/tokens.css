@@ -1,0 +1,134 @@
+@layer theme {
+  :root {
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+
+    --font-root: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    --color-black: #000;
+    --color-white: #fff;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+    --color-green-300: #86efac;
+    --color-green-400: #4ade80;
+    --color-green-500: #22c55e;
+    --color-red-200: #fecaca;
+    --color-red-400: #f87171;
+    --color-red-500: #ef4444;
+    --color-red-600: #dc2626;
+    --color-red-700: #b91c1c;
+    --color-amber-100: #fef3c7;
+    --color-amber-300: #fcd34d;
+    --color-amber-500: #f59e0b;
+    --color-amber-600: #d97706;
+    --color-rose-600: #e11d48;
+    --color-blue-600: #2563eb;
+    --color-purple-600: #9333ea;
+    --color-orange-600: #ea580c;
+    --color-pink-600: #db2777;
+    --color-spotify-green: #1db954;
+    --color-spotify-black: #191414;
+
+    --color-overlay: #00000080;
+    --color-overlay-strong: #000000b3;
+    --color-surface-hover: #37415180;
+    --color-surface-subtle: #1f293780;
+    --color-surface-muted: #1f293799;
+    --color-surface-sticky: #111827f2;
+    --color-underline-green: #22c55e99;
+    --color-success-surface: #14532d80;
+    --color-warning-surface: #78350f80;
+    --color-warning-surface-strong: #451a0399;
+    --color-error-surface: #7f1d1d80;
+    --color-error-surface-strong: #450a0ab3;
+
+    --space-0-5: 0.125rem;
+    --space-1: 0.25rem;
+    --space-1-5: 0.375rem;
+    --space-2: 0.5rem;
+    --space-2-5: 0.625rem;
+    --space-3: 0.75rem;
+    --space-3-5: 0.875rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-7: 1.75rem;
+    --space-8: 2rem;
+    --space-9: 2.25rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-14: 3.5rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+    --space-28: 7rem;
+    --space-32: 8rem;
+    --space-40: 10rem;
+    --space-48: 12rem;
+    --space-64: 16rem;
+    --space-72: 18rem;
+    --space-96: 24rem;
+
+    --width-sm: 24rem;
+    --width-md: 28rem;
+    --width-2xl: 42rem;
+    --width-3xl: 48rem;
+    --width-4xl: 56rem;
+
+    --text-xs: 0.75rem;
+    --text-xs-line: 1rem;
+    --text-sm: 0.875rem;
+    --text-sm-line: 1.25rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-lg-line: 1.75rem;
+    --text-xl: 1.25rem;
+    --text-xl-line: 1.75rem;
+    --text-2xl: 1.5rem;
+    --text-2xl-line: 2rem;
+    --text-3xl: 1.875rem;
+    --text-3xl-line: 2.25rem;
+    --text-4xl: 2.25rem;
+    --text-4xl-line: 2.5rem;
+    --text-5xl: 3rem;
+    --text-5xl-line: 1;
+
+    --leading-relaxed: 1.75rem;
+    --tracking-tight: -0.025em;
+    --tracking-wider: 0.05em;
+
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+
+    --radius-sm: 0.125rem;
+    --radius: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-full: 9999px;
+
+    --shadow-dialog: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+    --focus-ring-width: 2px;
+
+    --transition-colors: color, background-color, border-color,
+      text-decoration-color, fill, stroke;
+    --transition-interactive: color, background-color, border-color,
+      text-decoration-color, fill, stroke, opacity, box-shadow, transform,
+      filter, backdrop-filter;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --duration-fast: 150ms;
+  }
+}

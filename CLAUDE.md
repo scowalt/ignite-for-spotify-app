@@ -22,6 +22,12 @@ Before infrastructure adoption, environment provisioning or state changes, read
 `docs/operations/guarded-continuous-delivery.md`. Operations outside its reviewed
 image-only contract require separate approval; old cutover helpers are historical.
 
+## Frontend styling
+
+The frontend uses plain layered CSS in `frontend/src/styles/`; see the README's
+Styling section. Use the tokens and semantic class names there. Do not add a CSS
+framework, utility classes, CSS Modules, CSS-in-JS or `!important`.
+
 ## Secrets Management (Doppler)
 
 Secrets are managed in **Doppler** (project: `ignite-for-spotify`, configurations: `dev` and `prd`).

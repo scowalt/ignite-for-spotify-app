@@ -1,38 +1,37 @@
 const supportEmail = "privacy@igniteforspotify.com";
 const supportHref = `mailto:${supportEmail}`;
 
-const linkClass =
-  "font-medium text-spotify-green underline decoration-green-500/60 underline-offset-4 transition-colors hover:text-green-300 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spotify-green focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900";
+const linkClass = "privacy-link focus-ring";
 
 export default function Privacy() {
   return (
-    <div class="mx-auto max-w-3xl py-8 sm:py-12">
-      <header class="border-b border-gray-700 pb-8">
-        <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+    <div class="privacy-page">
+      <header class="privacy-header">
+        <h1 class="privacy-title">
           Privacy
         </h1>
-        <p class="mt-4 max-w-2xl text-base leading-7 text-gray-300">
+        <p class="privacy-intro">
           This notice explains what Ignite for Spotify handles when you use the
           service, why it is needed, where it goes, and the choices available to
           you.
         </p>
-        <p class="mt-3 text-sm text-gray-400">Last updated August 16, 2026</p>
+        <p class="privacy-updated">Last updated August 16, 2026</p>
       </header>
 
-      <article class="space-y-12 py-10 text-base leading-7 text-gray-300">
+      <article class="privacy-body">
         <section aria-labelledby="information-heading">
           <h2
             id="information-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Information Ignite handles
           </h2>
-          <p class="mt-4">
+          <p>
             You can browse public CDLC information without connecting Spotify.
             When you connect Spotify, Ignite receives and processes the data
             needed to provide account-backed features:
           </p>
-          <ul class="mt-4 list-disc space-y-3 pl-6 marker:text-spotify-green">
+          <ul class="privacy-list">
             <li>
               Your Spotify account ID, display name, profile image, access and
               refresh tokens, and token expiration time.
@@ -51,23 +50,23 @@ export default function Privacy() {
               tracks that you submit when creating a playlist in Spotify.
             </li>
           </ul>
-          <p class="mt-4">
+          <p>
             Ignite does not receive your Spotify password or payment details.
           </p>
         </section>
 
         <section
           aria-labelledby="use-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="use-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             How the information is used
           </h2>
-          <p class="mt-4">Ignite uses this information to:</p>
-          <ul class="mt-4 list-disc space-y-3 pl-6 marker:text-spotify-green">
+          <p>Ignite uses this information to:</p>
+          <ul class="privacy-list">
             <li>Keep you signed in and refresh your Spotify connection.</li>
             <li>
               Read playlists and compare their tracks with the Rocksmith CDLC
@@ -87,22 +86,22 @@ export default function Privacy() {
 
         <section
           aria-labelledby="spotify-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="spotify-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Spotify access
           </h2>
-          <p class="mt-4">
+          <p>
             Ignite asks Spotify for permission to read your private and
             collaborative playlists, read the basic private profile needed to
             identify your connection, and create or modify public and private
             playlists. Spotify shows these permissions before you approve the
             connection.
           </p>
-          <p class="mt-4">
+          <p>
             Removing Ignite locally does not revoke it from Spotify's connected
             apps list. You can also remove access from Spotify by following the
             instructions on Spotify's{" "}
@@ -118,15 +117,15 @@ export default function Privacy() {
 
         <section
           aria-labelledby="analytics-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="analytics-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Analytics and diagnostics
           </h2>
-          <p class="mt-4">
+          <p>
             Ignite uses PostHog for product analytics. It records page visits,
             feature actions, performance information, and production session
             replays. After you sign in, the analytics profile is associated
@@ -134,12 +133,12 @@ export default function Privacy() {
             Feature events can include playlist identifiers, playlist names,
             search filters, match totals, export details, and download choices.
           </p>
-          <p class="mt-4">
+          <p>
             Replay inputs are masked. Browser console output and network request
             or response headers and bodies are not recorded, and query strings
             and page fragments are removed from captured URLs.
           </p>
-          <p class="mt-4">
+          <p>
             Ignite also sends application errors to GlitchTip and operational
             logs and metrics to Grafana Cloud. These records can include error
             details, request paths, timestamps, browser or device information,
@@ -149,21 +148,21 @@ export default function Privacy() {
 
         <section
           aria-labelledby="storage-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="storage-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Cookies and browser storage
           </h2>
-          <p class="mt-4">
+          <p>
             Ignite sets a secure, HTTP-only session cookie after Spotify login.
             It is limited to same-site use and expires 30 days after it is
             issued or renewed. Blocking it prevents signed-in features from
             working.
           </p>
-          <p class="mt-4">
+          <p>
             PostHog uses cookies or similar browser storage for analytics and
             session continuity. You can block or clear browser storage using
             your browser settings, although doing so can reset analytics
@@ -173,15 +172,15 @@ export default function Privacy() {
 
         <section
           aria-labelledby="sharing-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="sharing-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Services that process information
           </h2>
-          <p class="mt-4">
+          <p>
             Ignite uses Spotify for account and playlist features, PostHog for
             analytics and session replay, GlitchTip for error monitoring,
             Grafana Cloud for logs and metrics, and Cloudflare for network
@@ -189,7 +188,7 @@ export default function Privacy() {
             only the information sent to support those functions and applies
             its own privacy and retention terms.
           </p>
-          <p class="mt-4">
+          <p>
             CDLC download links lead to CustomsForge, an independent service.
             Information you provide after following an external link is handled
             by that destination rather than Ignite.
@@ -198,15 +197,15 @@ export default function Privacy() {
 
         <section
           aria-labelledby="retention-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="retention-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Retention
           </h2>
-          <ul class="mt-4 list-disc space-y-3 pl-6 marker:text-spotify-green">
+          <ul class="privacy-list">
             <li>
               Server-side session information and Spotify tokens remain until
               you log out or request deletion.
@@ -233,15 +232,15 @@ export default function Privacy() {
 
         <section
           aria-labelledby="choices-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="choices-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Your choices
           </h2>
-          <p class="mt-4">
+          <p>
             Selecting Logout and confirming the action disconnects your Spotify
             account from Ignite, deletes the live session and Spotify tokens,
             and deletes your saved Match My Music results. This does not delete
@@ -249,7 +248,7 @@ export default function Privacy() {
             remove data from aging backups, or automatically erase provider-side
             analytics and diagnostic records.
           </p>
-          <p class="mt-4">
+          <p>
             For access questions or deletion of remaining account-linked
             records, email{" "}
             <a href={supportHref} class={linkClass}>
@@ -262,15 +261,15 @@ export default function Privacy() {
 
         <section
           aria-labelledby="contact-heading"
-          class="border-t border-gray-800 pt-10"
+          class="privacy-section"
         >
           <h2
             id="contact-heading"
-            class="text-2xl font-semibold tracking-tight text-white"
+            class="privacy-heading"
           >
             Contact
           </h2>
-          <p class="mt-4">
+          <p>
             Ignite for Spotify operates this service. Send privacy questions,
             support requests, or issue reports to{" "}
             <a href={supportHref} class={linkClass}>
