@@ -34,9 +34,14 @@ class PublicSourceTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIsNone(MODULE.rejection_reason(path))
 
-    def test_rejects_links_and_submodules(self):
-        for mode in ("120000", "160000"):
-            self.assertIsNotNone(MODULE.rejection_reason("source", mode))
+    def test_allows_symlinks(self):
+        self.assertIsNone(MODULE.rejection_reason("source", "120000"))
+
+    def test_applies_path_rules_to_symlinks(self):
+        self.assertIsNotNone(MODULE.rejection_reason("secrets/token", "120000"))
+
+    def test_rejects_submodules(self):
+        self.assertIsNotNone(MODULE.rejection_reason("source", "160000"))
 
     def test_checks_index_instead_of_only_working_tree(self):
         with tempfile.TemporaryDirectory() as directory:

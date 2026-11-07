@@ -22,8 +22,8 @@ DATABASE = re.compile(r"\.(?:db|sqlite|sqlite3)(?:[-.].*)?$", re.IGNORECASE)
 def rejection_reason(path, mode="100644"):
     parts = PurePosixPath(path).parts
     name = PurePosixPath(path).name.lower()
-    if mode not in {"100644", "100755"}:
-        return "symlink or non-file Git entry"
+    if mode not in {"100644", "100755", "120000"}:
+        return "submodule or other non-file Git entry"
     if any(part.lower() in FORBIDDEN_DIRECTORIES for part in parts):
         return "runtime, credential or dependency directory"
     if name in FORBIDDEN_FILES:
