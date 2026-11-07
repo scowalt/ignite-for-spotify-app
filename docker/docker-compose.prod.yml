@@ -119,7 +119,7 @@ services:
       - 127.0.0.53
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /home/scowalt/Code/ignite-for-spotify-app/docker/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - alloy-data:/var/lib/alloy/data
     environment:
       - LOKI_URL=${LOKI_URL}

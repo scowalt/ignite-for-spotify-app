@@ -49,7 +49,7 @@ class RuntimeGuardTests(unittest.TestCase):
             next_images = {name: reference.replace('a' * 64, 'b' * 64) for name, reference in prior_images.items()}
             config = render({name.upper() + '_IMAGE': reference for name, reference in prior_images.items()})
             bindings = {'caddy': {'/etc/caddy/Caddyfile': str(root / 'Caddyfile')},
-                        'alloy': {'/etc/alloy/config.alloy': str(anchor / 'alloy/config.alloy'), '/var/run/docker.sock': '/var/run/docker.sock'},
+                        'alloy': {'/etc/alloy/config.alloy': '/home/scowalt/Code/ignite-for-spotify-app/docker/alloy/config.alloy', '/var/run/docker.sock': '/var/run/docker.sock'},
                         'watchtower': {'/var/run/docker.sock': '/var/run/docker.sock', '/config.json': '/home/scowalt/.docker/config.json'}}
             for name, paths in bindings.items():
                 for mount in config['services'][name]['volumes']:
@@ -194,6 +194,18 @@ class RuntimeGuardTests(unittest.TestCase):
                                                            'Source': '/volumes/ignite-for-spotify_unlisted', 'Destination': '/unlisted'})
             state_path.write_text(json.dumps(state))
             with self.assertRaisesRegex(OperationFailed, 'physical_volume_mount_mismatch'):
+                runtime.preflight(release, prior, workspace)
+            self.assertEqual(json.loads(state_path.read_text())['updated'], [])
+            runtime.cleanup(workspace)
+
+    def test_alloy_still_bound_to_the_retired_anchor_config_is_refused_before_service_mutation(self):
+        with self.runtime_case() as (runtime, release, prior, workspace, state_path, docker):
+            state = json.loads(state_path.read_text())
+            for mount in state['containers']['alloy']['mounts']:
+                if mount['Destination'] == '/etc/alloy/config.alloy':
+                    mount['Source'] = str(workspace.parent / 'docker/alloy/config.alloy')
+            state_path.write_text(json.dumps(state))
+            with self.assertRaisesRegex(OperationFailed, 'live_retained_bind_anchor_changed'):
                 runtime.preflight(release, prior, workspace)
             self.assertEqual(json.loads(state_path.read_text())['updated'], [])
             runtime.cleanup(workspace)

@@ -140,7 +140,7 @@ class DockerRuntime:
                     raise OperationFailed('runtime_mount_drift')
             desired.pop('image')
         expected_binds = {'caddy': {'/etc/caddy/Caddyfile': str(self.anchor.parent / 'Caddyfile')},
-                          'alloy': {'/etc/alloy/config.alloy': str(self.anchor / 'alloy/config.alloy'), '/var/run/docker.sock': '/var/run/docker.sock'},
+                          'alloy': {'/etc/alloy/config.alloy': '/home/scowalt/Code/ignite-for-spotify-app/docker/alloy/config.alloy', '/var/run/docker.sock': '/var/run/docker.sock'},
                           'watchtower': {'/var/run/docker.sock': '/var/run/docker.sock', '/config.json': '/home/scowalt/.docker/config.json'}}
         for name, expected in expected_binds.items():
             binds = {m['target']: m['source'] for m in config['services'][name]['volumes'] if m['type'] == 'bind'}
@@ -271,7 +271,7 @@ class DockerRuntime:
         if baseline['watchtower']['running'] or any(not baseline[name]['running'] or baseline[name]['health'] not in [None, 'healthy'] for name in ALL if name != 'watchtower'):
             raise OperationFailed('baseline_not_healthy_or_updater_active')
         auxiliary_binds = {'caddy': {'/etc/caddy/Caddyfile': str(self.anchor.parent / 'Caddyfile')},
-                           'alloy': {'/etc/alloy/config.alloy': str(self.anchor / 'alloy/config.alloy'), '/var/run/docker.sock': '/var/run/docker.sock'},
+                           'alloy': {'/etc/alloy/config.alloy': '/home/scowalt/Code/ignite-for-spotify-app/docker/alloy/config.alloy', '/var/run/docker.sock': '/var/run/docker.sock'},
                            'watchtower': {'/var/run/docker.sock': '/var/run/docker.sock', '/config.json': '/home/scowalt/.docker/config.json'}}
         for name, expected in auxiliary_binds.items():
             actual = {mount['Destination']: mount['Source'] for mount in baseline[name]['mounts'] if mount['Type'] == 'bind'}

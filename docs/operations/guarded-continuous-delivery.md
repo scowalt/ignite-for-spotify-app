@@ -41,7 +41,9 @@ reviewed configuration whose runtime contract matches the ledger's `runtime_cont
 It moves only in a reviewed contract transition. Application image versions
 come from the signed release and ledger, not this checkout's Git HEAD. The old
 `~/Code/ignite-for-spotify-2/docker` remains only the explicit Compose project-directory
-and bind-path anchor. Preserve it, the Caddyfile/Alloy sources and physical volumes.
+and the Caddyfile anchor. Preserve it, the Caddyfile and physical volumes. Alloy's service
+and `docker/alloy/config.alloy` come from this checkout; the config is a runtime contract
+input, so an Alloy change reaches production only through a reviewed contract transition.
 The updater requires exactly these physical volumes and refuses any container volume
 mount outside them: `ignite-data`, `backup-state`, `caddy-data`, `caddy-config` and
 `alloy-data` (Alloy log positions), each prefixed `ignite-for-spotify_`.
@@ -163,9 +165,18 @@ Reviewed contract transition (operator bundle change, idle ledger only):
 
 1. Extract the merged commit with `git archive` into
    `~/.local/lib/ignite-deployer/<40-hex source SHA>` and make it read-only.
-2. If the transition changes runtime inputs (`docker/docker-compose.prod.yml`, the backup
-   scripts or `scripts/verify-production-config.py`), check out the same source SHA in the
-   production Compose checkout. The installed operator refuses to run until step 4 completes.
+2. If the transition changes runtime inputs (`docker/docker-compose.prod.yml`,
+   `docker/alloy/config.alloy`, the backup scripts or `scripts/verify-production-config.py`),
+   check out the same source SHA in the production Compose checkout. The installed operator
+   refuses to run until step 4 completes. If the Alloy service or config changed, recreate
+   only Alloy so it reads the new file; logs resume from the `alloy-data` positions:
+
+   ```sh
+   doppler run --project ignite-for-spotify --config prd -- docker compose -p ignite-for-spotify \
+     --project-directory ~/Code/ignite-for-spotify-2/docker --env-file /dev/null \
+     -f ~/Code/ignite-for-spotify-app/docker/docker-compose.prod.yml \
+     up -d --no-deps --no-build --pull never alloy
+   ```
 3. Run `scripts/upgrade-operator.py --expected-state-sha256 <fingerprint>` from that bundle.
    Without `--apply` it only reports the old/new contract, old/new runtime contract and
    the live ledger fingerprint.
