@@ -32,7 +32,7 @@ RUN go list -modfile=/tmp/restic.mod -m -json all > /tmp/modules.json \
       --main-source "https://github.com/restic/restic/archive/$RESTIC_COMMIT.tar.gz" \
       --modfile /tmp/restic.mod --sumfile /tmp/restic.sum --output /image-notices/go
 
-FROM alpine:3.24.2 AS runtime
+FROM alpine:3.24.4 AS runtime
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache ca-certificates sqlite tzdata
