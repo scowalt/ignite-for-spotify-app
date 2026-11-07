@@ -11,7 +11,7 @@ One helper, `ignite-verify`, owns the whole loop. Every run is isolated: its own
 V=.claude/skills/verify/scripts/ignite-verify
 ```
 
-Paths are relative to the repository root. `.agents/skills/verify` is a symlink to the same directory so Pi discovers the skill.
+Paths are relative to the repository root. `.pi/settings.json` adds `.claude/skills` to Pi's skill paths, so Pi discovers this skill once the project is trusted.
 
 Read [`features/README.md`](features/README.md) before driving, then the matching feature file as the recipe.
 
