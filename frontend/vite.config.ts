@@ -7,6 +7,9 @@ import {
   websiteStructuredData,
 } from "./src/lib/pageMetadata";
 
+const apiProxyTarget =
+  process.env.IGNITE_API_PROXY_TARGET || "http://localhost:5000";
+
 const htmlEntryPathByRoute: Record<PublicPagePath, string> = {
   "/": path.resolve(__dirname, "index.html"),
   "/match": path.resolve(__dirname, "match/index.html"),
@@ -134,11 +137,11 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: apiProxyTarget,
         changeOrigin: true,
       },
       "/hubs": {
-        target: "http://localhost:5000",
+        target: apiProxyTarget,
         ws: true,
       },
     },
