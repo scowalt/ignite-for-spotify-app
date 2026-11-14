@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.402 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.404 AS build
 WORKDIR /src
 
 COPY backend/src/Ignite.Core/Ignite.Core.fsproj Ignite.Core/
@@ -23,12 +23,12 @@ RUN python3 /tmp/collect-image-notices.py dotnet \
     --deps /app/publish/migrations/Ignite.Migrations.deps.json \
     --packages /root/.nuget/packages --output /image-notices/dotnet
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.402 AS test
+FROM mcr.microsoft.com/dotnet/sdk:10.0.404 AS test
 WORKDIR /src
 COPY backend/ .
 RUN dotnet test Ignite.slnx --verbosity minimal
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.14 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.15 AS runtime
 WORKDIR /app
 
 RUN apt-get update && apt-get upgrade -y \
