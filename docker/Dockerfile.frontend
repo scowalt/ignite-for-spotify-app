@@ -1,8 +1,8 @@
 FROM golang:1.27.3-alpine AS caddy-build
 ENV GOTOOLCHAIN=local
 
-ARG CADDY_VERSION=v2.11.8
-ARG CADDY_COMMIT=55996dfe05c10bb616ccdcc9bf5b8407a5be75b7
+ARG CADDY_VERSION=v2.11.9
+ARG CADDY_COMMIT=0d98caea58f794f88e709b1bef2880996a471bca
 
 WORKDIR /src
 
@@ -14,15 +14,13 @@ RUN apk add --no-cache git python3 \
     && test "$(git rev-parse "$CADDY_VERSION^{commit}")" = "$CADDY_COMMIT" \
     && git checkout --detach "$CADDY_VERSION"
 
+COPY scripts/pin-go-modules.sh /tmp/pin-go-modules.sh
 RUN cp go.mod /tmp/caddy.mod \
     && cp go.sum /tmp/caddy.sum \
-    && go get -modfile=/tmp/caddy.mod \
-      github.com/go-jose/go-jose/v4@v4.1.6 \
-      github.com/klauspost/compress@v1.18.7 \
+    && sh /tmp/pin-go-modules.sh /tmp/caddy.mod \
       golang.org/x/crypto@v0.58.0 \
       golang.org/x/net@v0.62.0 \
       golang.org/x/text@v0.43.0 \
-      google.golang.org/grpc@v1.83.2 \
     && go mod tidy -modfile=/tmp/caddy.mod \
     && CGO_ENABLED=0 go build -modfile=/tmp/caddy.mod -p=2 -trimpath \
       -ldflags "-s -w -X github.com/caddyserver/caddy/v2.CustomVersion=$CADDY_VERSION" \
@@ -35,7 +33,7 @@ RUN go list -modfile=/tmp/caddy.mod -m -json all > /tmp/modules.json \
       --main-source "https://github.com/caddyserver/caddy/archive/$CADDY_COMMIT.tar.gz" \
       --modfile /tmp/caddy.mod --sumfile /tmp/caddy.sum --output /image-notices/go
 
-FROM caddy:2.11.7-alpine
+FROM caddy:2.11.9-alpine
 
 RUN apk upgrade --no-cache
 

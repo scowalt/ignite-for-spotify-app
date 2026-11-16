@@ -144,7 +144,7 @@ jobs:
           persist-credentials: false
 
       - name: Lint backup and image verification scripts
-        run: shellcheck docker/backup/*.sh scripts/verify-release-image.sh
+        run: shellcheck docker/backup/*.sh scripts/verify-release-image.sh scripts/pin-go-modules.sh
 
       - name: Test publication and cutover guards
         run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
