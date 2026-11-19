@@ -184,6 +184,21 @@ class RuntimeGuardTests(unittest.TestCase):
             self.assertIsNone(final['inspector'])
             self.assertNotIn('RESTIC_PASSWORD', (workspace / 'runtime.json').read_text())
 
+    def test_recreated_container_reporting_absent_dns_matches_empty_dns_baseline(self):
+        with self.runtime_case() as (runtime, release, prior, workspace, state_path, docker):
+            runtime.preflight(release, prior, workspace)
+            subprocess.run([*docker, 'stop', 'ignite-backup'], check=True)
+            runtime.switch_backend(release, workspace)
+            runtime.switch_dependents(release, workspace)
+            state = json.loads(state_path.read_text())
+            self.assertEqual(state['containers']['frontend']['dns'], [])
+            state['containers']['frontend']['dns'] = None
+            state_path.write_text(json.dumps(state))
+            runtime.verify(dict(release.images), workspace)
+            runtime.rollback(prior, workspace)
+            runtime.verify(prior['images'], workspace)
+            runtime.cleanup(workspace)
+
     def test_alloy_positions_volume_is_admitted_but_unlisted_volumes_are_refused(self):
         with self.runtime_case() as (runtime, release, prior, workspace, state_path, docker):
             state = json.loads(state_path.read_text())

@@ -73,8 +73,8 @@ def main():
             raise ValueError('Ledger and policy are not an idle matching pair.')
         if report['state_fingerprint'] != args.expected_state_sha256:
             raise ValueError('Ledger differs from the reviewed state.')
-        if contract == policy['contract_sha256']:
-            raise ValueError('Contract is unchanged.')
+        if contract == policy['contract_sha256'] and runtime != pins['runtime_contract_sha256']:
+            raise ValueError('Runtime pin differs without a contract change.')
         if args.apply:
             lock = os.open(state_root / 'poll.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
             try:
@@ -83,7 +83,10 @@ def main():
                 evidence.mkdir(mode=0o700)
                 save_metadata(evidence / 'before-state.json', state)
                 save_metadata(evidence / 'before-policy.json', policy)
-                deployment.upgrade_contract(contract, runtime, expected_state_sha256=args.expected_state_sha256)
+                if contract != policy['contract_sha256']:
+                    deployment.upgrade_contract(contract, runtime, expected_state_sha256=args.expected_state_sha256)
+                elif fingerprint(deployment.status()) != args.expected_state_sha256:
+                    raise ValueError('Ledger differs from the reviewed state.')
                 save_metadata(policy_path, policy | {'contract_sha256': contract, 'operator_sha': bundle.name,
                                                      'migration_policy': pins | {'runtime_contract_sha256': runtime}})
                 replace_link(current, bundle)
