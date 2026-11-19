@@ -26,6 +26,7 @@ class RenovatePolicyTests(unittest.TestCase):
     def test_bot_policy_keeps_major_review_and_manual_providers_without_platform_automerge(self):
         config = json.loads((ROOT / 'renovate.json').read_text())
         self.assertTrue(config['enabled'])
+        self.assertEqual(config['dependencyDashboard'], {'enabled': True, 'autoclose': True})
         self.assertFalse(config['platformAutomerge'])
         self.assertEqual(config['automergeType'], 'pr')
         rules = config['packageRules']
