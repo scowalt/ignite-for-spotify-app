@@ -65,6 +65,25 @@
       "dependencyDashboardApproval": true
     },
     {
+      "description": "The deployer refuses releases whose migration engine identity differs from the running release; hold the SDK and SQLite migration closure for a reviewed engine transition",
+      "matchPackageNames": [
+        "mcr.microsoft.com/dotnet/sdk",
+        "dotnet-sdk",
+        "dotnet",
+        "FSharp.Core",
+        "Microsoft.EntityFrameworkCore.Sqlite",
+        "Microsoft.Data.Sqlite",
+        "Microsoft.Data.Sqlite.Core",
+        "/^SQLitePCLRaw\\./",
+        "/^dbup/i",
+        "/^Microsoft\\.Extensions\\./"
+      ],
+      "groupName": "migration engine",
+      "groupSlug": "migration-engine",
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    },
+    {
       "description": "Keep the Caddy runtime image and source release together",
       "matchPackageNames": ["caddy", "caddyserver/caddy"],
       "groupName": "caddy",
