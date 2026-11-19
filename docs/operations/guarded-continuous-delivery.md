@@ -183,7 +183,9 @@ Reviewed contract transition (operator bundle change, idle ledger only):
 4. Re-run with `--apply`. Under the poll lock it saves before-state evidence, moves the
    ledger contract and runtime pin, the policy contract/runtime pin/operator SHA and the
    `current` link together. It refuses stale fingerprints, a running transaction, a checkout
-   whose runtime contract differs from the bundle's, or changed units.
+   whose runtime contract differs from the bundle's, or changed units. When only operator
+   code changed, the old and new contracts are equal: the ledger stays as it is and only the
+   policy operator SHA and the `current` link move.
 5. Confirm with `ignite-deploy.py status` and a read-only `check`.
 
 The existing scheduled-backup retention policy is preserved. The guarded deployment

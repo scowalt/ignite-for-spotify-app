@@ -31,6 +31,7 @@ IMAGE_FORMAT = '''{"id":{{json .Id}},"digests":{{json .RepoDigests}},"user":{{js
 
 def invariant(value):
     result = {key: value[key] for key in ['project', 'network', 'dns', 'restart', 'ports', 'logging', 'mounts']}
+    result['dns'] = result['dns'] or []
     result['mounts'] = sorted(result['mounts'], key=lambda mount: json.dumps(mount, sort_keys=True))
     return result
 

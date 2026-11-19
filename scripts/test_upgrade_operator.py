@@ -147,11 +147,21 @@ class OperatorUpgradeTests(unittest.TestCase):
         self.assertEqual(before, self.deployment.status())
         self.assertEqual(OLD, json.loads((self.state_root / 'policy.json').read_text())['operator_sha'])
 
-    def test_unchanged_contract_is_refused(self):
+    def test_operator_only_change_moves_the_operator_and_leaves_the_ledger_and_contract_unchanged(self):
         shutil.copyfile(ROOT / CONTRACT_PATHS[-2], self.library / NEW / CONTRACT_PATHS[-2])
-        code, _ = self.run_upgrade('--apply')
-        self.assertEqual(1, code)
-        self.assertEqual(OLD, json.loads((self.state_root / 'policy.json').read_text())['operator_sha'])
+        before = self.deployment.status()
+        code, report = self.run_upgrade('--apply')
+        self.assertEqual(0, code)
+        self.assertEqual(report['previous_contract'], report['new_contract'])
+        self.assertEqual(before, self.deployment.status())
+        self.assertEqual(self.policy | {'operator_sha': NEW}, json.loads((self.state_root / 'policy.json').read_text()))
+        self.assertEqual(self.library / NEW, (self.library / 'current').resolve())
+        evidence = self.state_root / ('operator-transition-' + NEW[:7])
+        self.assertEqual(self.policy, json.loads((evidence / 'before-policy.json').read_text()))
+        result = subprocess.run(['python3', str(self.library / NEW / 'scripts/ignite-deploy.py'), 'status'],
+                                env={'PATH': os.environ['PATH'], 'HOME': str(self.home)}, capture_output=True, text=True)
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual(before, json.loads(result.stdout))
 
 
 if __name__ == '__main__':
