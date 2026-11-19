@@ -9,14 +9,14 @@ dependencies = []
 [dependency-groups]
 dev = [
   "pyright==1.1.414",
-  "ruff==0.16.9",
+  "ruff==0.17.5",
 ]
 
 [project.scripts]
 glitchtip-paseo-controller = "glitchtip_paseo_controller.cli:main"
 
 [build-system]
-requires = ["hatchling==1.32.4"]
+requires = ["hatchling==1.33.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]

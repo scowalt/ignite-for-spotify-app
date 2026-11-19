@@ -57,6 +57,14 @@
       "labels": ["dependencies", "major"]
     },
     {
+      "description": "Python minor releases change the interpreter series; keep them out of the automerged patch group",
+      "matchPackageNames": ["python"],
+      "matchUpdateTypes": ["minor"],
+      "groupName": null,
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    },
+    {
       "description": "Keep the Caddy runtime image and source release together",
       "matchPackageNames": ["caddy", "caddyserver/caddy"],
       "groupName": "caddy",

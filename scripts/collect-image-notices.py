@@ -182,6 +182,11 @@ def fetch_notice(url, cache):
     return content
 
 
+SQLITEPCLRAW_COMMITS = {
+    "2.1.12": "ca835d21508bff43121c65081035840ac5006c4c",
+    "2.1.13": "0873d14f6dcb3a8537444679468499ab9f5a782a",
+}
+
 def copy_package_notices(archive, directory):
     notices = []
     with zipfile.ZipFile(archive) as package:
@@ -230,11 +235,10 @@ def collect_dotnet(args):
         license_element = elements.get("license")
         repository = elements.get("repository")
         repo = safe_github_source(repository.attrib) if repository is not None else None
-        if repo is None and name.startswith("SQLitePCLRaw.") and version == "2.1.12":
-            repo = (
-                "ericsink/SQLitePCL.raw",
-                "ca835d21508bff43121c65081035840ac5006c4c",
-            )
+        if repo is None and name.startswith("SQLitePCLRaw."):
+            commit = SQLITEPCLRAW_COMMITS.get(version)
+            if commit:
+                repo = ("ericsink/SQLitePCL.raw", commit)
         directory = component_directory(output, name, version)
         notices = []
         for archive in sorted(package.glob("*.nupkg")):
