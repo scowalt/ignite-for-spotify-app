@@ -136,17 +136,29 @@ repository variable when necessary and record the reason. Source policy desires 
 a later IaC apply must not silently remove an emergency fence.
 
 No automatic database restore, repository initialization/pruning/unlocking, volume
-recreation, broad chown, image pruning or unrelated-service restart is permitted.
-Preserve old image digests and encrypted recovery evidence. Missing/corrupt state is
-not automatically bootstrapped. Manual retry/recovery or a contract/operator change
-requires a scoped reviewed procedure, not hand-editing the ledger to make it green.
+recreation, broad chown or unrelated-service restart is permitted. Preserve encrypted
+recovery evidence.
+
+After each `deployed` outcome, the operator removes local images from the
+`backend`, `backup`, `frontend` and `release` repositories of this project, except
+the active release and the release it replaced. It removes them by digest, without
+force, so Docker refuses to remove an image that a container still uses. Other
+images, including the legacy `ignite-for-spotify-2` repositories, are not touched.
+The output line reports `removed_images` as a count, or `failed`; a failure does not
+change the deployment outcome, and the next deployment tries again. No workflow in this
+repository deletes GHCR package versions, so an older release can be pulled again
+by digest for a manual rollback.
+
+Missing/corrupt state is not automatically bootstrapped. Manual retry/recovery or a
+contract/operator change requires a scoped reviewed procedure, not hand-editing the
+ledger to make it green.
 
 ## Budgets and compatibility
 
 Snapshot input is limited to 256 MiB, local scratch to 1 GiB and additional remote
 storage per operation to 512 MiB, with 3 GiB free disk retained. Image preflight adds
 conservative pull/unpack checks. These estimates are not quotas or hard billing caps.
-Do not increase budgets or prune recovery material automatically.
+Do not increase budgets or prune backup recovery material automatically.
 
 Known Compose/database-startup compatibility inputs are fingerprinted. A changed
 contract blocks automatic deployment for manual migration review. This is a guard,

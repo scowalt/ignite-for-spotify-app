@@ -55,6 +55,7 @@ and fixed, redacted failures; the core deliberately never persists exception tex
 | `switch_dependents(release, workspace)` | Update only backup/frontend to the same release, with bounded health checks. |
 | `verify(images, workspace)` | Verify the exact complete healthy set and unchanged database/mounts/Caddy/Alloy/Watchtower/configuration, including preserved backup access. No mutation. |
 | `rollback(prior, workspace)` | One bounded image-only recovery; retain unchanged original containers and restart only a stopped known original backup when possible. Refuse unrecognized drift. Never restore a database, recreate volumes or restart unrelated services. |
+| `prune_images(releases)` | Called only after a `deployed` outcome, with the active release and the release it replaced. Remove every other local image of this project's `backend`, `backup`, `frontend` and `release` repositories by digest, without force. Return the removed references. |
 
 The core requires the new snapshot to be within the transaction's time interval,
 restored successfully, within the 256 MiB input / 1 GiB scratch / 512 MiB additional
@@ -168,7 +169,9 @@ is intended. Running backup repository access is rechecked with a bounded read.
 Image preflight requires 5 GiB free before pulls, at most 1 GiB summed compressed layer
 sizes and four times that size plus 3 GiB free as conservative unpack headroom. After
 pulls and backup, 3 GiB must remain free. These estimates/budget checks are not filesystem
-quotas or hard billing caps. Do not increase them or prune images/history automatically.
+quotas or hard billing caps. Do not increase them or prune backup history automatically.
+After a `deployed` outcome, `ignite-deploy.py` calls `prune_images` with the active release and
+the release it replaced; it removes every other local image of this project's release repositories.
 
 ## Verification
 
