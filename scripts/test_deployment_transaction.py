@@ -138,6 +138,19 @@ class DeploymentTransactionTests(unittest.TestCase):
         self.assertEqual(self.runtime.unrelated_identity, 'original')
         self.assertFalse(self.runtime.owned_plaintext)
 
+    def test_retained_releases_are_the_active_release_and_the_one_it_replaced(self):
+        self.assertEqual(self.deployment.retained_releases(), [self.active])
+        self.assertEqual(self.deployment.run(candidate('c', 43), self.runtime), 'deployed')
+        first = self.deployment.status()['active']
+        self.assertEqual(self.deployment.retained_releases(), [first, self.active])
+        self.runtime.fail_dependents = True
+        self.assertEqual(self.deployment.run(candidate('e', 44), self.runtime), 'rolled_back')
+        self.assertEqual(self.deployment.retained_releases(), [first, self.active])
+        self.runtime.fail_dependents = False
+        self.runtime.rollback_available = True
+        self.assertEqual(self.deployment.run(candidate('f', 45), self.runtime), 'deployed')
+        self.assertEqual(self.deployment.retained_releases(), [self.deployment.status()['active'], first])
+
     def test_failed_partial_update_rolls_back_once_and_stays_fenced_after_restart(self):
         self.runtime.fail_dependents = True
         release = candidate()

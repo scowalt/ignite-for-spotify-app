@@ -16,6 +16,7 @@ import time
 from deployment_backup import BackupTool, bucket_inventory, INPUT_LIMIT, REMOTE_LIMIT
 from deployment_process import OperationFailed, run
 from release_record import deployment_contract, runtime_contract, REPOSITORY
+from release_signature import RELEASE_IMAGE
 from deployment_transaction import validate_migration_policy
 from migration_image import read_image_metadata
 from migration_plan import classify_transition, prepare_transition
@@ -24,6 +25,7 @@ from migration_tool import MigrationTool
 from migration_transition import MigrationTransition
 
 SERVICES = ('backend', 'backup', 'frontend')
+RELEASE_REPOSITORIES = (*('ghcr.io/' + REPOSITORY + '/' + name for name in SERVICES), RELEASE_IMAGE)
 ALL = (*SERVICES, 'caddy', 'alloy', 'watchtower')
 FORMAT = '''{"id":{{json .Id}},"image_id":{{json .Image}},"image":{{json .Config.Image}},"running":{{json .State.Running}},"started":{{json .State.StartedAt}},"health":{{with index .State "Health"}}{{json .Status}}{{else}}null{{end}},"project":{{json (index .Config.Labels "com.docker.compose.project")}},"network":{{json .HostConfig.NetworkMode}},"dns":{{json .HostConfig.Dns}},"restart":{{json .HostConfig.RestartPolicy.Name}},"ports":{{json .HostConfig.PortBindings}},"logging":{{json (index .Config.Labels "logging")}},"mounts":{{json .Mounts}}}'''
 IMAGE_FORMAT = '''{"id":{{json .Id}},"digests":{{json .RepoDigests}},"user":{{json (index .Config "User")}},"os":{{json .Os}},"arch":{{json .Architecture}},"volumes":{{json (index .Config "Volumes")}},"revision":{{with index .Config "Labels"}}{{json (index . "org.opencontainers.image.revision")}}{{else}}null{{end}},"source":{{with index .Config "Labels"}}{{json (index . "org.opencontainers.image.source")}}{{else}}null{{end}}}'''
@@ -617,6 +619,16 @@ class DockerRuntime:
         configuration = json.loads(self._docker(['exec', 'ignite-backup', 'timeout', '60', 'restic', '--no-cache', '--no-lock', 'cat', 'config'], timeout=75))
         if configuration.get('id') != self.repository_id:
             raise OperationFailed('running_backup_repository_unavailable')
+
+    def prune_images(self, releases):
+        retained = {RELEASE_IMAGE + '@' + release['artifact_digest'] for release in releases if release['artifact_digest']}
+        retained |= {reference for release in releases for reference in release['images'].values()}
+        listed = self._docker(['image', 'ls', '--digests', '--no-trunc', '--format', '{{json .}}']).splitlines()
+        stale = sorted({image['Repository'] + '@' + image['Digest'] for image in map(json.loads, listed)
+                        if image['Repository'] in RELEASE_REPOSITORIES and image['Digest'].startswith('sha256:')} - retained)
+        for reference in stale:
+            self._docker(['image', 'rm', reference])
+        return stale
 
     def rollback(self, prior, workspace):
         data = self._load(workspace)

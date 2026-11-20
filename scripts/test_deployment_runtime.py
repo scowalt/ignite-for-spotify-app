@@ -273,5 +273,35 @@ class RuntimeGuardTests(unittest.TestCase):
         self.assertEqual(value['arch'], 'amd64')
 
 
+class ImageRetentionTests(unittest.TestCase):
+    def test_only_unretained_release_images_are_removed(self):
+        repository = 'ghcr.io/scowalt/ignite-for-spotify-app/'
+        releases = [{'images': {name: repository + name + '@sha256:' + character * 64 for name in ['backend', 'backup', 'frontend']},
+                     'artifact_digest': 'sha256:' + character * 64 if character == 'a' else None, 'source_sha': 'c' * 40, 'order': [1, 1]}
+                    for character in 'ab']
+        listed = [(repository + name, 'sha256:' + character * 64) for name in ['backend', 'backup', 'frontend', 'release'] for character in 'abcd']
+        listed += [('ghcr.io/scowalt/ignite-for-spotify-2/backend', 'sha256:' + 'e' * 64), ('caddy', '<none>'), (repository + 'backend', '<none>')]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            log, images = root / 'docker.log', root / 'images.json'
+            images.write_text(json.dumps(listed))
+            docker = root / 'docker.py'
+            docker.write_text('import json,sys\n'
+                              'log,images,*args=sys.argv[1:]\n'
+                              'open(log,"a").write(json.dumps(args)+"\\n")\n'
+                              'if args[:2]==["image","ls"]:\n'
+                              '    for repository,digest in json.load(open(images)):\n'
+                              '        print(json.dumps({"Repository":repository,"Digest":digest,"Tag":"<none>"}))\n')
+            runtime = DockerRuntime(ROOT, root, deployment_contract(ROOT), 'a' * 64,
+                                    docker=[sys.executable, str(docker), str(log), str(images)], environment={})
+            removed = runtime.prune_images(releases)
+            expected = sorted([repository + name + '@sha256:' + character * 64 for name in ['backend', 'backup', 'frontend', 'release'] for character in 'cd'] +
+                              [repository + 'release@sha256:' + 'b' * 64])
+            self.assertEqual(removed, expected)
+            calls = [json.loads(line) for line in log.read_text().splitlines()]
+            self.assertEqual([call[2] for call in calls if call[:2] == ['image', 'rm']], expected)
+            self.assertEqual(len(calls), 1 + len(expected))
+
+
 if __name__ == '__main__':
     unittest.main()

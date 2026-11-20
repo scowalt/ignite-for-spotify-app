@@ -264,6 +264,18 @@ class Deployment:
         except (OSError, ValueError, TypeError, KeyError, RecursionError):
             raise StateRejected('Attempt evidence is unavailable or invalid.') from None
 
+    def retained_releases(self):
+        state = self.status()
+        active = state['active']
+        if state['transaction'] is not None:
+            raise StateRejected('Image retention is unavailable during a transaction.')
+        if active['artifact_digest'] is None:
+            return [active]
+        transaction = self.attempt(active['artifact_digest'])['state']['transaction']
+        if transaction['candidate'] != active:
+            raise StateRejected('Active release and attempt evidence disagree.')
+        return [active, transaction['prior']]
+
     def _finish(self, state, runtime, workspace, outcome):
         if state['schema'] == 1 and _has_migration_journal(workspace):
             return 'manual_recovery'
